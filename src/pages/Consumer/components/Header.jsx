@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { Layout, Menu, Badge, Space, Drawer, Button, Tooltip } from 'antd';
 import { ShoppingCartOutlined, UserOutlined, MenuOutlined } from '@ant-design/icons';
 import { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import styles from './Header.module.css';
 
 const { Header: AntHeader } = Layout;
@@ -12,35 +13,46 @@ const { Header: AntHeader } = Layout;
  */
 const Header = ({ cartCount = 7, userName = 'Budi S.' }) => {
   const [drawerVisible, setDrawerVisible] = useState(false);
+  const location = useLocation();
 
   const menuItems = [
-    { key: 'home', label: 'Beranda' },
-    { key: 'catalog', label: 'Katalog' },
-    { key: 'history', label: 'Riwayat' },
-    { key: 'status', label: 'Status Pesanan' },
+    { key: 'catalog', label: <Link to="/consumer">Katalog</Link> },
+    { key: 'history', label: <Link to="/consumer/riwayat">Riwayat</Link> },
+    { key: 'status', label: <Link to="/consumer/status-pesanan">Status Pesanan</Link> },
   ];
 
+  const getSelectedKey = () => {
+    if (location.pathname === '/consumer/status-pesanan') {
+      return ['status'];
+    }
+    if (location.pathname === '/consumer/riwayat') {
+      return ['history'];
+    }
+    return ['catalog'];
+  };
+
   const handleMenuClick = ({ key }) => {
-    console.log('Menu clicked:', key);
     setDrawerVisible(false);
   };
 
   return (
     <AntHeader className={styles.header}>
       <div className={styles.headerContainer}>
-        {/* Logo Section */}
+  
         <div className={styles.logoSection}>
-          <div className={styles.logo}>
-            <span className={styles.logoIcon}>🟢</span>
-            <span className={styles.logoText}>PT Ratu Oki</span>
-          </div>
+          <Link to="/consumer" style={{ textDecoration: 'none' }}>
+            <div className={styles.logo}>
+              <span className={styles.logoIcon}>🟢</span>
+              <span className={styles.logoText}>PT Ratu Oki</span>
+            </div>
+          </Link>
         </div>
 
-        {/* Desktop Navigation */}
         <Menu
           mode="horizontal"
           items={menuItems}
           onClick={handleMenuClick}
+          selectedKeys={getSelectedKey()}
           className={styles.desktopMenu}
           style={{
             backgroundColor: 'transparent',
@@ -52,9 +64,9 @@ const Header = ({ cartCount = 7, userName = 'Budi S.' }) => {
           itemLabelStyle={{ color: 'white' }}
         />
 
-        {/* Right Section */}
+      
         <Space size="large" className={styles.headerRight}>
-          {/* Cart Icon */}
+     
           <Tooltip title={`${cartCount} item dalam keranjang`}>
             <Badge count={cartCount} color="#ff4d4f" size="small">
               <ShoppingCartOutlined
@@ -67,13 +79,12 @@ const Header = ({ cartCount = 7, userName = 'Budi S.' }) => {
             </Badge>
           </Tooltip>
 
-          {/* User Profile */}
           <div className={styles.userProfile}>
             <UserOutlined style={{ fontSize: '20px', color: '#1b5e3f' }} />
             <span>{userName}</span>
           </div>
 
-          {/* Mobile Menu Button */}
+       
           <Button
             type="text"
             icon={<MenuOutlined style={{ fontSize: '20px' }} />}
@@ -83,7 +94,7 @@ const Header = ({ cartCount = 7, userName = 'Budi S.' }) => {
           />
         </Space>
 
-        {/* Mobile Drawer Menu */}
+    
         <Drawer
           placement="right"
           onClose={() => setDrawerVisible(false)}
@@ -95,6 +106,7 @@ const Header = ({ cartCount = 7, userName = 'Budi S.' }) => {
             mode="vertical"
             items={menuItems}
             onClick={handleMenuClick}
+            selectedKeys={getSelectedKey()}
             style={{ border: 'none' }}
           />
         </Drawer>

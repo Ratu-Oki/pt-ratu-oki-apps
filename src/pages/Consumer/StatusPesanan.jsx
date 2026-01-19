@@ -236,7 +236,7 @@ const StatusPesanan = () => {
         {/* Total */}
         <div className={styles.totalSection}>
           <Row justify="end">
-            <Col xs={24} sm={12} md={8}>
+            <Col xs={24} sm={20} md={16} lg={12}>
               <Space direction="vertical" style={{ width: '100%' }}>
                 <Row justify="space-between">
                   <span>Subtotal:</span>
@@ -289,25 +289,34 @@ const StatusPesanan = () => {
         <div className={styles.contentWrapper}>
           {/* Page Header */}
           <div className={styles.pageHeader}>
-            <h1 className={styles.pageTitle}>Status Pesanan Saya</h1>
-            <p className={styles.pageSubtitle}>
-              Pantau status dan detail pesanan Anda di sini
-            </p>
+            {!selectedOrder ? (
+              <>
+                <h1 className={styles.pageTitle}>Status Pesanan Saya</h1>
+                <p className={styles.pageSubtitle}>
+                  Pantau status dan detail pesanan Anda di sini
+                </p>
+              </>
+            ) : (
+              <>
+                <h1 className={styles.pageTitle}>Detail</h1>
+              </>
+            )}
           </div>
 
           {/* Content */}
-          <Row gutter={[24, 24]}>
-            {/* Orders List */}
-            <Col xs={24} lg={selectedOrder ? 12 : 24}>
-              <Card className={styles.ordersCard}>
-                <h2 className={styles.cardTitle}>Daftar Pesanan</h2>
-                {orders.length === 0 ? (
-                  <Empty
-                    description="Belum ada pesanan"
-                    style={{ marginTop: '40px' }}
-                  />
-                ) : (
-                  <Space direction="vertical" style={{ width: '100%' }}>
+          {!selectedOrder ? (
+            // List Pesanan
+            <Row gutter={[24, 24]}>
+              <Col xs={24}>
+                <Card className={styles.ordersCard}>
+                  <h2 className={styles.cardTitle}>Daftar Pesanan</h2>
+                  {orders.length === 0 ? (
+                    <Empty
+                      description="Belum ada pesanan"
+                      style={{ marginTop: '40px' }}
+                    />
+                  ) : (
+                    <Space direction="vertical" style={{ width: '100%' }}>
                     {orders.map((order) => {
                       const statusBadge = getStatusBadge(order.status);
                       return (
@@ -346,10 +355,11 @@ const StatusPesanan = () => {
                 )}
               </Card>
             </Col>
-
-            {/* Order Detail */}
-            {selectedOrder && (
-              <Col xs={24} lg={12}>
+            </Row>
+          ) : (
+            // Detail Pesanan
+            <Row gutter={[24, 24]}>
+              <Col xs={24}>
                 <Button
                   type="text"
                   icon={<ArrowLeftOutlined />}
@@ -360,8 +370,8 @@ const StatusPesanan = () => {
                 </Button>
                 {renderOrderDetail(selectedOrder)}
               </Col>
-            )}
-          </Row>
+            </Row>
+          )}
         </div>
       </Layout.Content>
 

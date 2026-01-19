@@ -7,6 +7,7 @@ import SignUp from './pages/SignUp';
 import Admin from './pages/Admin';
 import Consumer from './pages/Consumer';
 import StatusPesanan from './pages/Consumer/StatusPesanan';
+import Riwayat from './pages/Consumer/Riwayat';
 import Supplier from './pages/Supplier';
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
           <Route path="/signup" element={<SignUp />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/consumer" element={<Consumer />} />
+          <Route path="/consumer/riwayat" element={<Riwayat />} />
           <Route path="/consumer/status-pesanan" element={<StatusPesanan />} />
           <Route path="/supplier" element={<Supplier />} />
           <Route path="/" element={<Navigate to="/signin" replace />} />
