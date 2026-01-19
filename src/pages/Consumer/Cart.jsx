@@ -32,16 +32,7 @@ const Cart = () => {
       qty: 1,
       image: 'https://via.placeholder.com/80x80?text=Vanila+B',
     },
-    {
-      id: 3,
-      name: 'Vanila Bourbon 250g',
-      grade: 'Grade A',
-      weight: '250g',
-      origin: 'Teluk Sukabumi',
-      price: 2000000,
-      qty: 1,
-      image: 'https://via.placeholder.com/80x80?text=Vanila+250',
-    },
+    
   ]);
 
   const [promoCode, setPromoCode] = useState('');

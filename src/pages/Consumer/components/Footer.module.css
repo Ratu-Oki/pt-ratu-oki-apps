@@ -1,5 +1,5 @@
 .footer {
-  background: linear-gradient(135deg, #1b5e3f 0%, #0f3d2d 100%);
+  background: linear-gradient(135deg, #111827 0%, #111827 100%);
   color: #fff;
   padding: 40px 24px 20px;
   margin-top: 48px;
@@ -27,6 +27,21 @@
   letter-spacing: 0.5px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   padding-bottom: 6px;
+}
+
+.companyTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 12px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding-bottom: 6px;
+}
+
+.companyOki {
+  color: #D4A574;
 }
 
 .sectionDescription {

@@ -18,7 +18,8 @@ const Footer = () => {
           {/* About Company */}
           <Col xs={24} sm={12} md={6}>
             <div className={styles.footerSection}>
-              <h3 className={styles.sectionTitle}>PT Ratu Oki</h3>
+              <h3 className={styles.companyTitle}>PT Ratu <span className={styles.companyOki}>Oki</span></h3>
+              
               <p className={styles.sectionDescription}>
                 Penyedia vanila premium berkualitas tinggi dengan standar internasional.
               </p>
