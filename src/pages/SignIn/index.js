@@ -48,19 +48,19 @@ const SignIn = () => {
           <div className="signin-features">
             <div className="feature-item">
               <div className="feature-icon">
-                <img src={Assets.passwordImg} alt="security" />
+                <img src={Assets.secureImg} alt="security" />
               </div>
               <div className="feature-text">Transaksi aman dengan Multipas</div>
             </div>
             <div className="feature-item">
               <div className="feature-icon">
-                <img src={Assets.containerImg} alt="dashboard" />
+                <img src={Assets.dashboardImg} alt="dashboard" />
               </div>
               <div className="feature-text">Dashboard lengkap untuk semua role</div>
             </div>
             <div className="feature-item">
               <div className="feature-icon">
-                <img src={Assets.emailImg} alt="support" />
+                <img src={Assets.supportImg} alt="support" />
               </div>
               <div className="feature-text">Support 24/7 untuk intra kami</div>
             </div>
@@ -157,11 +157,11 @@ const SignIn = () => {
             <div className="social-divider">atau</div>
             <div className="social-buttons">
               <button className="social-button">
-                <span>🔵</span>
+                <img src={Assets.googleImg} alt="google" />
                 Google
               </button>
               <button className="social-button">
-                <span>📘</span>
+                <img src={Assets.facebookImg} alt="facebook" />
                 Facebook
               </button>
             </div>
