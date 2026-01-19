@@ -1,0 +1,162 @@
+.header {
+  background: linear-gradient(135deg, #1b5e3f 0%, #2d7a52 100%) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 0 24px;
+}
+
+.headerContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  height: 100%;
+}
+
+.logoSection {
+  flex-shrink: 0;
+  min-width: fit-content;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.logoIcon {
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logoText {
+  letter-spacing: 0.5px;
+  font-size: 16px;
+}
+
+.desktopMenu {
+  flex: 1;
+  margin-left: 24px;
+}
+
+.desktopMenu .ant-menu-item {
+  color: white !important;
+  border-bottom: none !important;
+}
+
+.desktopMenu .ant-menu-item:hover {
+  color: white !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.desktopMenu .ant-menu-item-selected {
+  color: white !important;
+  border-bottom: 2px solid white !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.userProfile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  color: white;
+  cursor: pointer;
+  transition: background 0.3s;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.userProfile:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.mobileMenuBtn {
+  display: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .headerContainer {
+    gap: 12px;
+    padding: 0 12px;
+  }
+
+  .logo {
+    gap: 6px;
+  }
+
+  .logoText {
+    font-size: 14px;
+  }
+
+  .logoIcon {
+    font-size: 20px;
+  }
+
+  .desktopMenu {
+    display: none !important;
+  }
+
+  .headerRight {
+    gap: 8px;
+  }
+
+  .userProfile {
+    padding: 6px 10px;
+    font-size: 12px;
+    gap: 4px;
+  }
+
+  .userProfile > span {
+    display: none;
+  }
+
+  .mobileMenuBtn {
+    display: block !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .headerContainer {
+    gap: 8px;
+  }
+
+  .logo {
+    gap: 4px;
+  }
+
+  .logoText {
+    font-size: 12px;
+    letter-spacing: 0;
+  }
+
+  .logoIcon {
+    font-size: 18px;
+  }
+
+  .headerRight {
+    gap: 4px;
+  }
+}

@@ -1,0 +1,290 @@
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #f5f5f5;
+}
+
+.content {
+  flex: 1;
+  padding: 32px 16px;
+  background: #f5f5f5;
+}
+
+.contentWrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.pageHeader {
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 2px solid #e8e8e8;
+}
+
+.pageTitle {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1b5e3f;
+  margin: 0 0 8px 0;
+}
+
+.pageSubtitle {
+  font-size: 16px;
+  color: #666;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Orders Card */
+.ordersCard {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.cardTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1b5e3f;
+  margin: 0 0 16px 0;
+  text-transform: uppercase;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+}
+
+.orderCard {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid #f0f0f0;
+  border-radius: 6px;
+}
+
+.orderCard:hover {
+  border-color: #1b5e3f;
+  box-shadow: 0 4px 12px rgba(27, 94, 63, 0.15);
+}
+
+.orderId {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1b5e3f;
+  margin: 0 0 6px 0;
+}
+
+.orderDate {
+  font-size: 13px;
+  color: #999;
+}
+
+.orderTotal {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1b5e3f;
+  margin: 0;
+  text-align: right;
+}
+
+.statusLabel {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* Order Detail */
+.orderDetail {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  margin-top: 16px;
+}
+
+.orderDetailHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.orderDetailTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1b5e3f;
+  margin: 0 0 4px 0;
+}
+
+.orderDetailDate {
+  font-size: 13px;
+  color: #999;
+  margin: 0;
+}
+
+.timelineSection {
+  margin-bottom: 24px;
+}
+
+.itemsSection {
+  margin-bottom: 24px;
+}
+
+.sectionTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1b5e3f;
+  margin: 0 0 16px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.timelineTime {
+  font-size: 13px;
+  color: #666;
+}
+
+.timelinePending {
+  font-size: 13px;
+  color: #999;
+  font-style: italic;
+}
+
+.itemsTable {
+  font-size: 13px;
+}
+
+.itemName {
+  font-weight: 700;
+  color: #1b5e3f;
+  margin-bottom: 2px;
+}
+
+.itemWeight {
+  font-size: 12px;
+  color: #999;
+}
+
+.totalSection {
+  background: #fafafa;
+  padding: 16px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+}
+
+.totalAmount {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1b5e3f;
+}
+
+.orderActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.backButton {
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .content {
+    padding: 24px 14px;
+  }
+
+  .pageTitle {
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 768px) {
+  .content {
+    padding: 16px 12px;
+  }
+
+  .contentWrapper {
+    max-width: 100%;
+  }
+
+  .pageHeader {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+  }
+
+  .pageTitle {
+    font-size: 24px;
+  }
+
+  .pageSubtitle {
+    font-size: 14px;
+  }
+
+  .orderDetailHeader {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .orderId {
+    font-size: 14px;
+  }
+
+  .orderTotal {
+    font-size: 16px;
+    text-align: left;
+  }
+
+  .orderDetailTitle {
+    font-size: 18px;
+  }
+
+  .itemsTable {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .content {
+    padding: 12px 8px;
+  }
+
+  .pageHeader {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+  }
+
+  .pageTitle {
+    font-size: 20px;
+  }
+
+  .pageSubtitle {
+    font-size: 13px;
+  }
+
+  .cardTitle {
+    font-size: 13px;
+  }
+
+  .orderId {
+    font-size: 13px;
+  }
+
+  .orderDate {
+    font-size: 12px;
+  }
+
+  .orderTotal {
+    font-size: 14px;
+  }
+
+  .orderDetailTitle {
+    font-size: 16px;
+  }
+
+  .sectionTitle {
+    font-size: 13px;
+  }
+}
