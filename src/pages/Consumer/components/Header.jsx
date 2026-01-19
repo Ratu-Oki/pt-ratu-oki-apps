@@ -28,6 +28,9 @@ const Header = ({ cartCount = 7, userName = 'Budi S.' }) => {
     if (location.pathname === '/consumer/riwayat') {
       return ['history'];
     }
+    if (location.pathname === '/consumer/cart') {
+      return [];
+    }
     return ['catalog'];
   };
 
@@ -53,6 +56,8 @@ const Header = ({ cartCount = 7, userName = 'Budi S.' }) => {
           items={menuItems}
           onClick={handleMenuClick}
           selectedKeys={getSelectedKey()}
+          selectable={true}
+          multiple={false}
           className={styles.desktopMenu}
           style={{
             backgroundColor: 'transparent',
@@ -68,15 +73,18 @@ const Header = ({ cartCount = 7, userName = 'Budi S.' }) => {
         <Space size="large" className={styles.headerRight}>
      
           <Tooltip title={`${cartCount} item dalam keranjang`}>
-            <Badge count={cartCount} color="#ff4d4f" size="small">
-              <ShoppingCartOutlined
-                style={{
-                  fontSize: '24px',
-                  color: 'white',
-                  cursor: 'pointer',
-                }}
-              />
-            </Badge>
+            <Link to="/consumer/cart" style={{ textDecoration: 'none' }}>
+              <Badge count={cartCount} color="#ff4d4f" size="small">
+                <ShoppingCartOutlined
+                  style={{
+                    fontSize: '24px',
+                    color: location.pathname === '/consumer/cart' ? '#1b5e3f' : 'white',
+                    cursor: 'pointer',
+                    transition: 'color 0.3s',
+                  }}
+                />
+              </Badge>
+            </Link>
           </Tooltip>
 
           <div className={styles.userProfile}>

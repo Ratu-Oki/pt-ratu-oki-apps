@@ -53,6 +53,8 @@
 .desktopMenu .ant-menu-item {
   color: white !important;
   border-bottom: none !important;
+  position: relative;
+  transition: all 0.3s ease !important;
 }
 
 .desktopMenu .ant-menu-item:hover {
@@ -62,8 +64,10 @@
 
 .desktopMenu .ant-menu-item-selected {
   color: white !important;
-  border-bottom: 2px solid white !important;
-  background-color: rgba(255, 255, 255, 0.1) !important;
+  border-bottom: 3px solid white !important;
+  background: rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.3) !important;
+  font-weight: 600;
 }
 
 .headerRight {

@@ -1,0 +1,510 @@
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #f5f5f5;
+}
+
+.content {
+  flex: 1;
+  padding: 32px 16px;
+  background: #f5f5f5;
+}
+
+@media (max-width: 1200px) {
+  .content {
+    padding: 24px 14px;
+  }
+}
+
+@media (max-width: 768px) {
+  .content {
+    padding: 16px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .content {
+    padding: 12px 8px;
+  }
+}
+
+.contentWrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.pageHeader {
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 2px solid #e8e8e8;
+}
+
+@media (max-width: 1200px) {
+  .pageHeader {
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e8e8e8;
+  }
+}
+
+@media (max-width: 768px) {
+  .pageHeader {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e8e8e8;
+  }
+}
+
+@media (max-width: 480px) {
+  .pageHeader {
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+}
+
+.pageTitle {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1b5e3f;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+@media (max-width: 1200px) {
+  .pageTitle {
+    font-size: 26px;
+  }
+}
+
+@media (max-width: 768px) {
+  .pageTitle {
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pageTitle {
+    font-size: 18px;
+  }
+}
+
+/* Card Styles */
+.formCard {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 768px) {
+  .formCard {
+    border-radius: 6px;
+    padding: 16px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    margin-bottom: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .formCard {
+    border-radius: 4px;
+    padding: 12px;
+    box-shadow: none;
+    border: 1px solid #f0f0f0;
+    margin-bottom: 12px;
+  }
+}
+
+.cardTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1b5e3f;
+  margin: 0 0 20px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+@media (max-width: 768px) {
+  .cardTitle {
+    font-size: 13px;
+    margin: 0 0 16px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .cardTitle {
+    font-size: 12px;
+    margin: 0 0 12px 0;
+  }
+}
+
+/* Form Styles */
+.form :global(.ant-form-item) {
+  margin-bottom: 16px;
+}
+
+.form :global(.ant-form-item-label) {
+  margin-bottom: 6px;
+}
+
+.form :global(.ant-form-item-label > label) {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+}
+
+.form :global(.ant-input),
+.form :global(.ant-input-number),
+.form :global(.ant-input-textarea > textarea),
+.form :global(.ant-select-selector) {
+  border-radius: 4px !important;
+  border: 1px solid #d9d9d9 !important;
+  font-size: 13px;
+}
+
+.form :global(.ant-input:hover),
+.form :global(.ant-input-number:hover),
+.form :global(.ant-input-textarea > textarea:hover),
+.form :global(.ant-select-selector:hover) {
+  border-color: #1b5e3f !important;
+}
+
+.form :global(.ant-input:focus),
+.form :global(.ant-input-number:focus),
+.form :global(.ant-input-textarea > textarea:focus),
+.form :global(.ant-select-selector:focus) {
+  border-color: #1b5e3f !important;
+  box-shadow: 0 0 0 2px rgba(27, 94, 63, 0.1) !important;
+}
+
+@media (max-width: 480px) {
+  .form :global(.ant-form-item) {
+    margin-bottom: 12px;
+  }
+
+  .form :global(.ant-input),
+  .form :global(.ant-input-number),
+  .form :global(.ant-input-textarea > textarea),
+  .form :global(.ant-select-selector) {
+    font-size: 12px !important;
+  }
+}
+
+/* Payment Options */
+.paymentOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (max-width: 480px) {
+  .paymentOptions {
+    gap: 8px;
+  }
+}
+
+.paymentOption {
+  border: 1px solid #f0f0f0;
+  border-radius: 6px;
+  padding: 12px 16px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.paymentOption:hover {
+  border-color: #1b5e3f;
+  background: #f5faf8;
+}
+
+@media (max-width: 480px) {
+  .paymentOption {
+    padding: 10px 12px;
+    border-radius: 4px;
+  }
+}
+
+.radioOption {
+  width: 100%;
+}
+
+.radioOption :global(.ant-radio-inner) {
+  border-color: #1b5e3f !important;
+}
+
+.radioOption :global(.ant-radio-inner::after) {
+  background-color: #1b5e3f !important;
+}
+
+.radioOption :global(.ant-radio-wrapper:hover) {
+  color: #1b5e3f;
+}
+
+.methodLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1b5e3f;
+  margin-bottom: 2px;
+}
+
+@media (max-width: 480px) {
+  .methodLabel {
+    font-size: 13px;
+  }
+}
+
+.methodInfo {
+  font-size: 12px;
+  color: #999;
+}
+
+@media (max-width: 480px) {
+  .methodInfo {
+    font-size: 11px;
+  }
+}
+
+/* Summary Card */
+.summaryCard {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  padding: 24px;
+  position: sticky;
+  top: 100px;
+}
+
+@media (max-width: 768px) {
+  .summaryCard {
+    border-radius: 6px;
+    padding: 16px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    position: static;
+  }
+}
+
+@media (max-width: 480px) {
+  .summaryCard {
+    border-radius: 4px;
+    padding: 12px;
+    box-shadow: none;
+    border: 1px solid #f0f0f0;
+  }
+}
+
+/* Items List */
+.itemsList {
+  margin-bottom: 16px;
+}
+
+@media (max-width: 480px) {
+  .itemsList {
+    margin-bottom: 12px;
+  }
+}
+
+.itemsList :global(.ant-list) {
+  padding: 0 !important;
+}
+
+.itemsList :global(.ant-list-item) {
+  padding: 0 0 12px 0 !important;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.itemsList :global(.ant-list-item:last-child) {
+  border-bottom: none !important;
+}
+
+@media (max-width: 480px) {
+  .itemsList :global(.ant-list-item) {
+    padding: 0 0 8px 0 !important;
+  }
+}
+
+.summaryItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+@media (max-width: 480px) {
+  .summaryItem {
+    gap: 8px;
+  }
+}
+
+.itemInfo {
+  flex: 1;
+}
+
+.itemName {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1b5e3f;
+  margin-bottom: 2px;
+}
+
+@media (max-width: 768px) {
+  .itemName {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .itemName {
+    font-size: 11px;
+  }
+}
+
+.itemDetails {
+  font-size: 11px;
+  color: #999;
+}
+
+@media (max-width: 480px) {
+  .itemDetails {
+    font-size: 10px;
+  }
+}
+
+.itemTotal {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1b5e3f;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .itemTotal {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .itemTotal {
+    font-size: 11px;
+  }
+}
+
+/* Summary Details */
+.summaryDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+@media (max-width: 480px) {
+  .summaryDetails {
+    gap: 8px;
+  }
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #666;
+}
+
+@media (max-width: 768px) {
+  .summaryRow {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .summaryRow {
+    font-size: 11px;
+  }
+}
+
+/* Total Row */
+.totalRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+  .totalRow {
+    margin-bottom: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .totalRow {
+    margin-bottom: 12px;
+  }
+}
+
+.totalLabel {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1b5e3f;
+}
+
+@media (max-width: 768px) {
+  .totalLabel {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .totalLabel {
+    font-size: 12px;
+  }
+}
+
+.totalAmount {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1b5e3f;
+}
+
+@media (max-width: 768px) {
+  .totalAmount {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .totalAmount {
+    font-size: 16px;
+  }
+}
+
+/* Buttons */
+.submitBtn {
+  background: #1b5e3f !important;
+  border-color: #1b5e3f !important;
+  font-weight: 600;
+}
+
+.submitBtn:hover {
+  background: #2d7a52 !important;
+  border-color: #2d7a52 !important;
+}
+
+@media (max-width: 480px) {
+  .submitBtn {
+    font-size: 12px;
+    height: 36px;
+  }
+}
+
+.backBtn {
+  font-weight: 600;
+}
+
+@media (max-width: 480px) {
+  .backBtn {
+    font-size: 12px;
+    height: 36px;
+  }
+}
