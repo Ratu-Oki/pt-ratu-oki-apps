@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import './SignIn.css';
 import Assets from '../../assets/images';
+import { useNavigate } from 'react-router-dom';
 
 const SignIn = () => {
+  const navigate = useNavigate();
   const [activeRole, setActiveRole] = useState('admin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -156,12 +158,12 @@ const SignIn = () => {
           <div className="social-login">
             <div className="social-divider">atau</div>
             <div className="social-buttons">
-              <button className="social-button">
-                <img src={Assets.googleImg} alt="google" />
+              <button type="button" className="social-button">
+                <img src={Assets.googleImg} alt="google" className="social-icon" />
                 Google
               </button>
-              <button className="social-button">
-                <img src={Assets.facebookImg} alt="facebook" />
+              <button type="button" className="social-button">
+                <img src={Assets.facebookImg} alt="facebook" className="social-icon" />
                 Facebook
               </button>
             </div>
@@ -169,7 +171,7 @@ const SignIn = () => {
 
           {/* Signup Link */}
           <div className="signup-link">
-            Belum punya akun? <a href="#signup">Daftar sekarang</a>
+            Belum punya akun? <a onClick={() => navigate('/signup')}>Daftar sekarang</a>
           </div>
         </div>
       </div>
