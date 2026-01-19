@@ -13,7 +13,15 @@ const SignIn = () => {
   const handleSignIn = (e) => {
     e.preventDefault();
     console.log('SignIn dengan role:', activeRole, 'Email:', email, 'Password:', password);
-    // TODO: Implementasi login logic di sini
+    
+    // Navigate berdasarkan role yang dipilih
+    const roleRoutes = {
+      'admin': '/admin',
+      'pengguna': '/consumer',
+      'supplier': '/supplier'
+    };
+    
+    navigate(roleRoutes[activeRole]);
   };
 
   const getRoleIcon = (role) => {
