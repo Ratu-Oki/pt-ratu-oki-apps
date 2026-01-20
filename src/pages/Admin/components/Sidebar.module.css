@@ -1,0 +1,512 @@
+/* Sidebar Container */
+.sidebar {
+  width: 280px;
+  background: #0D2818;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 100vh;
+  position: relative;
+  z-index: 100;
+  transition: width 0.3s ease, transform 0.3s ease;
+  box-sizing: border-box;
+}
+
+/* Sidebar Collapsed State */
+.sidebar.collapsed {
+  width: 80px;
+}
+
+.sidebar.collapsed .logoText,
+.sidebar.collapsed .menuText,
+.sidebar.collapsed .menuLabel,
+.sidebar.collapsed .userInfo {
+  display: none;
+}
+
+.sidebar.collapsed .logoSection {
+  padding: 20px 12px;
+}
+
+.sidebar.collapsed .menuItem {
+  justify-content: center;
+  padding: 12px;
+}
+
+.sidebar.collapsed .menuIcon {
+  font-size: 24px;
+  min-width: auto;
+}
+
+.sidebar.collapsed .userProfile {
+  justify-content: center;
+}
+
+.sidebar.collapsed .userAvatar {
+  width: 40px;
+  height: 40px;
+  margin: 0;
+}
+
+.sidebar.collapsed .collapseButton {
+  margin-left: auto;
+}
+
+/* Sidebar Overlay for Mobile */
+.sidebarOverlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 99;
+}
+
+/* Logo Section */
+.logoSection {
+  padding: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  transition: padding 0.3s ease;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  flex: 1;
+}
+
+.logo:hover {
+  transform: scale(1.05);
+}
+
+.logoIcon {
+  font-size: 28px;
+  flex-shrink: 0;
+  display: none;
+}
+
+.logoText {
+  color: white;
+  white-space: nowrap;
+  transition: opacity 0.3s ease;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* Collapse Button */
+.collapseButton {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.collapseButton:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: scale(1.1);
+}
+
+.collapseButton:active {
+  transform: scale(0.95);
+}
+
+/* Close Button */
+.closeButton {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 18px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.closeButton:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: scale(1.1);
+}
+
+.closeButton:active {
+  transform: scale(0.95);
+}
+
+/* Navigation */
+.nav {
+  flex: 1;
+  overflow-y: hidden;
+  padding: 20px 0;
+  transition: padding 0.3s ease;
+}
+
+.menuContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: hidden;
+}
+
+.nav::-webkit-scrollbar {
+  width: 6px;
+}
+
+.nav::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.nav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.nav::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Menu Section */
+.menuSection {
+  margin-bottom: 24px;
+}
+
+.menuLabel {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+  padding: 0 20px;
+  margin-bottom: 12px;
+}
+
+/* Menu Item */
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  margin: 4px 12px;
+}
+
+.menuItem:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border-left-color: transparent;
+}
+
+.menuItem.active {
+  background: #C9A961;
+  color: #1b5e3f;
+  border-left-color: transparent;
+  font-weight: 600;
+}
+
+.menuIcon {
+  font-size: 18px;
+  min-width: 24px;
+}
+
+.menuText {
+  flex: 1;
+}
+
+/* User Section */
+.userSection {
+  padding: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.2);
+  margin-top: auto;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.userProfile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.userProfile:hover {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.userAvatar {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.userInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.userName {
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.userRole {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Tablet Responsive - 768px to 1024px */
+@media (max-width: 1024px) and (min-width: 481px) {
+  .sidebar {
+    width: 240px;
+  }
+
+  .sidebar.collapsed {
+    width: 80px;
+  }
+
+  .logoText {
+    font-size: 16px;
+  }
+
+  .menuItem {
+    font-size: 13px;
+    padding: 10px 16px;
+  }
+
+  .menuIcon {
+    font-size: 16px;
+  }
+
+  .menuLabel {
+    padding: 0 16px;
+    font-size: 11px;
+  }
+
+  .logoSection {
+    padding: 16px;
+  }
+
+  .userSection {
+    padding: 16px;
+  }
+}
+
+/* Mobile Responsive - 481px to 768px */
+@media (max-width: 768px) and (min-width: 481px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 240px;
+    height: 100vh;
+    min-height: 100vh;
+    background: #0D2818;
+    background-attachment: fixed;
+    transform: translateX(-100%);
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar.collapsed {
+    width: 80px;
+  }
+
+  .sidebarOverlay {
+    display: block;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .sidebar.open ~ .sidebarOverlay {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/* Mobile Small - 480px and below */
+@media (max-width: 480px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 260px;
+    height: 100vh;
+    min-height: 100vh;
+    max-height: none;
+    background: #0D2818;
+    background-attachment: fixed;
+    transform: translateX(-100%);
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar.collapsed {
+    width: 100px;
+  }
+
+  .sidebar.collapsed .logoText,
+  .sidebar.collapsed .menuText,
+  .sidebar.collapsed .menuLabel,
+  .sidebar.collapsed .userInfo {
+    display: none;
+  }
+
+  .sidebar.collapsed .logoSection {
+    padding: 12px;
+  }
+
+  .sidebar.collapsed .menuItem {
+    padding: 12px 8px;
+    margin: 4px 4px;
+    justify-content: center;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .sidebar.collapsed .menuIcon {
+    font-size: 24px;
+    min-width: auto;
+  }
+
+  .sidebarOverlay {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .sidebar.open ~ .sidebarOverlay {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .logoSection {
+    padding: 12px 16px;
+  }
+
+  .logo {
+    gap: 8px;
+  }
+
+  .logoIcon {
+    font-size: 24px;
+  }
+
+  .logoText {
+    font-size: 16px;
+  }
+
+  .collapseButton {
+    display: none;
+  }
+
+  .closeButton {
+    display: flex;
+  }
+
+  .menuContainer {
+    overflow-y: auto;
+  }
+
+  .menuLabel {
+    padding: 12px 16px;
+    font-size: 10px;
+    margin-bottom: 8px;
+  }
+
+  .menuItem {
+    padding: 10px 16px;
+    margin: 4px 12px;
+    font-size: 13px;
+  }
+
+  .menuIcon {
+    font-size: 18px;
+  }
+
+  .userSection {
+    padding: 12px 16px;
+  }
+
+  .userInfo {
+    display: block;
+  }
+
+  .userName {
+    font-size: 13px;
+  }
+
+  .userRole {
+    font-size: 11px;
+  }
+}
+  
+

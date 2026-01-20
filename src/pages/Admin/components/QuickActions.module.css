@@ -1,0 +1,167 @@
+/* Actions Container */
+.actionsContainer {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* Actions Title */
+.actionsTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0 0 20px 0;
+}
+
+/* Action Grid */
+.actionGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+/* Action Button */
+.actionButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px 16px;
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-top: 4px solid #2d7a52;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  text-align: center;
+}
+
+.actionButton:hover {
+  background: white;
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.actionButton:active {
+  transform: translateY(0);
+}
+
+/* Action Icon */
+.actionIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: white;
+  background: #2d7a52;
+}
+
+/* Action Label */
+.actionLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a202c;
+  line-height: 1.3;
+}
+
+/* Tablet Responsive - 1024px and below */
+@media (max-width: 1024px) {
+  .actionsContainer {
+    padding: 16px;
+  }
+
+  .actionsTitle {
+    font-size: 16px;
+    margin-bottom: 16px;
+  }
+
+  .actionGrid {
+    gap: 10px;
+  }
+
+  .actionButton {
+    padding: 16px 12px;
+    gap: 10px;
+  }
+
+  .actionIcon {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+
+  .actionLabel {
+    font-size: 12px;
+  }
+}
+
+/* Mobile Responsive - 768px and below */
+@media (max-width: 768px) {
+  .actionsContainer {
+    padding: 12px;
+  }
+
+  .actionsTitle {
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+
+  .actionGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .actionButton {
+    padding: 14px 10px;
+    gap: 8px;
+    border-top-width: 3px;
+  }
+
+  .actionIcon {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+
+  .actionLabel {
+    font-size: 11px;
+  }
+}
+
+/* Mobile Small - 480px and below */
+@media (max-width: 480px) {
+  .actionsContainer {
+    padding: 10px;
+  }
+
+  .actionsTitle {
+    font-size: 13px;
+    margin-bottom: 10px;
+  }
+
+  .actionGrid {
+    gap: 6px;
+  }
+
+  .actionButton {
+    padding: 12px 8px;
+    gap: 6px;
+  }
+
+  .actionIcon {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+
+  .actionLabel {
+    font-size: 10px;
+  }
+}

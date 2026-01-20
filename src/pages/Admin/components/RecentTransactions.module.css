@@ -1,0 +1,274 @@
+/* Transaction Container */
+.transactionContainer {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* Transaction Header */
+.transactionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.transactionHeader h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0;
+}
+
+.viewAllLink {
+  font-size: 13px;
+  color: #2d7a52;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.viewAllLink:hover {
+  color: #1b5e3f;
+  text-decoration: underline;
+}
+
+/* Table Wrapper */
+.tableWrapper {
+  overflow-x: auto;
+  border-radius: 8px;
+}
+
+.tableWrapper::-webkit-scrollbar {
+  height: 6px;
+}
+
+.tableWrapper::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.tableWrapper::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.tableWrapper::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Table */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table thead {
+  background: #f8fafc;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 700;
+  color: #475569;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.table tbody tr {
+  border-bottom: 1px solid #e2e8f0;
+  transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.table td {
+  padding: 14px 16px;
+  color: #1a202c;
+}
+
+.orderId {
+  font-weight: 700;
+  color: #2d7a52;
+}
+
+.supplier {
+  color: #475569;
+  font-weight: 500;
+}
+
+.product {
+  color: #64748b;
+}
+
+.productName {
+  display: block;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.total {
+  font-weight: 600;
+  color: #1a202c;
+}
+
+/* Status Badge */
+.status {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.status.success {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.status.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status.processing {
+  background: #dbeafe;
+  color: #0c4a6e;
+}
+
+.status.default {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+/* Tablet Responsive - 1024px and below */
+@media (max-width: 1024px) {
+  .transactionContainer {
+    padding: 16px;
+  }
+
+  .transactionHeader h3 {
+    font-size: 16px;
+  }
+
+  .table {
+    font-size: 13px;
+  }
+
+  .table th,
+  .table td {
+    padding: 10px 12px;
+  }
+
+  .table th {
+    font-size: 11px;
+  }
+
+  .productName {
+    max-width: 150px;
+  }
+}
+
+/* Mobile Responsive - 768px and below */
+@media (max-width: 768px) {
+  .transactionContainer {
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+
+  .transactionHeader {
+    margin-bottom: 16px;
+  }
+
+  .transactionHeader h3 {
+    font-size: 14px;
+  }
+
+  .viewAllLink {
+    font-size: 12px;
+  }
+
+  .table {
+    font-size: 12px;
+  }
+
+  .table th {
+    padding: 8px 10px;
+    font-size: 10px;
+  }
+
+  .table td {
+    padding: 10px;
+  }
+
+  .productName {
+    max-width: 100px;
+  }
+
+  .status {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+
+  /* Hide less important columns on mobile */
+  .table th:nth-child(3),
+  .table td:nth-child(3) {
+    display: none;
+  }
+}
+
+/* Mobile Small - 480px and below */
+@media (max-width: 480px) {
+  .transactionContainer {
+    padding: 10px;
+  }
+
+  .transactionHeader h3 {
+    font-size: 13px;
+  }
+
+  .viewAllLink {
+    font-size: 11px;
+  }
+
+  .table {
+    font-size: 11px;
+  }
+
+  .table th {
+    padding: 6px 8px;
+    font-size: 9px;
+  }
+
+  .table td {
+    padding: 8px;
+  }
+
+  .orderId {
+    font-size: 11px;
+  }
+
+  .total {
+    font-size: 11px;
+  }
+
+  .status {
+    padding: 3px 6px;
+    font-size: 9px;
+  }
+}
