@@ -7,8 +7,9 @@ import styles from './Header.module.css';
  * @param {string} title - Judul halaman (optional, untuk type="simple")
  * @param {string} subTitle - Subtitle atau label tambahan (optional)
  * @param {string} type - Tipe header: "full" (dengan search + profile) atau "simple" (hanya judul)
+ * @param {React.ReactNode} actionButton - Action button untuk ditampilkan di sisi kanan header
  */
-const Header = ({ onMenuClick, title, subTitle, type = 'full' }) => {
+const Header = ({ onMenuClick, title, subTitle, type = 'full', actionButton }) => {
   return (
     <header className={styles.header}>
       {type === 'full' ? (
@@ -64,6 +65,7 @@ const Header = ({ onMenuClick, title, subTitle, type = 'full' }) => {
 
           <div className={styles.headerRight}>
             {subTitle && <p className={styles.pageSubtitle}>{subTitle}</p>}
+            {actionButton && actionButton}
           </div>
         </>
       )}

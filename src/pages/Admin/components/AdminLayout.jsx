@@ -11,8 +11,9 @@ import Header from './Header';
  * @param {string} headerType - Tipe header: "full" (search + profile) atau "simple" (hanya judul)
  * @param {string} title - Judul halaman (untuk simple header)
  * @param {string} subTitle - Subtitle halaman (untuk simple header)
+ * @param {ReactNode} actionButton - Action button untuk ditampilkan di header
  */
-const AdminLayout = ({ children, headerType = 'full', title, subTitle }) => {
+const AdminLayout = ({ children, headerType = 'full', title, subTitle, actionButton }) => {
   const [sidebarOpen, setSidebarOpen] = useState(
     typeof window !== 'undefined' ? window.innerWidth > 768 : true
   );
@@ -25,7 +26,7 @@ const AdminLayout = ({ children, headerType = 'full', title, subTitle }) => {
     <div className={styles.dashboardContainer}>
       <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
       <div className={styles.mainContent}>
-        <Header onMenuClick={toggleSidebar} type={headerType} title={title} subTitle={subTitle} />
+        <Header onMenuClick={toggleSidebar} type={headerType} title={title} subTitle={subTitle} actionButton={actionButton} />
         <div className={styles.dashboardContent}>
           {children}
         </div>

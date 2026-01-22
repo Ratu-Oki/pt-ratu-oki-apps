@@ -17,6 +17,12 @@ const Pengguna = () => {
     { id: 'supplier', label: 'Supplier', count: 2323 }
   ];
 
+  const actionButton = (
+    <button className={styles.addButton}>
+      <span className={styles.plusIcon}>+</span> Tambah Pengguna
+    </button>
+  );
+
   // User data
   const users = [
     {
@@ -66,15 +72,19 @@ const Pengguna = () => {
   ];
 
   return (
-    <AdminLayout headerType="simple" title="Manajemen Pengguna">
+    <AdminLayout 
+      headerType="simple" 
+      title="Manajemen Pengguna"
+      actionButton={actionButton}
+    >
       <div className={styles.penggunaContainer}>
         {/* Header with Add Button */}
         <div className={styles.headerSection}>
           <div className={styles.titleRow}>
-            <h3>Daftar Pengguna Sistem</h3>
-            <button className={styles.addButton}>
-              <span className={styles.plusIcon}>+</span> Tambah Pengguna
-            </button>
+            
+           
+              
+            
           </div>
 
           {/* Tabs */}

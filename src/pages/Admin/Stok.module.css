@@ -1,11 +1,465 @@
-/* Stok Page Styles */
-.stokPage {
-  padding: 20px;
+/* Stok Container */
+.stokContainer {
+  width: 100%;
 }
 
-.stokPage h1 {
-  font-size: 28px;
+/* Header Section */
+.headerSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.headerSection h3 {
+  font-size: 20px;
   font-weight: 600;
   color: #1a1a1a;
+  margin: 0;
+}
+
+/* Add Button */
+.addButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #2D7A52;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.addButton:hover {
+  background: #1f5638;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(45, 122, 82, 0.2);
+}
+
+.plusIcon {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+/* Summary Grid */
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+/* Summary Card */
+.summaryCard {
+  padding: 16px 20px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.summaryContent {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.summaryIcon {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.summaryText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.summaryLabel {
+  font-size: 12px;
+  font-weight: 500;
+  opacity: 0.8;
+  line-height: 1.2;
+}
+
+.summaryValue {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* Table Section */
+.tableSection {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.tableHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.tableHeader h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+/* Export Button */
+.exportBtn {
+  background: none;
+  border: 1px solid #e9ecef;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: #495057;
+  transition: all 0.2s ease;
+}
+
+.exportBtn:hover {
+  background: #f8f9fa;
+  border-color: #2D7A52;
+}
+
+/* Table Container */
+.tableContainer {
+  overflow-x: auto;
+}
+
+/* Table Styles */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table thead {
+  background: #f8f9fa;
+}
+
+.table thead th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #495057;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.table tbody tr {
+  border-bottom: 1px solid #e9ecef;
+  transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.table tbody td {
+  padding: 14px 12px;
+  color: #333;
+}
+
+/* Product Cell */
+.productCell {
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+/* Grade Badge */
+.gradeBadge {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 4px;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+/* Stock Bar */
+.stockBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stockFill {
+  height: 6px;
+  border-radius: 3px;
+  min-width: 80px;
+  transition: width 0.2s ease;
+}
+
+.stockText {
+  font-size: 12px;
+  color: #64748b;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+/* Level Badge */
+.levelBadge {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Status Badge */
+.statusBadge {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 4px;
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* Action Buttons */
+.actionButtons {
+  display: flex;
+  gap: 8px;
+}
+
+.actionBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.actionBtn:hover {
+  background-color: #e9ecef;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .summaryGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .table {
+    font-size: 13px;
+  }
+
+  .table thead th,
+  .table tbody td {
+    padding: 10px;
+  }
+
+  .stockFill {
+    min-width: 60px;
+  }
+
+  .stockText {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 768px) {
+  .headerSection {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .addButton {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .summaryGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .summaryCard {
+    padding: 12px 16px;
+  }
+
+  .summaryIcon {
+    font-size: 24px;
+  }
+
+  .summaryValue {
+    font-size: 20px;
+  }
+
+  .tableSection {
+    padding: 16px;
+  }
+
+  .table {
+    font-size: 12px;
+  }
+
+  .table thead th {
+    padding: 8px 6px;
+    font-size: 10px;
+  }
+
+  .table tbody td {
+    padding: 10px 6px;
+  }
+
+  .stockBar {
+    gap: 6px;
+  }
+
+  .stockFill {
+    min-width: 50px;
+    height: 5px;
+  }
+
+  .stockText {
+    font-size: 10px;
+  }
+
+  /* Hide grade and level on tablet */
+  .table thead th:nth-child(2),
+  .table tbody td:nth-child(2),
+  .table thead th:nth-child(4),
+  .table tbody td:nth-child(4) {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .headerSection h3 {
+    font-size: 16px;
+  }
+
+  .addButton {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .plusIcon {
+    font-size: 14px;
+  }
+
+  .summaryGrid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .summaryCard {
+    padding: 10px 12px;
+  }
+
+  .summaryIcon {
+    font-size: 20px;
+  }
+
+  .summaryLabel {
+    font-size: 11px;
+  }
+
+  .summaryValue {
+    font-size: 18px;
+  }
+
+  .tableSection {
+    padding: 12px;
+    margin: 0 -20px;
+    border-radius: 0;
+    border: none;
+    border-top: 1px solid #e9ecef;
+  }
+
+  .tableHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .tableHeader h4 {
+    font-size: 14px;
+  }
+
+  .exportBtn {
+    width: 100%;
+    font-size: 12px;
+  }
+
+  .table {
+    font-size: 11px;
+  }
+
+  .table thead th {
+    padding: 6px 4px;
+    font-size: 9px;
+  }
+
+  .table tbody td {
+    padding: 8px 4px;
+  }
+
+  .productCell {
+    font-size: 11px;
+  }
+
+  .gradeBadge {
+    padding: 4px 6px;
+    font-size: 10px;
+  }
+
+  .stockBar {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .stockFill {
+    min-width: 100%;
+    height: 4px;
+  }
+
+  .stockText {
+    font-size: 9px;
+  }
+
+  .levelBadge {
+    font-size: 11px;
+  }
+
+  .statusBadge {
+    padding: 4px 6px;
+    font-size: 9px;
+  }
+
+  .actionBtn {
+    padding: 4px 6px;
+    font-size: 14px;
+  }
+
+  /* Hide grade, level on mobile */
+  .table thead th:nth-child(2),
+  .table tbody td:nth-child(2),
+  .table thead th:nth-child(4),
+  .table tbody td:nth-child(4) {
+    display: none;
+  }
 }
