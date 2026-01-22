@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import styles from './Sidebar.module.css';
 
 const Sidebar = ({ isOpen, onToggle, isCollapsed = false }) => {
   const [collapsed, setCollapsed] = useState(isCollapsed);
+  const location = useLocation();
 
   const menuItems = [
     { id: 1, label: 'Dashboard', icon: '📊', path: '/admin/dashboard' },
@@ -26,6 +27,8 @@ const Sidebar = ({ isOpen, onToggle, isCollapsed = false }) => {
   const toggleCollapse = () => {
     setCollapsed(!collapsed);
   };
+
+  const isActive = (path) => location.pathname === path;
 
   return (
     <>
@@ -71,7 +74,7 @@ const Sidebar = ({ isOpen, onToggle, isCollapsed = false }) => {
               <Link
                 key={item.id}
                 to={item.path}
-                className={styles.menuItem}
+                className={`${styles.menuItem} ${isActive(item.path) ? styles.active : ''}`}
                 title={collapsed ? item.label : ''}
                 onClick={onToggle}
               >
@@ -87,7 +90,7 @@ const Sidebar = ({ isOpen, onToggle, isCollapsed = false }) => {
               <Link
                 key={item.id}
                 to={item.path}
-                className={styles.menuItem}
+                className={`${styles.menuItem} ${isActive(item.path) ? styles.active : ''}`}
                 title={collapsed ? item.label : ''}
                 onClick={onToggle}
               >
@@ -103,7 +106,7 @@ const Sidebar = ({ isOpen, onToggle, isCollapsed = false }) => {
               <Link
                 key={item.id}
                 to={item.path}
-                className={styles.menuItem}
+                className={`${styles.menuItem} ${isActive(item.path) ? styles.active : ''}`}
                 title={collapsed ? item.label : ''}
                 onClick={onToggle}
               >

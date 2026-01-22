@@ -8,7 +8,7 @@ import AdminLayout from './components/AdminLayout';
 
 const Pengguna = () => {
   return (
-    <AdminLayout>
+    <AdminLayout headerType="simple" title="Pengguna">
       <div className={styles.penggunaPage}>
         <h1>Pengguna</h1>
         {/* Content akan ditambahkan nanti */}

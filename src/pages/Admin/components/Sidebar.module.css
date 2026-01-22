@@ -230,10 +230,11 @@
 }
 
 .menuItem.active {
-  background: #C9A961;
+  background: #D4B5A0;
   color: #1b5e3f;
   border-left-color: transparent;
   font-weight: 600;
+  box-shadow: 0 2px 8px rgba(212, 181, 160, 0.3);
 }
 
 .menuIcon {

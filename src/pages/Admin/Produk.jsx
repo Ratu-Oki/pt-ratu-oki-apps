@@ -8,7 +8,7 @@ import AdminLayout from './components/AdminLayout';
 
 const Produk = () => {
   return (
-    <AdminLayout>
+    <AdminLayout headerType="simple" title="Produk">
       <div className={styles.produkPage}>
         <h1>Produk</h1>
         {/* Content akan ditambahkan nanti */}

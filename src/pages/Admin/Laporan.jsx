@@ -8,7 +8,7 @@ import AdminLayout from './components/AdminLayout';
 
 const Laporan = () => {
   return (
-    <AdminLayout>
+    <AdminLayout headerType="simple" title="Laporan">
       <div className={styles.laporanPage}>
         <h1>Laporan</h1>
         {/* Content akan ditambahkan nanti */}

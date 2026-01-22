@@ -8,7 +8,7 @@ import AdminLayout from './components/AdminLayout';
 
 const Stok = () => {
   return (
-    <AdminLayout>
+    <AdminLayout headerType="simple" title="Stok">
       <div className={styles.stokPage}>
         <h1>Stok</h1>
         {/* Content akan ditambahkan nanti */}
