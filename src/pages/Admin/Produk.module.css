@@ -1,0 +1,11 @@
+/* Produk Page Styles */
+.produkPage {
+  padding: 20px;
+}
+
+.produkPage h1 {
+  font-size: 28px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 20px;
+}

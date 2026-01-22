@@ -1,0 +1,11 @@
+/* Transaksi Page Styles */
+.transaksiPage {
+  padding: 20px;
+}
+
+.transaksiPage h1 {
+  font-size: 28px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 20px;
+}

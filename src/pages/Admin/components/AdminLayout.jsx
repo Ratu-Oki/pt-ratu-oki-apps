@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import styles from './Admin.module.css';
-import Sidebar from './components/Sidebar';
-import Header from './components/Header';
+import styles from './AdminLayout.module.css';
+import Sidebar from './Sidebar';
+import Header from './Header';
 
-const Admin = ({ children }) => {
-  // Initialize sidebar based on screen size
+/**
+ * AdminLayout - Layout wrapper untuk halaman admin
+ * Menyediakan sidebar, header, dan content area
+ */
+const AdminLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(
-    typeof window !== 'undefined' ? window.innerWidth > 480 : true
+    typeof window !== 'undefined' ? window.innerWidth > 768 : true
   );
-  const location = useLocation();
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -28,4 +29,4 @@ const Admin = ({ children }) => {
   );
 };
 
-export default Admin;
+export default AdminLayout;

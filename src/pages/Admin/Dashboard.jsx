@@ -1,22 +1,16 @@
-import React, { useState } from 'react';
-import styles from './DashboardLayout.module.css';
-import Sidebar from './Sidebar';
-import Header from './Header';
-import MetricsCard from './MetricsCard';
-import RecentTransactions from './RecentTransactions';
-import QuickActions from './QuickActions';
-import RecentActivities from './RecentActivities';
+/**
+ * Dashboard Page
+ * Halaman utama dashboard admin
+ */
+import React from 'react';
+import AdminLayout from './components/AdminLayout';
+import styles from './components/AdminLayout.module.css';
+import MetricsCard from './components/MetricsCard';
+import RecentTransactions from './components/RecentTransactions';
+import QuickActions from './components/QuickActions';
+import RecentActivities from './components/RecentActivities';
 
-const DashboardLayout = () => {
-  // Initialize sidebar based on screen size
-  const [sidebarOpen, setSidebarOpen] = useState(
-    typeof window !== 'undefined' ? window.innerWidth > 480 : true
-  );
-
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
-
+const Dashboard = () => {
   // Dummy data untuk metrics
   const metrics = [
     {
@@ -118,42 +112,35 @@ const DashboardLayout = () => {
   ];
 
   return (
-    <div className={styles.dashboardContainer}>
-      <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
-      <div className={styles.mainContent}>
-        <Header onMenuClick={toggleSidebar} />
-        
-        <div className={styles.dashboardContent}>
-          {/* Welcome Section */}
-          <div className={styles.welcomeSection}>
-            <h2>Dashboard</h2>
-            <p>Selamat datang kembali! Berikut ringkasan bisnis Anda hari ini.</p>
-          </div>
+    <AdminLayout>
+      {/* Welcome Section */}
+      <div className={styles.welcomeSection}>
+        <h2>Dashboard</h2>
+        <p>Selamat datang kembali! Berikut ringkasan bisnis Anda hari ini.</p>
+      </div>
 
-          {/* Metrics Grid */}
-          <div className={styles.metricsGrid}>
-            {metrics.map(metric => (
-              <MetricsCard key={metric.id} {...metric} />
-            ))}
-          </div>
+      {/* Metrics Grid */}
+      <div className={styles.metricsGrid}>
+        {metrics.map(metric => (
+          <MetricsCard key={metric.id} {...metric} />
+        ))}
+      </div>
 
-          {/* Main Content Grid */}
-          <div className={styles.contentGrid}>
-            {/* Left Column - Transactions */}
-            <div className={styles.leftColumn}>
-              <RecentTransactions transactions={transactions} />
-            </div>
+      {/* Main Content Grid */}
+      <div className={styles.contentGrid}>
+        {/* Left Column - Transactions */}
+        <div className={styles.leftColumn}>
+          <RecentTransactions transactions={transactions} />
+        </div>
 
-            {/* Right Column - Quick Actions and Activities */}
-            <div className={styles.rightColumn}>
-              <QuickActions />
-              <RecentActivities activities={activities} />
-            </div>
-          </div>
+        {/* Right Column - Quick Actions and Activities */}
+        <div className={styles.rightColumn}>
+          <QuickActions />
+          <RecentActivities activities={activities} />
         </div>
       </div>
-    </div>
+    </AdminLayout>
   );
 };
 
-export default DashboardLayout;
+export default Dashboard;

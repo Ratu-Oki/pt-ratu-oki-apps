@@ -1,25 +1,26 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import styles from './Sidebar.module.css';
 
 const Sidebar = ({ isOpen, onToggle, isCollapsed = false }) => {
   const [collapsed, setCollapsed] = useState(isCollapsed);
 
   const menuItems = [
-    { id: 1, label: 'Dashboard', icon: '📊', isActive: true },
-    { id: 2, label: 'Produk', icon: '📦', isActive: false },
-    { id: 3, label: 'Transaksi', icon: '💳', isActive: false },
-    { id: 4, label: 'Pembayaran', icon: '💰', isActive: false },
-    { id: 5, label: 'Stok', icon: '📈', isActive: false }
+    { id: 1, label: 'Dashboard', icon: '📊', path: '/admin/dashboard' },
+    { id: 2, label: 'Produk', icon: '📦', path: '/admin/produk' },
+    { id: 3, label: 'Transaksi', icon: '💳', path: '/admin/transaksi' },
+    { id: 4, label: 'Pembayaran', icon: '💰', path: '/admin/pembayaran' },
+    { id: 5, label: 'Stok', icon: '📈', path: '/admin/stok' }
   ];
 
   const footerMenuItems = [
-    { id: 1, label: 'Pengguna', icon: '👥', isActive: false },
-    { id: 2, label: 'Laporan', icon: '📄', isActive: false }
+    { id: 1, label: 'Pengguna', icon: '👥', path: '/admin/pengguna' },
+    { id: 2, label: 'Laporan', icon: '📄', path: '/admin/laporan' }
   ];
 
   const accountMenuItems = [
-    { id: 1, label: 'Pengaturan', icon: '⚙️', isActive: false },
-    { id: 2, label: 'Keluar', icon: '🚪', isActive: false }
+    { id: 1, label: 'Pengaturan', icon: '⚙️', path: '/admin/pengaturan' },
+    { id: 2, label: 'Keluar', icon: '🚪', path: '/signin' }
   ];
 
   const toggleCollapse = () => {
@@ -67,45 +68,48 @@ const Sidebar = ({ isOpen, onToggle, isCollapsed = false }) => {
           <div className={styles.menuSection}>
             {!collapsed && <p className={styles.menuLabel}>MENU UTAMA</p>}
             {menuItems.map(item => (
-              <a
+              <Link
                 key={item.id}
-                href="#!"
-                className={`${styles.menuItem} ${item.isActive ? styles.active : ''}`}
+                to={item.path}
+                className={styles.menuItem}
                 title={collapsed ? item.label : ''}
+                onClick={onToggle}
               >
                 <span className={styles.menuIcon}>{item.icon}</span>
                 {!collapsed && <span className={styles.menuText}>{item.label}</span>}
-              </a>
+              </Link>
             ))}
           </div>
 
           <div className={styles.menuSection}>
             {!collapsed && <p className={styles.menuLabel}>MENU LAINNYA</p>}
             {footerMenuItems.map(item => (
-              <a
+              <Link
                 key={item.id}
-                href="#!"
+                to={item.path}
                 className={styles.menuItem}
                 title={collapsed ? item.label : ''}
+                onClick={onToggle}
               >
                 <span className={styles.menuIcon}>{item.icon}</span>
                 {!collapsed && <span className={styles.menuText}>{item.label}</span>}
-              </a>
+              </Link>
             ))}
           </div>
 
           <div className={styles.menuSection}>
             {!collapsed && <p className={styles.menuLabel}>AKUN</p>}
             {accountMenuItems.map(item => (
-              <a
+              <Link
                 key={item.id}
-                href="#!"
+                to={item.path}
                 className={styles.menuItem}
                 title={collapsed ? item.label : ''}
+                onClick={onToggle}
               >
                 <span className={styles.menuIcon}>{item.icon}</span>
                 {!collapsed && <span className={styles.menuText}>{item.label}</span>}
-              </a>
+              </Link>
             ))}
           </div>
         </nav>
