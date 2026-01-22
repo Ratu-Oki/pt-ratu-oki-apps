@@ -223,15 +223,8 @@
 
 /* Responsive Design */
 @media (max-width: 1024px) {
-  .titleRow {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  .addButton {
-    width: 100%;
-    justify-content: center;
+  .penggunaContainer {
+    padding: 0;
   }
 
   .table {
@@ -248,12 +241,22 @@
     height: 36px;
     font-size: 12px;
   }
+
+  .actionButtons {
+    gap: 6px;
+  }
+
+  .actionBtn {
+    padding: 4px 6px;
+    font-size: 14px;
+  }
 }
 
 @media (max-width: 768px) {
   .tabsContainer {
     gap: 8px;
     padding-bottom: 8px;
+    margin-bottom: 16px;
   }
 
   .tab {
@@ -293,100 +296,229 @@
     font-size: 11px;
   }
 
-  /* Hide email on tablet */
+  /* Hide ROLE column on tablet */
   .table thead th:nth-child(2),
   .table tbody td:nth-child(2) {
-    display: none;
+    display: block;
   }
 }
 
 @media (max-width: 480px) {
-  .titleRow h3 {
-    font-size: 16px;
+  .penggunaContainer {
+    padding: 0;
+    margin: 0 -20px;
   }
 
-  .addButton {
-    padding: 8px 12px;
-    font-size: 12px;
-  }
-
-  .plusIcon {
-    font-size: 14px;
+  .headerSection {
+    margin-bottom: 16px;
+    padding: 0 20px;
   }
 
   .tabsContainer {
-    gap: 6px;
+    gap: 8px;
     overflow-x: auto;
-    padding-bottom: 8px;
-    margin-bottom: 0;
+    padding: 12px 20px;
+    margin: 0 -20px 16px -20px;
     border-bottom: 1px solid #e9ecef;
+    -webkit-overflow-scrolling: touch;
+    display: flex;
+    flex-wrap: nowrap;
   }
 
   .tab {
-    padding: 6px 10px;
-    font-size: 11px;
+    padding: 8px 12px;
+    font-size: 13px;
     white-space: nowrap;
-    margin-bottom: -8px;
+    margin-bottom: 0;
+    border-bottom: 2px solid transparent;
+    color: #64748b;
+    font-weight: 500;
+  }
+
+  .tab.active {
+    border-bottom-color: #2D7A52;
+    color: #2D7A52;
+    font-weight: 600;
   }
 
   .tabCount {
-    display: none;
+    margin-left: 4px;
+    opacity: 0.7;
+    font-size: 12px;
   }
 
+  /* Mobile Card Layout */
   .tableContainer {
-    margin: 0 -20px;
+    margin: 20px;
     border-radius: 0;
     border: none;
-    border-top: 1px solid #e9ecef;
+    padding: 0 20px;
+    background: transparent;
+    box-shadow: none;
   }
 
   .table {
-    font-size: 11px;
+    width: 100%;
+    border-collapse: collapse;
+    display: block;
+    background: transparent;
+  }
+
+  .table thead {
+    display: block;
+    background: transparent;
+    border: none;
+    margin-bottom: 12px;
+  }
+
+  .table thead tr {
+    display: flex;
+    gap: 12px;
   }
 
   .table thead th {
-    padding: 8px 4px;
-    font-size: 9px;
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 0;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 8px;
+  }
+
+  .table thead th:nth-child(2),
+  .table thead th:nth-child(3),
+  .table thead th:nth-child(4),
+  .table thead th:nth-child(5) {
+    display: none;
+  }
+
+  .table tbody {
+    display: block;
+    background: transparent;
+  }
+
+  .table tbody tr {
+    border: none;
+    background: white;
+    border-radius: 10px;
+    padding: 12px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e9ecef;
+  }
+
+  .table tbody tr:hover {
+    background-color: white;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   }
 
   .table tbody td {
-    padding: 8px 4px;
+    padding: 0;
+    text-align: left;
+    font-size: 13px;
+    color: #333;
+    border: none;
+  }
+
+  .userCell {
+    padding: 0 !important;
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    min-width: 0;
   }
 
   .userInfo {
-    gap: 6px;
+    gap: 12px;
+    display: flex;
+    align-items: flex-start;
+    flex: 1;
+    min-width: 0;
   }
 
   .avatar {
-    width: 28px;
-    height: 28px;
-    font-size: 10px;
+    width: 40px;
+    height: 40px;
+    font-size: 12px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+  }
+
+  .userDetails {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+    width: 100%;
   }
 
   .userName {
     font-size: 12px;
+    font-weight: 600;
+    color: #1a1a1a;
+    line-height: 1.2;
+    margin: 20;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .userEmail {
+    font-size: 11px;
+    color: #64748b;
+    display: block;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Hide TANGGAL BERGABUNG, STATUS, AKSI columns - show ROLE */
+  .table tbody td:nth-child(3),
+  .table tbody td:nth-child(4),
+  .table tbody td:nth-child(5) {
     display: none;
   }
 
-  .roleBadge,
+  .roleBadge {
+    display: inline-block;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: capitalize;
+    border-radius: 20px;
+    color: white;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+
   .statusBadge {
-    padding: 4px 8px;
-    font-size: 10px;
+    display: none;
+  }
+
+  .actionButtons {
+    display: none;
   }
 
   .actionBtn {
-    padding: 4px 6px;
-    font-size: 14px;
-  }
-
-  /* Hide role and date on mobile */
-  .table thead th:nth-child(2),
-  .table tbody td:nth-child(2),
-  .table thead th:nth-child(3),
-  .table tbody td:nth-child(3) {
     display: none;
   }
 }
