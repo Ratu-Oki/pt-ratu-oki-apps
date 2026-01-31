@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Layout,
   Card,
@@ -11,115 +11,132 @@ import {
   Button,
   Empty,
   Divider,
+  Spin,
+  message,
 } from 'antd';
 import {
   ArrowLeftOutlined,
   PrinterOutlined,
   DownloadOutlined,
+  ReloadOutlined,
 } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import styles from './StatusPesanan.module.css';
+import { transactionService } from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 
 /**
  * Status Pesanan Page
- * Menampilkan status dan riwayat pesanan pelanggan
+ * Menampilkan status dan detail pesanan pelanggan dengan data dari API
  */
 const StatusPesanan = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
 
-  // Mock data pesanan
-  const orders = [
-    {
-      id: 'ORD-2024-001',
-      date: '2024-01-15',
-      total: 2250000,
-      status: 'delivered',
-      items: [
-        {
-          id: 1,
-          name: 'Vanila Premium Grade A',
+  // Fetch orders
+  const fetchOrders = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await transactionService.getMyTransactions({ page: 1, limit: 20 });
+      const data = response.data || {};
+
+      // Transform transactions to orders with timeline
+      const transformedOrders = (data.transactions || []).map(tx => ({
+        id: tx.invoice_number,
+        dbId: tx.id,
+        date: tx.tanggal_transaksi,
+        total: tx.total_harga,
+        status: tx.status,
+        shippingAddress: tx.shipping_address,
+        paymentMethod: tx.payment_method,
+        items: (tx.details || []).map(detail => ({
+          id: detail.id,
+          name: detail.product?.nama_produk || `Produk #${detail.product_id}`,
           weight: '1 kg',
-          price: 450000,
-          qty: 5,
-        },
-      ],
-      timeline: [
-        { step: 0, title: 'Pesanan Dibuat', time: '2024-01-15 10:30' },
-        { step: 1, title: 'Pembayaran Dikonfirmasi', time: '2024-01-15 11:00' },
-        { step: 2, title: 'Diproses', time: '2024-01-15 14:00' },
-        { step: 3, title: 'Dikirim', time: '2024-01-16 08:00' },
-        { step: 4, title: 'Diterima', time: '2024-01-17 16:30' },
-      ],
-    },
-    {
-      id: 'ORD-2024-002',
-      date: '2024-01-18',
-      total: 1300000,
-      status: 'in_transit',
-      items: [
-        {
-          id: 2,
-          name: 'Vanila Premium Grade B',
-          weight: '1 kg',
-          price: 350000,
-          qty: 2,
-        },
-        {
-          id: 3,
-          name: 'Vanila Extract',
-          weight: '500 gram',
-          price: 150000,
-          qty: 2,
-        },
-      ],
-      timeline: [
-        { step: 0, title: 'Pesanan Dibuat', time: '2024-01-18 09:00' },
-        { step: 1, title: 'Pembayaran Dikonfirmasi', time: '2024-01-18 09:30' },
-        { step: 2, title: 'Diproses', time: '2024-01-18 13:00' },
-        { step: 3, title: 'Dikirim', time: '2024-01-19 10:00', pending: false },
-        { step: 4, title: 'Diterima', time: null, pending: true },
-      ],
-    },
-    {
-      id: 'ORD-2024-003',
-      date: '2024-01-20',
-      total: 1900000,
-      status: 'processing',
-      items: [
-        {
-          id: 5,
-          name: 'Vanila Powder',
-          weight: '250 gram',
-          price: 380000,
-          qty: 3,
-        },
-        {
-          id: 6,
-          name: 'Vanila Organic',
-          weight: '1 kg',
-          price: 520000,
-          qty: 1,
-        },
-      ],
-      timeline: [
-        { step: 0, title: 'Pesanan Dibuat', time: '2024-01-20 08:00' },
-        { step: 1, title: 'Pembayaran Dikonfirmasi', time: '2024-01-20 08:15' },
-        { step: 2, title: 'Diproses', time: null, pending: true },
-        { step: 3, title: 'Dikirim', time: null, pending: true },
-        { step: 4, title: 'Diterima', time: null, pending: true },
-      ],
-    },
-  ];
+          price: detail.harga_satuan,
+          qty: detail.jumlah,
+        })),
+        timeline: buildTimeline(tx),
+      }));
+
+      setOrders(transformedOrders);
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      message.error('Gagal memuat status pesanan');
+      setOrders([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Build timeline based on transaction status
+  const buildTimeline = (tx) => {
+    const statusOrder = ['pending', 'paid', 'shipped', 'completed'];
+    const currentIndex = statusOrder.indexOf(tx.status);
+
+    const steps = [
+      { step: 0, title: 'Pesanan Dibuat', status: 'pending' },
+      { step: 1, title: 'Pembayaran Dikonfirmasi', status: 'paid' },
+      { step: 2, title: 'Diproses & Dikirim', status: 'shipped' },
+      { step: 3, title: 'Diterima', status: 'completed' },
+    ];
+
+    return steps.map((step, idx) => {
+      if (tx.status === 'cancelled') {
+        return {
+          ...step,
+          time: idx === 0 ? formatDateTime(tx.createdAt) : null,
+          pending: idx > 0,
+          cancelled: true
+        };
+      }
+
+      const isCompleted = idx <= currentIndex;
+      return {
+        ...step,
+        time: isCompleted ? formatDateTime(tx.updatedAt) : null,
+        pending: !isCompleted
+      };
+    });
+  };
+
+  // Format date time
+  const formatDateTime = (dateStr) => {
+    if (!dateStr) return null;
+    return new Date(dateStr).toLocaleString('id-ID', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
+
+  // Get cart count
+  const getCartCount = () => {
+    const cart = localStorage.getItem('cart');
+    if (cart) return JSON.parse(cart).reduce((sum, item) => sum + (item.qty || 1), 0);
+    return 0;
+  };
 
   /**
    * Get status badge with color
    */
   const getStatusBadge = (status) => {
     const statusConfig = {
-      delivered: { color: 'success', label: 'Diterima' },
-      in_transit: { color: 'processing', label: 'Dalam Pengiriman' },
-      processing: { color: 'warning', label: 'Diproses' },
+      completed: { color: 'success', label: 'Diterima' },
+      shipped: { color: 'processing', label: 'Dalam Pengiriman' },
+      paid: { color: 'warning', label: 'Diproses' },
+      pending: { color: 'default', label: 'Menunggu Pembayaran' },
       cancelled: { color: 'error', label: 'Dibatalkan' },
     };
     return statusConfig[status] || { color: 'default', label: 'Tidak Diketahui' };
@@ -137,10 +154,25 @@ const StatusPesanan = () => {
   };
 
   /**
-   * Render order detail modal
+   * Get current step based on status
+   */
+  const getCurrentStep = (status) => {
+    const stepMap = {
+      pending: 0,
+      paid: 1,
+      shipped: 2,
+      completed: 3,
+      cancelled: -1
+    };
+    return stepMap[status] ?? 0;
+  };
+
+  /**
+   * Render order detail
    */
   const renderOrderDetail = (order) => {
     const statusBadge = getStatusBadge(order.status);
+    const currentStep = getCurrentStep(order.status);
 
     return (
       <Card className={styles.orderDetail}>
@@ -167,9 +199,9 @@ const StatusPesanan = () => {
           <h3 className={styles.sectionTitle}>Status Pengiriman</h3>
           <Steps
             direction="vertical"
-            current={order.timeline.findIndex((t) => t.pending) - 1}
+            current={currentStep}
             status={
-              order.status === 'delivered'
+              order.status === 'completed'
                 ? 'finish'
                 : order.status === 'cancelled'
                   ? 'error'
@@ -233,6 +265,17 @@ const StatusPesanan = () => {
           />
         </div>
 
+        {/* Shipping Address */}
+        {order.shippingAddress && (
+          <>
+            <Divider />
+            <div>
+              <h3 className={styles.sectionTitle}>Alamat Pengiriman</h3>
+              <p style={{ color: '#666' }}>{order.shippingAddress}</p>
+            </div>
+          </>
+        )}
+
         {/* Total */}
         <div className={styles.totalSection}>
           <Row justify="end">
@@ -269,7 +312,7 @@ const StatusPesanan = () => {
             <Button
               type="default"
               icon={<DownloadOutlined />}
-              onClick={() => alert('Download invoice')}
+              onClick={() => message.info('Fitur download invoice akan segera tersedia')}
             >
               Download Invoice
             </Button>
@@ -279,10 +322,24 @@ const StatusPesanan = () => {
     );
   };
 
+  if (loading) {
+    return (
+      <Layout className={styles.layout}>
+        <Header cartCount={getCartCount()} userName={user?.nama || 'Guest'} />
+        <Layout.Content className={styles.content}>
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '100px' }}>
+            <Spin size="large" />
+          </div>
+        </Layout.Content>
+        <Footer />
+      </Layout>
+    );
+  }
+
   return (
     <Layout className={styles.layout}>
       {/* Header */}
-      <Header cartCount={0} userName="Budi Santoso" />
+      <Header cartCount={getCartCount()} userName={user?.nama || 'Guest'} />
 
       {/* Main Content */}
       <Layout.Content className={styles.content}>
@@ -298,7 +355,7 @@ const StatusPesanan = () => {
               </>
             ) : (
               <>
-                <h1 className={styles.pageTitle}>Detail</h1>
+                <h1 className={styles.pageTitle}>Detail Pesanan</h1>
               </>
             )}
           </div>
@@ -309,52 +366,65 @@ const StatusPesanan = () => {
             <Row gutter={[24, 24]}>
               <Col xs={24}>
                 <Card className={styles.ordersCard}>
-                  <h2 className={styles.cardTitle}>Daftar Pesanan</h2>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                    <h2 className={styles.cardTitle}>Daftar Pesanan</h2>
+                    <Button
+                      icon={<ReloadOutlined />}
+                      onClick={fetchOrders}
+                      loading={loading}
+                    >
+                      Refresh
+                    </Button>
+                  </div>
                   {orders.length === 0 ? (
                     <Empty
                       description="Belum ada pesanan"
                       style={{ marginTop: '40px' }}
-                    />
+                    >
+                      <Button type="primary" onClick={() => navigate('/consumer')}>
+                        Mulai Belanja
+                      </Button>
+                    </Empty>
                   ) : (
                     <Space direction="vertical" style={{ width: '100%' }}>
-                    {orders.map((order) => {
-                      const statusBadge = getStatusBadge(order.status);
-                      return (
-                        <Card
-                          key={order.id}
-                          className={styles.orderCard}
-                          onClick={() => setSelectedOrder(order)}
-                        >
-                          <Row align="middle" justify="space-between">
-                            <Col flex="auto">
-                              <div>
-                                <p className={styles.orderId}>{order.id}</p>
-                                <Space>
-                                  <span className={styles.orderDate}>
-                                    {new Date(order.date).toLocaleDateString(
-                                      'id-ID'
-                                    )}
-                                  </span>
-                                  <Badge
-                                    status={statusBadge.color}
-                                    text={statusBadge.label}
-                                  />
-                                </Space>
-                              </div>
-                            </Col>
-                            <Col>
-                              <p className={styles.orderTotal}>
-                                {formatPrice(order.total)}
-                              </p>
-                            </Col>
-                          </Row>
-                        </Card>
-                      );
-                    })}
-                  </Space>
-                )}
-              </Card>
-            </Col>
+                      {orders.map((order) => {
+                        const statusBadge = getStatusBadge(order.status);
+                        return (
+                          <Card
+                            key={order.id}
+                            className={styles.orderCard}
+                            onClick={() => setSelectedOrder(order)}
+                            style={{ cursor: 'pointer' }}
+                            hoverable
+                          >
+                            <Row align="middle" justify="space-between">
+                              <Col flex="auto">
+                                <div>
+                                  <p className={styles.orderId}>{order.id}</p>
+                                  <Space>
+                                    <span className={styles.orderDate}>
+                                      {new Date(order.date).toLocaleDateString('id-ID')}
+                                    </span>
+                                    <Badge
+                                      status={statusBadge.color}
+                                      text={statusBadge.label}
+                                    />
+                                  </Space>
+                                </div>
+                              </Col>
+                              <Col>
+                                <p className={styles.orderTotal}>
+                                  {formatPrice(order.total)}
+                                </p>
+                              </Col>
+                            </Row>
+                          </Card>
+                        );
+                      })}
+                    </Space>
+                  )}
+                </Card>
+              </Col>
             </Row>
           ) : (
             // Detail Pesanan

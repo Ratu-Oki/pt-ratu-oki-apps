@@ -1,85 +1,137 @@
 /**
  * Laporan Page
- * Halaman laporan penjualan dan distribusi
+ * Halaman laporan penjualan dan distribusi dengan data dari API
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import styles from './Laporan.module.css';
 import AdminLayout from './components/AdminLayout';
+import { transactionService, stockService } from '../../services/api';
+import { Spin, message } from 'antd';
 
 const Laporan = () => {
-  const [selectedPeriod, setSelectedPeriod] = useState('januari-2024');
+  const [loading, setLoading] = useState(true);
+  const [selectedPeriod, setSelectedPeriod] = useState('all');
   const [selectedReport, setSelectedReport] = useState('semua');
+  const [reportData, setReportData] = useState({
+    penjualan: { total: 0, count: 0 },
+    distribusi: { total: 0, count: 0 },
+    stok: { total: 0, count: 0 },
+    laba: { total: 0, margin: 0 }
+  });
 
-  // Data laporan
-  const reportData = {
-    penjualan: {
-      total: 'Rp 45.250.000',
-      subtitle: '102 transaksi bulan ini',
-      icon: '📊'
-    },
-    distribusi: {
-      total: '1.250 kg',
-      subtitle: 'Semua distribusi',
-      icon: '📦'
-    },
-    pengemasan: {
-      total: '890 kg',
-      subtitle: 'Dari 2022-2024',
-      icon: '📮'
-    },
-    laba: {
-      total: 'Rp 15.800.000',
-      subtitle: 'Margin 35%',
-      icon: '💰'
-    }
+  // Format currency
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount || 0);
   };
+
+  // Fetch report data
+  const fetchReportData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [transactionsRes, stockRes] = await Promise.all([
+        transactionService.getAllAdmin({ page: 1, limit: 100 }).catch(() => ({ data: [] })),
+        stockService.getSummary().catch(() => ({ data: {} }))
+      ]);
+
+      // Handle transactions data
+      let transactions = [];
+      if (Array.isArray(transactionsRes.data)) {
+        transactions = transactionsRes.data;
+      } else if (transactionsRes.data) {
+        transactions = transactionsRes.data.transactions || transactionsRes.data || [];
+      }
+
+      // Calculate totals
+      const completedOrders = transactions.filter(t =>
+        t.status_pembayaran === 'paid' || t.status_pembayaran === 'completed'
+      );
+      const totalPenjualan = completedOrders.reduce((sum, t) => sum + (t.total_harga || 0), 0);
+
+      // Stock data
+      const stockData = stockRes.data || {};
+
+      setReportData({
+        penjualan: {
+          total: totalPenjualan,
+          count: completedOrders.length
+        },
+        distribusi: {
+          total: stockData.today_transactions || 0,
+          count: transactions.length
+        },
+        stok: {
+          total: stockData.total_stock_value || 0,
+          count: stockData.low_stock_products || 0
+        },
+        laba: {
+          total: Math.round(totalPenjualan * 0.35), // Estimated 35% margin
+          margin: 35
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching report data:', error);
+      message.error('Gagal memuat data laporan');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchReportData();
+  }, [fetchReportData]);
 
   // Export ke PDF
   const handleExportPDF = () => {
-    alert('Mengekspor ke PDF... (Fitur akan diintegrasikan dengan jsPDF/React-PDF)');
-    // Implementasi real: gunakan jsPDF atau react-pdf
+    message.info('Fitur export PDF akan segera tersedia');
   };
 
   // Export ke Excel
   const handleExportExcel = () => {
-    alert('Mengekspor ke Excel... (Fitur akan diintegrasikan dengan XLSX)');
-    // Implementasi real: gunakan xlsx library
+    message.info('Fitur export Excel akan segera tersedia');
   };
 
-  // Button untuk actionButton di AdminLayout
-  const actionButtons = (
-    <div className={styles.actionButtonsGroup}>
-    </div>
-  );
+  if (loading) {
+    return (
+      <AdminLayout headerType="simple" title="Laporan Penjualan & Distribusi">
+        <div style={{ display: 'flex', justifyContent: 'center', padding: 100 }}>
+          <Spin size="large" />
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
-    <AdminLayout 
-      headerType="simple" 
+    <AdminLayout
+      headerType="simple"
       title="Laporan Penjualan & Distribusi"
-      actionButton={actionButtons}
     >
       <div className={styles.laporanContainer}>
         {/* Filter Section */}
         <div className={styles.filterSection}>
           <div className={styles.filterGroup}>
             <label htmlFor="period">Periode:</label>
-            <select 
+            <select
               id="period"
-              value={selectedPeriod} 
+              value={selectedPeriod}
               onChange={(e) => setSelectedPeriod(e.target.value)}
               className={styles.filterSelect}
             >
-              <option value="januari-2024">Januari 2024</option>
-              <option value="februari-2024">Februari 2024</option>
-              <option value="maret-2024">Maret 2024</option>
+              <option value="all">Semua Waktu</option>
+              <option value="januari-2026">Januari 2026</option>
+              <option value="desember-2025">Desember 2025</option>
             </select>
           </div>
 
           <div className={styles.filterGroup}>
             <label htmlFor="report">Jenis Laporan:</label>
-            <select 
+            <select
               id="report"
-              value={selectedReport} 
+              value={selectedReport}
               onChange={(e) => setSelectedReport(e.target.value)}
               className={styles.filterSelect}
             >
@@ -89,67 +141,67 @@ const Laporan = () => {
             </select>
           </div>
 
-          <button className={styles.filterBtn}>🔍 Filter</button>
+          <button className={styles.filterBtn} onClick={fetchReportData}>🔍 Filter</button>
         </div>
 
         {/* Metrics Cards */}
         <div className={styles.metricsGrid}>
           <div className={styles.metricCard}>
             <div className={styles.metricIcon} style={{ backgroundColor: '#2D7A52' }}>
-              {reportData.penjualan.icon}
+              📊
             </div>
             <div className={styles.metricContent}>
               <h3>Total Penjualan</h3>
-              <p className={styles.metricValue}>{reportData.penjualan.total}</p>
-              <p className={styles.metricSubtitle}>{reportData.penjualan.subtitle}</p>
+              <p className={styles.metricValue}>{formatCurrency(reportData.penjualan.total)}</p>
+              <p className={styles.metricSubtitle}>{reportData.penjualan.count} transaksi selesai</p>
               <div className={styles.metricButtons}>
-                <button className={styles.btnExcel}>📊 Excel</button>
-                <button className={styles.btnPdf}>📄 PDF</button>
+                <button className={styles.btnExcel} onClick={handleExportExcel}>📊 Excel</button>
+                <button className={styles.btnPdf} onClick={handleExportPDF}>📄 PDF</button>
               </div>
             </div>
           </div>
 
           <div className={styles.metricCard}>
             <div className={styles.metricIcon} style={{ backgroundColor: '#F39C12' }}>
-              {reportData.distribusi.icon}
+              📦
             </div>
             <div className={styles.metricContent}>
-              <h3>Total Distribusi</h3>
-              <p className={styles.metricValue}>{reportData.distribusi.total}</p>
-              <p className={styles.metricSubtitle}>{reportData.distribusi.subtitle}</p>
+              <h3>Total Transaksi</h3>
+              <p className={styles.metricValue}>{reportData.distribusi.count}</p>
+              <p className={styles.metricSubtitle}>{reportData.distribusi.total} transaksi hari ini</p>
               <div className={styles.metricButtons}>
-                <button className={styles.btnExcel}>📊 Excel</button>
-                <button className={styles.btnPdf}>📄 PDF</button>
+                <button className={styles.btnExcel} onClick={handleExportExcel}>📊 Excel</button>
+                <button className={styles.btnPdf} onClick={handleExportPDF}>📄 PDF</button>
               </div>
             </div>
           </div>
 
           <div className={styles.metricCard}>
             <div className={styles.metricIcon} style={{ backgroundColor: '#3498DB' }}>
-              {reportData.pengemasan.icon}
+              📮
             </div>
             <div className={styles.metricContent}>
-              <h3>Total Pengemasan</h3>
-              <p className={styles.metricValue}>{reportData.pengemasan.total}</p>
-              <p className={styles.metricSubtitle}>{reportData.pengemasan.subtitle}</p>
+              <h3>Nilai Stok</h3>
+              <p className={styles.metricValue}>{formatCurrency(reportData.stok.total)}</p>
+              <p className={styles.metricSubtitle}>{reportData.stok.count} produk stok rendah</p>
               <div className={styles.metricButtons}>
-                <button className={styles.btnExcel}>📊 Excel</button>
-                <button className={styles.btnPdf}>📄 PDF</button>
+                <button className={styles.btnExcel} onClick={handleExportExcel}>📊 Excel</button>
+                <button className={styles.btnPdf} onClick={handleExportPDF}>📄 PDF</button>
               </div>
             </div>
           </div>
 
           <div className={styles.metricCard}>
             <div className={styles.metricIcon} style={{ backgroundColor: '#9B59B6' }}>
-              {reportData.laba.icon}
+              💰
             </div>
             <div className={styles.metricContent}>
-              <h3>Laba Kotor</h3>
-              <p className={styles.metricValue}>{reportData.laba.total}</p>
-              <p className={styles.metricSubtitle}>{reportData.laba.subtitle}</p>
+              <h3>Estimasi Laba</h3>
+              <p className={styles.metricValue}>{formatCurrency(reportData.laba.total)}</p>
+              <p className={styles.metricSubtitle}>Margin ~{reportData.laba.margin}%</p>
               <div className={styles.metricButtons}>
-                <button className={styles.btnExcel}>📊 Excel</button>
-                <button className={styles.btnPdf}>📄 PDF</button>
+                <button className={styles.btnExcel} onClick={handleExportExcel}>📊 Excel</button>
+                <button className={styles.btnPdf} onClick={handleExportPDF}>📄 PDF</button>
               </div>
             </div>
           </div>

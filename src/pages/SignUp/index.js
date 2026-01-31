@@ -2,16 +2,22 @@ import React, { useState } from 'react';
 import './SignUp.css';
 import Assets from '../../assets/images';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { message, Spin } from 'antd';
 
 const SignUp = () => {
   const navigate = useNavigate();
+  const { register, loading, error, clearError } = useAuth();
   const [formData, setFormData] = useState({
-    fullName: '',
+    nama: '',
     email: '',
     password: '',
     retypePassword: '',
+    telepon: '',
+    alamat: '',
+    role: 'consumer', // Default role
   });
-  const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
   const handleInputChange = (e) => {
@@ -20,30 +26,69 @@ const SignUp = () => {
       ...prev,
       [name]: value
     }));
+    clearError();
   };
 
-  const handleSignUp = (e) => {
+  const handleSignUp = async (e) => {
     e.preventDefault();
-    
+    clearError();
+
     // Validasi
     if (formData.password !== formData.retypePassword) {
-      alert('Password dan Retype Password tidak sesuai!');
+      message.error('Password dan Retype Password tidak sesuai!');
       return;
     }
 
-    console.log('Sign Up Data:', formData);
-    // Show success modal
-    setShowSuccess(true);
-    
-    // Auto redirect after 2 seconds
-    setTimeout(() => {
-      navigate('/signin');
-    }, 2000);
+    if (formData.password.length < 6) {
+      message.error('Password minimal 6 karakter!');
+      return;
+    }
+
+    if (formData.nama.length < 3) {
+      message.error('Nama minimal 3 karakter!');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const result = await register({
+        nama: formData.nama,
+        email: formData.email,
+        password: formData.password,
+        role: formData.role,
+        telepon: formData.telepon || undefined,
+        alamat: formData.alamat || undefined,
+      });
+
+      if (result.success) {
+        setShowSuccess(true);
+        message.success('Registrasi berhasil!');
+
+        // Auto redirect after 2 seconds
+        setTimeout(() => {
+          const roleRoutes = {
+            'admin': '/admin/dashboard',
+            'consumer': '/consumer',
+            'supplier': '/supplier'
+          };
+          navigate(roleRoutes[result.user.role] || '/');
+        }, 2000);
+      } else {
+        message.error(result.message || 'Registrasi gagal. Silakan coba lagi.');
+      }
+    } catch (err) {
+      message.error('Terjadi kesalahan. Silakan coba lagi.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleNavigateToSignIn = () => {
     navigate('/signin');
   };
+
+  const isLoading = loading || isSubmitting;
 
   return (
     <div className="signup-container">
@@ -102,12 +147,13 @@ const SignUp = () => {
               </label>
               <input
                 type="text"
-                name="fullName"
+                name="nama"
                 className="form-input"
                 placeholder="Masukkan nama lengkap"
-                value={formData.fullName}
+                value={formData.nama}
                 onChange={handleInputChange}
                 required
+                disabled={isLoading}
               />
             </div>
 
@@ -125,26 +171,43 @@ const SignUp = () => {
                 value={formData.email}
                 onChange={handleInputChange}
                 required
+                disabled={isLoading}
               />
             </div>
 
+            {/* Role Selection */}
+            <div className="form-group">
+              <label className="form-label">
+                Daftar Sebagai
+              </label>
+              <select
+                name="role"
+                className="form-input"
+                value={formData.role}
+                onChange={handleInputChange}
+                disabled={isLoading}
+              >
+                <option value="consumer">Consumer (Pembeli)</option>
+                <option value="supplier">Supplier (Pemasok)</option>
+              </select>
+            </div>
+
             {/* Password Field */}
-              <div className="form-group">
+            <div className="form-group">
               <label className="form-label">
                 <img src={Assets.passwordImg} alt="password" className="form-icon" />
-               Password
+                Password
               </label>
               <input
                 type="password"
                 name="password"
                 className="form-input"
-                placeholder="Masukkan password"
+                placeholder="Masukkan password (min 6 karakter)"
                 value={formData.password}
                 onChange={handleInputChange}
                 required
+                disabled={isLoading}
               />
-              
-              
             </div>
 
             {/* Retype Password Field */}
@@ -161,14 +224,20 @@ const SignUp = () => {
                 value={formData.retypePassword}
                 onChange={handleInputChange}
                 required
+                disabled={isLoading}
               />
-              
-              
             </div>
 
+            {/* Error message */}
+            {error && (
+              <div className="error-message" style={{ color: '#e74c3c', marginBottom: '16px', fontSize: '14px' }}>
+                {error}
+              </div>
+            )}
+
             {/* Sign Up Button */}
-            <button type="submit" className="signup-button">
-              Daftar
+            <button type="submit" className="signup-button" disabled={isLoading}>
+              {isLoading ? <Spin size="small" /> : 'Daftar'}
             </button>
           </form>
 
@@ -176,11 +245,11 @@ const SignUp = () => {
           <div className="social-login">
             <div className="social-divider">atau</div>
             <div className="social-buttons">
-              <button type="button" className="social-button">
+              <button type="button" className="social-button" disabled={isLoading}>
                 <img src={Assets.googleImg} alt="google" className="social-icon" />
                 Google
               </button>
-              <button type="button" className="social-button">
+              <button type="button" className="social-button" disabled={isLoading}>
                 <img src={Assets.facebookImg} alt="facebook" className="social-icon" />
                 Facebook
               </button>
@@ -200,12 +269,12 @@ const SignUp = () => {
           <div className="modal-content">
             <div className="modal-icon">✓</div>
             <h2 className="modal-title">Daftar Berhasil!</h2>
-            <p className="modal-message">Akun Anda telah berhasil dibuat. Anda akan diarahkan ke halaman login dalam 2 detik...</p>
-            <button 
+            <p className="modal-message">Akun Anda telah berhasil dibuat. Anda akan diarahkan ke dashboard dalam 2 detik...</p>
+            <button
               className="modal-button"
-              onClick={() => navigate('/signin')}
+              onClick={() => navigate('/consumer')}
             >
-              Kembali ke Login
+              Lanjut ke Dashboard
             </button>
           </div>
         </div>

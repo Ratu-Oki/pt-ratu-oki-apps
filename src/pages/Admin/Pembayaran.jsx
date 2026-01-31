@@ -1,109 +1,158 @@
 /**
  * Pembayaran Page
- * Halaman monitoring pembayaran dengan data transaksi
+ * Halaman monitoring pembayaran dengan data dari API
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import styles from './Pembayaran.module.css';
 import AdminLayout from './components/AdminLayout';
 import MetricsCard from './components/MetricsCard';
+import { transactionService } from '../../services/api';
+import { Spin, message, Tag, Empty } from 'antd';
 
 const Pembayaran = () => {
+  const [loading, setLoading] = useState(true);
+  const [transactions, setTransactions] = useState([]);
+  const [summary, setSummary] = useState({
+    total_pembayaran: 0,
+    pending_pembayaran: 0,
+    gagal_pembayaran: 0,
+    total_transaksi: 0
+  });
+
+  // Fetch payment data
+  const fetchPaymentData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await transactionService.getAllAdmin({
+        page: 1,
+        limit: 20
+      });
+
+      // Handle both array and object response formats
+      let transactionsData = [];
+      if (Array.isArray(response.data)) {
+        transactionsData = response.data;
+      } else if (response.data) {
+        transactionsData = response.data.transactions || response.data || [];
+      }
+
+      setTransactions(transactionsData);
+
+      // Calculate summary from transactions
+      const totalPembayaran = transactionsData
+        .filter(t => t.status_pembayaran === 'paid' || t.status_pembayaran === 'completed')
+        .reduce((sum, t) => sum + (t.total_harga || 0), 0);
+      const pendingPembayaran = transactionsData
+        .filter(t => t.status_pembayaran === 'pending')
+        .reduce((sum, t) => sum + (t.total_harga || 0), 0);
+      const gagalPembayaran = transactionsData
+        .filter(t => t.status_pembayaran === 'failed' || t.status_pembayaran === 'cancelled')
+        .reduce((sum, t) => sum + (t.total_harga || 0), 0);
+
+      setSummary({
+        total_pembayaran: totalPembayaran,
+        pending_pembayaran: pendingPembayaran,
+        gagal_pembayaran: gagalPembayaran,
+        total_transaksi: transactionsData.length
+      });
+    } catch (error) {
+      console.error('Error fetching payment data:', error);
+      message.error('Gagal memuat data pembayaran');
+      setTransactions([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchPaymentData();
+  }, [fetchPaymentData]);
+
+  // Format currency
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount || 0);
+  };
+
+  // Format date
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '-';
+    return new Date(dateStr).toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  // Get status color
+  const getStatusColor = (status) => {
+    const colors = {
+      paid: '#27AE60',
+      completed: '#27AE60',
+      pending: '#F39C12',
+      failed: '#E74C3C',
+      cancelled: '#E74C3C'
+    };
+    return colors[status] || '#95A5A6';
+  };
+
+  const getStatusLabel = (status) => {
+    const labels = {
+      paid: 'Dibayar',
+      completed: 'Selesai',
+      pending: 'Menunggu',
+      failed: 'Gagal',
+      cancelled: 'Dibatalkan'
+    };
+    return labels[status] || status;
+  };
+
   // Metrics data
   const metrics = [
     {
       id: 1,
       label: 'Total Pembayaran',
-      value: 'Rp 45.2M',
-      change: '+12%',
-      isPositive: true,
+      value: formatCurrency(summary.total_pembayaran),
       icon: '💰',
       bgColor: '#2D7A52'
     },
     {
       id: 2,
       label: 'Menunggu Pembayaran',
-      value: 'Rp 2.5M',
-      change: '+5%',
-      isPositive: true,
+      value: formatCurrency(summary.pending_pembayaran),
       icon: '⏳',
       bgColor: '#E67E22'
     },
     {
       id: 3,
       label: 'Pembayaran Gagal',
-      value: 'Rp 850K',
-      change: '-3%',
-      isPositive: false,
+      value: formatCurrency(summary.gagal_pembayaran),
       icon: '❌',
       bgColor: '#E74C3C'
     },
     {
       id: 4,
       label: 'Total Transaksi',
-      value: '156',
-      change: '+8%',
-      isPositive: true,
+      value: summary.total_transaksi.toString(),
       icon: '📊',
       bgColor: '#3498DB'
     }
   ];
 
-  // Transaction data
-  const [transactions] = useState([
-    {
-      id: '#ORD-2401',
-      customer: 'Budi Santoso',
-      method: 'Bank Transfer (BCA)',
-      amount: 'Rp 4.400.000',
-      time: '13 Jan, 14:35',
-      status: 'Sukses',
-      statusColor: '#27AE60'
-    },
-    {
-      id: '#ORD-2400',
-      customer: 'Siti Rahayu',
-      method: 'GCPay',
-      amount: 'Rp 8.550.000',
-      time: '12 Jan, 10:20',
-      status: 'Sukses',
-      statusColor: '#27AE60'
-    },
-    {
-      id: '#ORD-2399',
-      customer: 'Ahmad Wijaya',
-      method: 'Bank Transfer (Mandiri)',
-      amount: 'Rp 2.175.000',
-      time: '12 Jan, 08:15',
-      status: 'Pending',
-      statusColor: '#F39C12'
-    },
-    {
-      id: '#ORD-2398',
-      customer: 'Dewi Lestari',
-      method: 'DANA',
-      amount: 'Rp 8.050.000',
-      time: '11 Jan, 16:45',
-      status: 'Sukses',
-      statusColor: '#27AE60'
-    },
-    {
-      id: '#ORD-2397',
-      customer: 'Budi Hermawan',
-      method: 'Credit Card',
-      amount: 'Rp 850.000',
-      time: '11 Jan, 14:30',
-      status: 'Gagal',
-      statusColor: '#E74C3C'
-    }
-  ]);
-
   const getStatusIcon = (status) => {
     switch (status) {
-      case 'Sukses':
+      case 'paid':
+      case 'completed':
         return '✓';
-      case 'Pending':
+      case 'pending':
         return '⏳';
-      case 'Gagal':
+      case 'failed':
+      case 'cancelled':
         return '✕';
       default:
         return '•';
@@ -111,7 +160,7 @@ const Pembayaran = () => {
   };
 
   return (
-    <AdminLayout headerType="simple" title="Monitoring Pembayaran" subTitle="Powered by Midtrans">
+    <AdminLayout headerType="simple" title="Monitoring Pembayaran" subTitle="Data dari transaksi order">
       <div className={styles.pembayaranContainer}>
 
         {/* Metrics Grid */}
@@ -122,43 +171,47 @@ const Pembayaran = () => {
         </div>
 
         {/* Transactions Table */}
-        <div className={styles.tableContainer}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>ORDER ID</th>
-                <th>PELANGGAN</th>
-                <th>METODE</th>
-                <th>JUMLAH</th>
-                <th>WAKTU</th>
-                <th>STATUS</th>
-                <th>AKSI</th>
-              </tr>
-            </thead>
-            <tbody>
-              {transactions.map((tx) => (
-                <tr key={tx.id}>
-                  <td className={styles.orderId}>{tx.id}</td>
-                  <td>{tx.customer}</td>
-                  <td>{tx.method}</td>
-                  <td className={styles.amount}>{tx.amount}</td>
-                  <td>{tx.time}</td>
-                  <td>
-                    <span 
-                      className={styles.statusBadge}
-                      style={{ backgroundColor: tx.statusColor }}
-                    >
-                      {getStatusIcon(tx.status)} {tx.status}
-                    </span>
-                  </td>
-                  <td>
-                    <button className={styles.actionBtn}>👁️</button>
-                  </td>
+        {loading ? (
+          <div style={{ display: 'flex', justifyContent: 'center', padding: 50 }}>
+            <Spin size="large" />
+          </div>
+        ) : transactions.length === 0 ? (
+          <Empty description="Belum ada data transaksi" />
+        ) : (
+          <div className={styles.tableContainer}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>ORDER ID</th>
+                  <th>PELANGGAN</th>
+                  <th>METODE</th>
+                  <th>JUMLAH</th>
+                  <th>WAKTU</th>
+                  <th>STATUS</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {transactions.map((tx) => (
+                  <tr key={tx.id}>
+                    <td className={styles.orderId}>#{tx.id || tx.order_id}</td>
+                    <td>{tx.consumer?.nama || tx.nama_penerima || 'Customer'}</td>
+                    <td>{tx.metode_pembayaran || 'Transfer'}</td>
+                    <td className={styles.amount}>{formatCurrency(tx.total_harga)}</td>
+                    <td>{formatDate(tx.createdAt || tx.tanggal_order)}</td>
+                    <td>
+                      <span
+                        className={styles.statusBadge}
+                        style={{ backgroundColor: getStatusColor(tx.status_pembayaran) }}
+                      >
+                        {getStatusIcon(tx.status_pembayaran)} {getStatusLabel(tx.status_pembayaran)}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </AdminLayout>
   );

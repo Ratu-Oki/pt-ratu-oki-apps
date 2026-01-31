@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Modal, message } from 'antd';
+import { useAuth } from '../../../context/AuthContext';
 import styles from './Sidebar.module.css';
 
 const Sidebar = ({ isOpen, onToggle, isCollapsed = false }) => {
   const [collapsed, setCollapsed] = useState(isCollapsed);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
   const menuItems = [
     { id: 1, label: 'Dashboard', icon: '📊', path: '/admin/dashboard' },
@@ -20,8 +24,7 @@ const Sidebar = ({ isOpen, onToggle, isCollapsed = false }) => {
   ];
 
   const accountMenuItems = [
-    { id: 1, label: 'Pengaturan', icon: '⚙️', path: '/admin/pengaturan' },
-    { id: 2, label: 'Keluar', icon: '🚪', path: '/signin' }
+    { id: 1, label: 'Pengaturan', icon: '⚙️', path: '/admin/pengaturan' }
   ];
 
   const toggleCollapse = () => {
@@ -30,12 +33,28 @@ const Sidebar = ({ isOpen, onToggle, isCollapsed = false }) => {
 
   const isActive = (path) => location.pathname === path;
 
+  // Handle logout with confirmation modal
+  const handleLogout = () => {
+    Modal.confirm({
+      title: 'Konfirmasi Logout',
+      content: 'Apakah Anda yakin ingin keluar dari admin panel?',
+      okText: 'Ya, Keluar',
+      cancelText: 'Batal',
+      okButtonProps: { danger: true },
+      onOk: () => {
+        logout();
+        message.success('Berhasil logout');
+        navigate('/signin');
+      }
+    });
+  };
+
   return (
     <>
       {/* Sidebar Overlay Mobile */}
       {isOpen && (
-        <div 
-          className={styles.sidebarOverlay} 
+        <div
+          className={styles.sidebarOverlay}
           onClick={onToggle}
         />
       )}
@@ -48,7 +67,7 @@ const Sidebar = ({ isOpen, onToggle, isCollapsed = false }) => {
             <span className={styles.logoIcon}>🌾</span>
             {!collapsed && <span className={styles.logoText}>PT Ratu Oki</span>}
           </div>
-          <button 
+          <button
             className={styles.closeButton}
             onClick={onToggle}
             title="Close Sidebar"
@@ -56,7 +75,7 @@ const Sidebar = ({ isOpen, onToggle, isCollapsed = false }) => {
           >
             ✕
           </button>
-          <button 
+          <button
             className={styles.collapseButton}
             onClick={toggleCollapse}
             title={collapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
@@ -114,6 +133,23 @@ const Sidebar = ({ isOpen, onToggle, isCollapsed = false }) => {
                 {!collapsed && <span className={styles.menuText}>{item.label}</span>}
               </Link>
             ))}
+            {/* Logout Button */}
+            <button
+              className={styles.menuItem}
+              onClick={handleLogout}
+              title={collapsed ? 'Keluar' : ''}
+              style={{
+                width: '90%',
+                textAlign: 'left',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                color: '#e74c3c'
+              }}
+            >
+              <span className={styles.menuIcon}>🚪</span>
+              {!collapsed && <span className={styles.menuText}>Keluar</span>}
+            </button>
           </div>
         </nav>
 
@@ -121,7 +157,7 @@ const Sidebar = ({ isOpen, onToggle, isCollapsed = false }) => {
         <div className={styles.userSection}>
           {!collapsed && (
             <div className={styles.userInfo}>
-              <p className={styles.userName}>Admin User</p>
+              <p className={styles.userName}>{user?.nama || 'Admin'}</p>
               <p className={styles.userRole}>Administrator</p>
             </div>
           )}

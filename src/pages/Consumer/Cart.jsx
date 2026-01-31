@@ -1,41 +1,34 @@
-import React, { useState } from 'react';
-import { Layout, Row, Col, Card, Button, Input, Space, Empty, Divider, message } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Layout, Row, Col, Card, Button, Input, Empty, Divider, message } from 'antd';
 import { DeleteOutlined, MinusOutlined, PlusOutlined, ShoppingOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import styles from './Cart.module.css';
+import { useAuth } from '../../context/AuthContext';
 
 /**
  * Shopping Cart Page
- * Menampilkan daftar produk di keranjang dan ringkasan pesanan
+ * Menampilkan daftar produk di keranjang dengan localStorage persistence
  */
 const Cart = () => {
-  // Mock cart items
-  const [cartItems, setCartItems] = useState([
-    {
-      id: 1,
-      name: 'Vanila Bourbon Premium',
-      grade: 'Grade A',
-      weight: '100g',
-      origin: 'Teluk Sukabumi',
-      price: 850000,
-      qty: 2,
-      image: 'https://via.placeholder.com/80x80?text=Vanila+A',
-    },
-    {
-      id: 2,
-      name: 'Vanila Planifolia',
-      grade: 'Grade B',
-      weight: '100g',
-      origin: 'Malang',
-      price: 650000,
-      qty: 1,
-      image: 'https://via.placeholder.com/80x80?text=Vanila+B',
-    },
-    
-  ]);
-
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [cartItems, setCartItems] = useState([]);
   const [promoCode, setPromoCode] = useState('');
+
+  // Load cart from localStorage
+  useEffect(() => {
+    const savedCart = localStorage.getItem('cart');
+    if (savedCart) {
+      setCartItems(JSON.parse(savedCart));
+    }
+  }, []);
+
+  // Save cart to localStorage
+  useEffect(() => {
+    localStorage.setItem('cart', JSON.stringify(cartItems));
+  }, [cartItems]);
 
   /**
    * Format currency
@@ -49,53 +42,69 @@ const Cart = () => {
   };
 
   /**
-   * Calculate subtotal
+   * Calculate totals
    */
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.qty, 0);
-  const shipping = 50000;
-  const discount = promoCode ? subtotal * 0.1 : 0;
+  const subtotal = cartItems.reduce((sum, item) => sum + (item.harga_jual || item.price || 0) * (item.qty || 1), 0);
+  const shipping = cartItems.length > 0 ? 50000 : 0;
+  const discount = promoCode === 'RATUOKI10' ? subtotal * 0.1 : 0;
   const total = subtotal + shipping - discount;
 
   /**
    * Handle quantity change
    */
-  const handleQtyChange = (id, qty) => {
+  const handleQtyChange = (itemId, qty) => {
     if (qty <= 0) return;
-    setCartItems(cartItems.map(item => 
-      item.id === id ? { ...item, qty } : item
+    setCartItems(cartItems.map(item =>
+      (item.id === itemId || item.cartItemId === itemId) ? { ...item, qty } : item
     ));
   };
 
   /**
    * Handle delete item
    */
-  const handleDeleteItem = (id) => {
-    setCartItems(cartItems.filter(item => item.id !== id));
+  const handleDeleteItem = (itemId) => {
+    setCartItems(cartItems.filter(item => item.id !== itemId && item.cartItemId !== itemId));
     message.success('Produk dihapus dari keranjang');
   };
 
-//   /**
-//    * Handle apply promo
-//    */
-//   const handleApplyPromo = () => {
-//     if (promoCode) {
-//       message.success(`Promo code "${promoCode}" diterapkan!`);
-//     } else {
-//       message.warning('Masukkan kode promo');
-//     }
-//   };
+  /**
+   * Handle apply promo
+   */
+  const handleApplyPromo = () => {
+    if (promoCode === 'RATUOKI10') {
+      message.success('Promo code berhasil diterapkan! Diskon 10%');
+    } else if (promoCode) {
+      message.error('Kode promo tidak valid');
+    } else {
+      message.warning('Masukkan kode promo');
+    }
+  };
 
   /**
    * Handle checkout
    */
   const handleCheckout = () => {
-    window.location.href = '/consumer/checkout';
+    if (cartItems.length === 0) {
+      message.warning('Keranjang kosong');
+      return;
+    }
+    navigate('/consumer/checkout');
+  };
+
+  /**
+   * Handle continue shopping
+   */
+  const handleContinueShopping = () => {
+    navigate('/consumer');
   };
 
   return (
     <Layout className={styles.layout}>
       {/* Header */}
-      <Header cartCount={cartItems.length} userName="Budi Santoso" />
+      <Header
+        cartCount={cartItems.reduce((sum, item) => sum + (item.qty || 1), 0)}
+        userName={user?.nama || 'Guest'}
+      />
 
       {/* Main Content */}
       <Layout.Content className={styles.content}>
@@ -106,29 +115,43 @@ const Cart = () => {
           </div>
 
           {cartItems.length === 0 ? (
-            <Empty 
+            <Empty
               description="Keranjang belanja kosong"
               style={{ marginTop: '50px' }}
-            />
+            >
+              <Button type="primary" onClick={handleContinueShopping}>
+                Mulai Belanja
+              </Button>
+            </Empty>
           ) : (
             <Row gutter={[24, 24]}>
               {/* Cart Items */}
               <Col xs={24} lg={16}>
                 <Card className={styles.cartCard} bordered={false}>
-                  <h2 className={styles.cardTitle}>Daftar Produk</h2>
+                  <h2 className={styles.cardTitle}>Daftar Produk ({cartItems.length} item)</h2>
                   <div className={styles.itemsList}>
                     {cartItems.map((item) => (
-                      <div key={item.id} className={styles.cartItem}>
+                      <div key={item.cartItemId || item.id} className={styles.cartItem}>
                         <div className={styles.itemContent}>
                           <div className={styles.itemImage}>
-                            <ShoppingOutlined className={styles.icon} />
+                            {item.image_url ? (
+                              <img
+                                src={item.image_url}
+                                alt={item.nama_produk || item.name}
+                                style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8 }}
+                              />
+                            ) : (
+                              <ShoppingOutlined className={styles.icon} />
+                            )}
                           </div>
                           <div className={styles.itemInfo}>
-                            <div className={styles.itemName}>{item.name}</div>
+                            <div className={styles.itemName}>{item.nama_produk || item.name}</div>
                             <div className={styles.itemDetails}>
-                              {item.grade} • {item.weight} • {item.origin}
+                              Grade {item.grade || 'A'} • {item.lokasi_supplier || item.origin || 'Indonesia'}
                             </div>
-                            <div className={styles.itemPrice}>{formatCurrency(item.price)}</div>
+                            <div className={styles.itemPrice}>
+                              {formatCurrency(item.harga_jual || item.price)}
+                            </div>
                           </div>
                         </div>
 
@@ -138,29 +161,29 @@ const Cart = () => {
                               type="text"
                               size="small"
                               icon={<MinusOutlined />}
-                              onClick={() => handleQtyChange(item.id, item.qty - 1)}
+                              onClick={() => handleQtyChange(item.cartItemId || item.id, (item.qty || 1) - 1)}
                             />
                             <Input
                               type="number"
-                              value={item.qty}
-                              onChange={(e) => handleQtyChange(item.id, parseInt(e.target.value) || 1)}
+                              value={item.qty || 1}
+                              onChange={(e) => handleQtyChange(item.cartItemId || item.id, parseInt(e.target.value) || 1)}
                               className={styles.qtyInput}
                             />
                             <Button
                               type="text"
                               size="small"
                               icon={<PlusOutlined />}
-                              onClick={() => handleQtyChange(item.id, item.qty + 1)}
+                              onClick={() => handleQtyChange(item.cartItemId || item.id, (item.qty || 1) + 1)}
                             />
                           </div>
                           <div className={styles.subtotal}>
-                            {formatCurrency(item.price * item.qty)}
+                            {formatCurrency((item.harga_jual || item.price || 0) * (item.qty || 1))}
                           </div>
                           <Button
                             type="text"
                             danger
                             icon={<DeleteOutlined />}
-                            onClick={() => handleDeleteItem(item.id)}
+                            onClick={() => handleDeleteItem(item.cartItemId || item.id)}
                             className={styles.deleteBtn}
                           />
                         </div>
@@ -176,13 +199,14 @@ const Cart = () => {
                   <h2 className={styles.cardTitle}>Ringkasan Pesanan</h2>
 
                   {/* Promo Code */}
-                  {/* <div className={styles.promoSection}>
-                    <Space.Compact style={{ width: '100%' }}>
+                  <div className={styles.promoSection}>
+                    <Input.Group compact style={{ display: 'flex' }}>
                       <Input
-                        placeholder="Kode Promo"
+                        placeholder="Kode Promo (coba: RATUOKI10)"
                         value={promoCode}
-                        onChange={(e) => setPromoCode(e.target.value)}
+                        onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
                         className={styles.promoInput}
+                        style={{ flex: 1 }}
                       />
                       <Button
                         type="primary"
@@ -191,13 +215,13 @@ const Cart = () => {
                       >
                         Terapkan
                       </Button>
-                    </Space.Compact>
-                  </div> */}
+                    </Input.Group>
+                  </div>
 
                   {/* Summary Details */}
                   <div className={styles.summaryDetails}>
                     <div className={styles.summaryRow}>
-                      <span>Subtotal ({cartItems.length} item)</span>
+                      <span>Subtotal ({cartItems.reduce((sum, item) => sum + (item.qty || 1), 0)} item)</span>
                       <span>{formatCurrency(subtotal)}</span>
                     </div>
                     <div className={styles.summaryRow}>
@@ -206,8 +230,8 @@ const Cart = () => {
                     </div>
                     {discount > 0 && (
                       <div className={styles.summaryRow + ' ' + styles.discount}>
-                        <span>Diskon</span>
-                        <span>-{formatCurrency(discount)}</span>
+                        <span>Diskon (10%)</span>
+                        <span style={{ color: '#e74c3c' }}>-{formatCurrency(discount)}</span>
                       </div>
                     )}
                   </div>
@@ -236,7 +260,7 @@ const Cart = () => {
                     type="default"
                     block
                     size="large"
-                    onClick={() => window.location.href = '/consumer'}
+                    onClick={handleContinueShopping}
                     className={styles.continueBtn}
                   >
                     Lanjut Belanja

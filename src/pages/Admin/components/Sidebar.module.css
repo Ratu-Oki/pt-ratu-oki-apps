@@ -11,6 +11,8 @@
   z-index: 100;
   transition: width 0.3s ease, transform 0.3s ease;
   box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 /* Sidebar Collapsed State */
@@ -374,7 +376,7 @@
     transition: opacity 0.3s ease;
   }
 
-  .sidebar.open ~ .sidebarOverlay {
+  .sidebar.open~.sidebarOverlay {
     opacity: 1;
     pointer-events: auto;
   }
@@ -444,7 +446,7 @@
     transition: opacity 0.3s ease;
   }
 
-  .sidebar.open ~ .sidebarOverlay {
+  .sidebar.open~.sidebarOverlay {
     opacity: 1;
     pointer-events: auto;
   }
@@ -509,5 +511,3 @@
     font-size: 11px;
   }
 }
-  
-

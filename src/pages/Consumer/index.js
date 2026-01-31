@@ -1,142 +1,168 @@
-import React, { useState, useCallback } from 'react';
-import { Layout, Row, Col, PageHeader, message, Affix, Button, Badge } from 'antd';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Layout, Row, Col, message, Affix, Button, Badge, Spin } from 'antd';
 import { ShoppingCartOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import ProductGrid from './components/ProductGrid';
 import Footer from './components/Footer';
 import styles from './Consumer.module.css';
+import { productService } from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 
 /**
  * Consumer Page
  * Halaman katalog produk untuk konsumen dengan filter, grid produk, dan keranjang
  */
 const Consumer = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState([]);
   const [cartItems, setCartItems] = useState([]);
   const [filters, setFilters] = useState({
-    grades: ['Grade A (Premium)'],
+    grades: [],
     priceRange: { min: 0, max: 100000000 },
-    weights: ['1 kg'],
+    search: '',
   });
 
-  // Mock product data
-  const allProducts = [
-    {
-      id: 1,
-      name: 'Vanila Premium Grade A',
-      grade: 'Grade A',
-      image: 'https://via.placeholder.com/300x300?text=Vanila+A',
-      price: 450000,
-      rating: 4.5,
-      reviews: 128,
-      weight: '1 kg',
-      origin: 'Madagascar',
-    },
-    {
-      id: 2,
-      name: 'Vanila Premium Grade B',
-      grade: 'Grade B',
-      image: 'https://via.placeholder.com/300x300?text=Vanila+B',
-      price: 350000,
-      rating: 4.3,
-      reviews: 95,
-      weight: '1 kg',
-      origin: 'Tahiti',
-    },
-    {
-      id: 3,
-      name: 'Vanila Premium Grade C',
-      grade: 'Grade C',
-      image: 'https://via.placeholder.com/300x300?text=Vanila+C',
-      price: 280000,
-      rating: 4.0,
-      reviews: 76,
-      weight: '1 kg',
-      origin: 'Madagascar',
-    },
-    {
-      id: 4,
-      name: 'Vanila Extract',
-      grade: 'Extract',
-      image: 'https://via.placeholder.com/300x300?text=Extract',
-      price: 150000,
-      rating: 4.4,
-      reviews: 112,
-      weight: '500 gram',
-      origin: 'Mexico',
-    },
-    {
-      id: 5,
-      name: 'Vanila Powder',
-      grade: 'Grade A',
-      image: 'https://via.placeholder.com/300x300?text=Powder',
-      price: 380000,
-      rating: 4.6,
-      reviews: 142,
-      weight: '250 gram',
-      origin: 'Madagascar',
-    },
-    {
-      id: 6,
-      name: 'Vanila Organic',
-      grade: 'Grade A',
-      image: 'https://via.placeholder.com/300x300?text=Organic',
-      price: 520000,
-      rating: 4.7,
-      reviews: 156,
-      weight: '1 kg',
-      origin: 'Bali',
-    },
-  ];
+  // Load cart from localStorage
+  useEffect(() => {
+    const savedCart = localStorage.getItem('cart');
+    if (savedCart) {
+      setCartItems(JSON.parse(savedCart));
+    }
+  }, []);
+
+  // Save cart to localStorage
+  useEffect(() => {
+    localStorage.setItem('cart', JSON.stringify(cartItems));
+  }, [cartItems]);
+
+  // Fetch products from API
+  const fetchProducts = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = {
+        page: 1,
+        limit: 50,
+        search: filters.search || undefined
+      };
+
+      const response = await productService.getAll(params);
+      const data = response.data || {};
+
+      // Only show active/approved products
+      const activeProducts = (data.products || []).filter(
+        p => p.status_produk === 'active' || p.status_produk === 'approved'
+      );
+
+      setProducts(activeProducts);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      message.error('Gagal memuat produk');
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [filters.search]);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   // Filter products based on active filters
-  const filteredProducts = allProducts.filter((product) => {
-    const isGradeMatch = filters.grades.some((grade) =>
-      product.grade.includes(grade.split(' ')[0])
-    );
-    const isPriceMatch =
-      product.price >= filters.priceRange.min &&
-      product.price <= filters.priceRange.max;
-    const isWeightMatch = filters.weights.includes(product.weight);
+  const filteredProducts = products.filter((product) => {
+    // Grade filter
+    if (filters.grades.length > 0) {
+      // Extract grade from product (could be in name or separate field)
+      const productGrade = product.grade || 'A';
+      const matchesGrade = filters.grades.some(g => g.includes(productGrade));
+      if (!matchesGrade) return false;
+    }
 
-    return isGradeMatch && isPriceMatch && isWeightMatch;
+    // Price filter
+    const price = product.harga_jual || 0;
+    if (price < filters.priceRange.min || price > filters.priceRange.max) {
+      return false;
+    }
+
+    return true;
   });
 
   /**
    * Handle filter change from sidebar
    */
   const handleFilterChange = useCallback((newFilters) => {
-    setFilters(newFilters);
+    setFilters(prev => ({ ...prev, ...newFilters }));
+  }, []);
+
+  /**
+   * Handle search
+   */
+  const handleSearch = useCallback((searchTerm) => {
+    setFilters(prev => ({ ...prev, search: searchTerm }));
   }, []);
 
   /**
    * Handle add to cart
    */
   const handleAddToCart = useCallback((productId) => {
-    const product = allProducts.find((p) => p.id === productId);
+    const product = products.find((p) => p.id === productId);
     if (product) {
-      setCartItems((prev) => [
-        ...prev,
-        {
-          ...product,
-          cartItemId: Date.now(),
-        },
-      ]);
-      message.success(`${product.name} ditambahkan ke keranjang`);
+      // Check if already in cart
+      const existingIndex = cartItems.findIndex(item => item.id === productId);
+
+      if (existingIndex >= 0) {
+        // Increase quantity
+        const newCart = [...cartItems];
+        newCart[existingIndex].qty = (newCart[existingIndex].qty || 1) + 1;
+        setCartItems(newCart);
+        message.success(`Jumlah ${product.nama_produk} ditambah`);
+      } else {
+        // Add new item
+        setCartItems((prev) => [
+          ...prev,
+          {
+            ...product,
+            qty: 1,
+            cartItemId: Date.now(),
+          },
+        ]);
+        message.success(`${product.nama_produk} ditambahkan ke keranjang`);
+      }
     }
-  }, []);
+  }, [products, cartItems]);
 
   /**
-   * Navigate to cart/checkout
+   * Navigate to cart
    */
-  // const handleGoToCart = () => {
-  //   message.info('Fitur keranjang akan segera hadir');
-  // };
+  const handleGoToCart = () => {
+    navigate('/consumer/cart');
+  };
+
+  // Transform products for ProductGrid component
+  const transformedProducts = filteredProducts.map(p => ({
+    id: p.id,
+    name: p.nama_produk,
+    grade: `Grade ${p.grade || 'A'}`,
+    image: p.image_url || 'https://via.placeholder.com/300x300?text=No+Image',
+    price: p.harga_jual,
+    rating: p.rating || 0,
+    reviews: p.total_rating || 0,
+    weight: '1 kg',
+    origin: p.lokasi_supplier || 'Indonesia',
+    stok: p.stok
+  }));
 
   return (
     <Layout className={styles.layout}>
       {/* Header */}
-      <Header cartCount={cartItems.length} userName="Budi Santoso" />
+      <Header
+        cartCount={cartItems.reduce((sum, item) => sum + (item.qty || 1), 0)}
+        userName={user?.nama || 'Guest'}
+        onSearch={handleSearch}
+      />
 
       {/* Main Content */}
       <Layout.Content className={styles.content}>
@@ -160,10 +186,16 @@ const Consumer = () => {
 
             {/* Products Area */}
             <Col xs={24} md={18} lg={19} xl={20}>
-              <ProductGrid
-                products={filteredProducts}
-                onAddToCart={handleAddToCart}
-              />
+              {loading ? (
+                <div style={{ display: 'flex', justifyContent: 'center', padding: '50px' }}>
+                  <Spin size="large" />
+                </div>
+              ) : (
+                <ProductGrid
+                  products={transformedProducts}
+                  onAddToCart={handleAddToCart}
+                />
+              )}
             </Col>
           </Row>
         </div>
@@ -175,7 +207,7 @@ const Consumer = () => {
       {/* Floating Cart Button */}
       {cartItems.length > 0 && (
         <Affix style={{ position: 'fixed', bottom: 24, right: 24 }}>
-          {/* <Button
+          <Button
             type="primary"
             size="large"
             shape="circle"
@@ -188,11 +220,11 @@ const Consumer = () => {
               boxShadow: '0 4px 12px rgba(27, 94, 63, 0.3)',
             }}
             icon={
-              <Badge count={cartItems.length} offset={[-8, 8]}>
+              <Badge count={cartItems.reduce((sum, item) => sum + (item.qty || 1), 0)} offset={[-8, 8]}>
                 <ShoppingCartOutlined style={{ fontSize: '20px', color: '#fff' }} />
               </Badge>
             }
-          /> */}
+          />
         </Affix>
       )}
     </Layout>

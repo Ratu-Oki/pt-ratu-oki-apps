@@ -1,4 +1,8 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Dropdown, Modal, message } from 'antd';
+import { LogoutOutlined, UserOutlined } from '@ant-design/icons';
+import { useAuth } from '../../../context/AuthContext';
 import styles from './Header.module.css';
 
 /**
@@ -10,27 +14,58 @@ import styles from './Header.module.css';
  * @param {React.ReactNode} actionButton - Action button untuk ditampilkan di sisi kanan header
  */
 const Header = ({ onMenuClick, title, subTitle, type = 'full', actionButton }) => {
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+
+  const handleLogout = () => {
+    Modal.confirm({
+      title: 'Konfirmasi Logout',
+      content: 'Apakah Anda yakin ingin keluar?',
+      okText: 'Ya, Keluar',
+      cancelText: 'Batal',
+      okButtonProps: { danger: true },
+      onOk: () => {
+        logout();
+        message.success('Berhasil logout');
+        navigate('/signin');
+      }
+    });
+  };
+
+
+  const userMenuItems = [
+    {
+      key: 'profile',
+      icon: <UserOutlined />,
+      label: 'Profile',
+    },
+    {
+      type: 'divider',
+    },
+    {
+      key: 'logout',
+      icon: <LogoutOutlined />,
+      label: 'Logout',
+      danger: true,
+      onClick: handleLogout,
+    },
+  ];
+
   return (
     <header className={styles.header}>
       {type === 'full' ? (
         <>
           {/* Full Header with Search and Profile */}
           <div className={styles.headerLeft}>
-            <button 
-              className={styles.menuButton} 
+            <button
+              className={styles.menuButton}
               onClick={onMenuClick}
               aria-label="Toggle sidebar"
             >
               ☰
             </button>
-            <div className={styles.searchBar}>
-              <span className={styles.searchIcon}>🔍</span>
-              <input 
-                type="text" 
-                placeholder="Cari produk, transaksi, pengguna..." 
-                className={styles.searchInput}
-              />
-            </div>
+            {actionButton && actionButton}
           </div>
 
           <div className={styles.headerRight}>
@@ -39,18 +74,20 @@ const Header = ({ onMenuClick, title, subTitle, type = 'full', actionButton }) =
               <span className={styles.notificationBadge}>3</span>
             </button>
 
-            <button className={styles.userButton}>
-              <span className={styles.userIcon}>👤</span>
-              <span className={styles.userName}>Admin User</span>
-            </button>
+            <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" trigger={['click']}>
+              <button className={styles.userButton}>
+                <span className={styles.userIcon}>👤</span>
+                <span className={styles.userName}>{user?.nama || 'Admin'}</span>
+              </button>
+            </Dropdown>
           </div>
         </>
       ) : (
         <>
           {/* Simple Header with Title and optional SubTitle */}
           <div className={styles.headerLeft}>
-            <button 
-              className={styles.menuButton} 
+            <button
+              className={styles.menuButton}
               onClick={onMenuClick}
               aria-label="Toggle sidebar"
             >
@@ -66,6 +103,12 @@ const Header = ({ onMenuClick, title, subTitle, type = 'full', actionButton }) =
           <div className={styles.headerRight}>
             {subTitle && <p className={styles.pageSubtitle}>{subTitle}</p>}
             {actionButton && actionButton}
+            <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" trigger={['click']}>
+              <button className={styles.userButton} style={{ marginLeft: '16px' }}>
+                <span className={styles.userIcon}>👤</span>
+                <span className={styles.userName}>{user?.nama || 'Admin'}</span>
+              </button>
+            </Dropdown>
           </div>
         </>
       )}
