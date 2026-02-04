@@ -15,7 +15,8 @@ const Sidebar = ({ isOpen, onToggle, isCollapsed = false }) => {
     { id: 2, label: 'Produk', icon: '📦', path: '/admin/produk' },
     { id: 3, label: 'Transaksi', icon: '💳', path: '/admin/transaksi' },
     { id: 4, label: 'Pembayaran', icon: '💰', path: '/admin/pembayaran' },
-    { id: 5, label: 'Stok', icon: '📈', path: '/admin/stok' }
+    { id: 5, label: 'Bayar Supplier', icon: '🤝', path: '/admin/pembayaran-supplier' },
+    { id: 6, label: 'Stok', icon: '📈', path: '/admin/stok' }
   ];
 
   const footerMenuItems = [

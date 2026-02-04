@@ -191,6 +191,169 @@
   background: #2874A6;
 }
 
+/* Period Info */
+.periodInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 12px 16px;
+  background: #f0f9f4;
+  border-radius: 8px;
+  color: #2D7A52;
+  font-size: 14px;
+}
+
+.dateRange {
+  color: #6c757d;
+  font-size: 13px;
+}
+
+/* Metric Details */
+.metricDetails {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.metricDetails .warning {
+  color: #e74c3c;
+}
+
+/* Supply Section */
+.supplySection {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+  margin-bottom: 20px;
+}
+
+.supplySection h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 16px 0;
+}
+
+.supplyGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.supplyItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.supplyLabel {
+  font-size: 12px;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.supplyValue {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+/* Top Products Section */
+.topProductsSection {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+  margin-bottom: 20px;
+}
+
+.topProductsSection h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 16px 0;
+}
+
+/* Recent Transactions Section */
+.recentSection {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+  margin-bottom: 20px;
+}
+
+.recentSection h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 16px 0;
+}
+
+.transactionList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.transactionItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.transactionItem:hover {
+  background: #f0f9f4;
+}
+
+.transactionInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.invoiceNumber {
+  font-size: 13px;
+  font-weight: 600;
+  color: #2D7A52;
+}
+
+.consumerName {
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.transactionMeta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.transactionDate {
+  font-size: 11px;
+  color: #6c757d;
+}
+
+.transactionAmount {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
 /* Download Section */
 .downloadSection {
   background: white;

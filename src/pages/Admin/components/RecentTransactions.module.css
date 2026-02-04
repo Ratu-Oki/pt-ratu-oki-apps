@@ -26,12 +26,23 @@
   color: #2d7a52;
   text-decoration: none;
   font-weight: 600;
-  transition: color 0.2s ease;
+  transition: all 0.2s ease;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 6px;
 }
 
 .viewAllLink:hover {
   color: #1b5e3f;
-  text-decoration: underline;
+  background: #f0f9f4;
+}
+
+/* Empty State */
+.emptyState {
+  padding: 40px 20px;
+  text-align: center;
 }
 
 /* Table Wrapper */
@@ -120,6 +131,13 @@
   text-overflow: ellipsis;
 }
 
+.productDate {
+  display: block;
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
 .total {
   font-weight: 600;
   color: #1a202c;
@@ -144,6 +162,21 @@
 .status.pending {
   background: #fef3c7;
   color: #92400e;
+}
+
+.status.paid {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.status.shipped {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+
+.status.cancelled {
+  background: #fee2e2;
+  color: #dc2626;
 }
 
 .status.processing {

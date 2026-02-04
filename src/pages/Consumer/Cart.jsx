@@ -14,18 +14,14 @@ import { useAuth } from '../../context/AuthContext';
 const Cart = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [cartItems, setCartItems] = useState([]);
+  const [cartItems, setCartItems] = useState(() => {
+    // Initialize from localStorage on mount
+    const savedCart = localStorage.getItem('cart');
+    return savedCart ? JSON.parse(savedCart) : [];
+  });
   const [promoCode, setPromoCode] = useState('');
 
-  // Load cart from localStorage
-  useEffect(() => {
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
-      setCartItems(JSON.parse(savedCart));
-    }
-  }, []);
-
-  // Save cart to localStorage
+  // Save cart to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cartItems));
   }, [cartItems]);
@@ -198,25 +194,8 @@ const Cart = () => {
                 <Card className={styles.summaryCard} bordered={false}>
                   <h2 className={styles.cardTitle}>Ringkasan Pesanan</h2>
 
-                  {/* Promo Code */}
-                  <div className={styles.promoSection}>
-                    <Input.Group compact style={{ display: 'flex' }}>
-                      <Input
-                        placeholder="Kode Promo (coba: RATUOKI10)"
-                        value={promoCode}
-                        onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-                        className={styles.promoInput}
-                        style={{ flex: 1 }}
-                      />
-                      <Button
-                        type="primary"
-                        onClick={handleApplyPromo}
-                        className={styles.promoBtn}
-                      >
-                        Terapkan
-                      </Button>
-                    </Input.Group>
-                  </div>
+
+
 
                   {/* Summary Details */}
                   <div className={styles.summaryDetails}>

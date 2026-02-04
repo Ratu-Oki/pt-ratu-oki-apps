@@ -230,6 +230,14 @@ export const stockService = {
         return response.data;
     },
 
+    // Create supply with new product (supplier creates product + supply)
+    createSupplyNewProduct: async (formData) => {
+        const response = await api.post('/stock/supplies/new-product', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        return response.data;
+    },
+
     getMySupplies: async (params = {}) => {
         const response = await api.get('/stock/supplies/my-supplies', { params });
         return response.data;
@@ -271,6 +279,12 @@ export const transactionService = {
         return response.data;
     },
 
+    // Create transaction with QRIS payment
+    createWithPayment: async (data) => {
+        const response = await api.post('/transactions/pay', data);
+        return response.data;
+    },
+
     getMyTransactions: async (params = {}) => {
         const response = await api.get('/transactions/my-transactions', { params });
         return response.data;
@@ -293,6 +307,121 @@ export const transactionService = {
 
     updateStatus: async (id, status) => {
         const response = await api.put(`/transactions/${id}/status`, { status });
+        return response.data;
+    },
+
+    // Get payment status for a transaction
+    getPaymentStatus: async (id) => {
+        const response = await api.get(`/transactions/${id}/payment-status`);
+        return response.data;
+    },
+};
+
+// ============================================
+// SUPPLIER PAYMENT SERVICES (Admin-Supplier)
+// ============================================
+export const paymentService = {
+    // Create payment for approved supply
+    create: async (data) => {
+        const response = await api.post('/payments', data);
+        console.log(response)
+        return response.data;
+    },
+
+    // Get all payments (admin sees all, supplier sees own)
+    getAll: async (params = {}) => {
+        const response = await api.get('/payments', { params });
+        return response.data;
+    },
+
+    // Get payment by ID
+    getById: async (id) => {
+        const response = await api.get(`/payments/${id}`);
+        return response.data;
+    },
+
+    // Get payment summary/statistics
+    getSummary: async () => {
+        const response = await api.get('/payments/summary');
+        return response.data;
+    },
+
+    // Process refund (admin only)
+    refund: async (id, reason = '') => {
+        const response = await api.post(`/payments/${id}/refund`, { reason });
+        return response.data;
+    },
+
+    // Update disbursement status (admin only)
+    updateDisbursement: async (id, disbursement_status, disbursement_ref = '') => {
+        const response = await api.patch(`/payments/${id}/disbursement`, {
+            disbursement_status,
+            disbursement_ref
+        });
+        return response.data;
+    },
+};
+
+// ============================================
+// SUPPLIER BANK ACCOUNT SERVICES
+// ============================================
+export const bankAccountService = {
+    // Get supported banks list
+    getSupportedBanks: async () => {
+        const response = await api.get('/payments/banks/supported');
+        return response.data;
+    },
+
+    // Get bank accounts (supplier sees own, admin can filter)
+    getAll: async (params = {}) => {
+        const response = await api.get('/payments/bank-accounts', { params });
+        return response.data;
+    },
+
+    // Add new bank account
+    create: async (data) => {
+        const response = await api.post('/payments/bank-accounts', data);
+        return response.data;
+    },
+
+    // Update bank account
+    update: async (id, data) => {
+        const response = await api.put(`/payments/bank-accounts/${id}`, data);
+        return response.data;
+    },
+
+    // Set as default
+    setDefault: async (id) => {
+        const response = await api.patch(`/payments/bank-accounts/${id}/default`);
+        return response.data;
+    },
+
+    // Verify bank account (admin only)
+    verify: async (id, is_verified) => {
+        const response = await api.patch(`/payments/bank-accounts/${id}/verify`, { is_verified });
+        return response.data;
+    },
+
+    // Delete bank account
+    delete: async (id) => {
+        const response = await api.delete(`/payments/bank-accounts/${id}`);
+        return response.data;
+    },
+};
+
+// ============================================
+// REPORT SERVICES (Admin)
+// ============================================
+export const reportService = {
+    // Get comprehensive report summary
+    getSummary: async (params = {}) => {
+        const response = await api.get('/reports/summary', { params });
+        return response.data;
+    },
+
+    // Export report data
+    exportData: async (params = {}) => {
+        const response = await api.get('/reports/export', { params });
         return response.data;
     },
 };

@@ -19,22 +19,18 @@ const Consumer = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState([]);
-  const [cartItems, setCartItems] = useState([]);
+  const [cartItems, setCartItems] = useState(() => {
+    // Initialize from localStorage
+    const savedCart = localStorage.getItem('cart');
+    return savedCart ? JSON.parse(savedCart) : [];
+  });
   const [filters, setFilters] = useState({
     grades: [],
     priceRange: { min: 0, max: 100000000 },
     search: '',
   });
 
-  // Load cart from localStorage
-  useEffect(() => {
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
-      setCartItems(JSON.parse(savedCart));
-    }
-  }, []);
-
-  // Save cart to localStorage
+  // Save cart to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cartItems));
   }, [cartItems]);
@@ -50,14 +46,17 @@ const Consumer = () => {
       };
 
       const response = await productService.getAll(params);
-      const data = response.data || {};
 
-      // Only show active/approved products
-      const activeProducts = (data.products || []).filter(
-        p => p.status_produk === 'active' || p.status_produk === 'approved'
-      );
+      // Handle both array and object response formats
+      let productsData = [];
+      if (Array.isArray(response.data)) {
+        productsData = response.data;
+      } else if (response.data) {
+        productsData = response.data.products || response.data || [];
+      }
 
-      setProducts(activeProducts);
+      // Backend already filters for active & stok > 0, no need to filter again
+      setProducts(productsData);
     } catch (error) {
       console.error('Error fetching products:', error);
       message.error('Gagal memuat produk');

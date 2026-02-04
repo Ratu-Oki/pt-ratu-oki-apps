@@ -210,7 +210,7 @@ const Produk = () => {
       render: (text, record) => (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {record.image_url && (
-            <Image src={`${process.env.REACT_APP_API_URL?.replace('/api', '')}${record.image_url}`} width={40} height={40} style={{ objectFit: 'cover', borderRadius: 4 }} />
+            <Image src={`${record.image_url}`} width={40} height={40} style={{ objectFit: 'cover', borderRadius: 4 }} />
           )}
           <span>{text}</span>
         </div>
@@ -284,7 +284,14 @@ const Produk = () => {
       title: 'Produk',
       dataIndex: ['product', 'nama_produk'],
       key: 'product',
-      render: (_, record) => record.product?.nama_produk || `#${record.product_id}`
+      render: (_, record) => (
+        <div>
+          <div>{record.product?.nama_produk || `#${record.product_id}`}</div>
+          {record.product?.supplier_id && (
+            <Tag color="purple" style={{ marginTop: 4 }}>Produk Baru</Tag>
+          )}
+        </div>
+      )
     },
     {
       title: 'Supplier',

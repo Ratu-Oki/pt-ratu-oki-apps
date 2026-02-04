@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Card, Rate, Button, Badge, Space } from 'antd';
 import { ShoppingCartOutlined } from '@ant-design/icons';
 import styles from './ProductCard.module.css';
@@ -12,8 +12,8 @@ import styles from './ProductCard.module.css';
 const ProductCard = ({
   product = {
     id: 1,
-    name: 'Vanila Premium Grade A',
-    grade: 'Grade A',
+    name: 'Vanila Premium Grade B',
+    grade: 'Grade B',
     image: 'https://via.placeholder.com/300x300?text=Vanila',
     price: 450000,
     rating: 4.5,
@@ -21,7 +21,7 @@ const ProductCard = ({
     weight: '1 kg',
     origin: 'Madagascar',
   },
-  onAddToCart = () => {},
+  onAddToCart = () => { },
 }) => {
   const formatPrice = (price) => {
     return new Intl.NumberFormat('id-ID', {
@@ -30,6 +30,10 @@ const ProductCard = ({
       maximumFractionDigits: 0,
     }).format(price);
   };
+
+  useEffect(() => {
+    console.log(product);
+  }, [product])
 
   return (
     <div className={styles.cardWrapper}>

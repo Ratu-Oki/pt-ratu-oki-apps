@@ -1,0 +1,107 @@
+/**
+ * PembayaranSupplier Styles
+ */
+
+.container {
+    padding: 20px;
+}
+
+.metricsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.tableContainer {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th {
+    background: #f8f9fa;
+    padding: 14px 16px;
+    text-align: left;
+    font-weight: 600;
+    color: #495057;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #f1f1f1;
+    color: #333;
+    vertical-align: middle;
+}
+
+.table tbody tr:hover {
+    background: #f8fffe;
+}
+
+.invoice {
+    color: #2D7A52;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.invoice:hover {
+    text-decoration: underline;
+}
+
+.amount {
+    font-weight: 600;
+    color: #27AE60;
+}
+
+/* Detail Modal */
+.detailGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.detailRow {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.detailRow span {
+    color: #666;
+}
+
+.detailRow strong {
+    color: #333;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .metricsGrid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .tableContainer {
+        overflow-x: auto;
+    }
+
+    .table {
+        min-width: 800px;
+    }
+}
+
+@media (max-width: 480px) {
+    .metricsGrid {
+        grid-template-columns: 1fr;
+    }
+}

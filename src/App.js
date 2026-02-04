@@ -18,6 +18,7 @@ import Stok from './pages/Admin/Stok';
 import Pengguna from './pages/Admin/Pengguna';
 import Laporan from './pages/Admin/Laporan';
 import Pengaturan from './pages/Admin/Pengaturan';
+import PembayaranSupplier from './pages/Admin/PembayaranSupplier';
 import Consumer from './pages/Consumer';
 import StatusPesanan from './pages/Consumer/StatusPesanan';
 import Riwayat from './pages/Consumer/Riwayat';
@@ -74,6 +75,11 @@ function App() {
             <Route path="/admin/pengaturan" element={
               <ProtectedRoute allowedRoles={['admin']}>
                 <Pengaturan />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/pembayaran-supplier" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <PembayaranSupplier />
               </ProtectedRoute>
             } />
             <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />

@@ -4,6 +4,7 @@ import { PlusOutlined, UploadOutlined, LogoutOutlined, ShoppingCartOutlined, His
 import { useNavigate } from 'react-router-dom';
 import { stockService } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import BankAccountManager from './BankAccountManager';
 import './Supplier.css';
 
 /**
@@ -20,12 +21,16 @@ const Supplier = () => {
 
   // Modal states
   const [supplyModal, setSupplyModal] = useState({ visible: false, product: null });
+  const [newProductModal, setNewProductModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [newProductImageFile, setNewProductImageFile] = useState(null);
+  const [newProductImagePreview, setNewProductImagePreview] = useState(null);
 
   // Form
   const [supplyForm] = Form.useForm();
+  const [newProductForm] = Form.useForm();
 
   // Fetch data
   const fetchData = useCallback(async () => {
@@ -87,6 +92,17 @@ const Supplier = () => {
     }
   };
 
+  // Handle new product image upload
+  const handleNewProductImageChange = (info) => {
+    const file = info.file.originFileObj || info.file;
+    if (file) {
+      setNewProductImageFile(file);
+      const reader = new FileReader();
+      reader.onload = (e) => setNewProductImagePreview(e.target.result);
+      reader.readAsDataURL(file);
+    }
+  };
+
   // Open supply modal for a product
   const handleOpenSupplyModal = (product) => {
     setSupplyModal({ visible: true, product });
@@ -127,6 +143,41 @@ const Supplier = () => {
     } catch (error) {
       console.error('Error submitting supply:', error);
       message.error(error.message || 'Gagal mengajukan supply');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Handle submit new product with supply
+  const handleSubmitNewProduct = async () => {
+    try {
+      const values = await newProductForm.validateFields();
+      setSubmitting(true);
+
+      const formData = new FormData();
+      formData.append('nama_produk', values.nama_produk);
+      formData.append('jumlah', values.jumlah);
+      formData.append('harga_supply', values.harga_supply);
+      formData.append('grade', values.grade || 'A');
+      formData.append('pesan', values.pesan || '');
+      formData.append('lokasi_supplier', values.lokasi_supplier || '');
+      formData.append('deskripsi', values.deskripsi || '');
+
+      if (newProductImageFile) {
+        formData.append('image', newProductImageFile);
+      }
+
+      await stockService.createSupplyNewProduct(formData);
+
+      message.success('Produk baru dan supply berhasil diajukan! Menunggu persetujuan admin.');
+      setNewProductModal(false);
+      setNewProductImageFile(null);
+      setNewProductImagePreview(null);
+      newProductForm.resetFields();
+      fetchData();
+    } catch (error) {
+      console.error('Error submitting new product:', error);
+      message.error(error.message || 'Gagal mengajukan produk baru');
     } finally {
       setSubmitting(false);
     }
@@ -269,6 +320,15 @@ const Supplier = () => {
           />
         </Card>
       )
+    },
+    {
+      key: 'bank',
+      label: (
+        <span>
+          🏦 Rekening Bank
+        </span>
+      ),
+      children: <BankAccountManager />
     }
   ];
 
@@ -326,14 +386,28 @@ const Supplier = () => {
           </Col>
         </Row>
 
-        {/* Info Card */}
+        {/* Info Card with Action Button */}
         <Card style={{ marginBottom: 24, background: '#e6f7ff', borderColor: '#91d5ff' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <InboxOutlined style={{ fontSize: 24, color: '#1890ff' }} />
-            <div>
-              <strong>Cara Kerja:</strong> Pilih produk yang ingin Anda supply, upload foto produk Anda,
-              tentukan jumlah dan harga penawaran (bisa nego), lalu kirim pengajuan ke admin.
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <InboxOutlined style={{ fontSize: 24, color: '#1890ff' }} />
+              <div>
+                <strong>Cara Kerja:</strong> Pilih produk yang ingin Anda supply, atau <strong>buat produk baru</strong> jika belum ada.
+              </div>
             </div>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => {
+                setNewProductModal(true);
+                setNewProductImageFile(null);
+                setNewProductImagePreview(null);
+                newProductForm.resetFields();
+              }}
+              style={{ background: '#52c41a', borderColor: '#52c41a' }}
+            >
+              Supply Produk Baru
+            </Button>
           </div>
         </Card>
 
@@ -431,6 +505,124 @@ const Supplier = () => {
             >
               {imagePreview ? (
                 <img src={imagePreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                <div>
+                  <UploadOutlined />
+                  <div style={{ marginTop: 8 }}>Upload Foto</div>
+                </div>
+              )}
+            </Upload>
+            <div style={{ fontSize: 12, color: '#888' }}>Upload foto produk Anda agar admin bisa melihat kualitasnya</div>
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* New Product Modal */}
+      <Modal
+        title="Supply Produk Baru"
+        open={newProductModal}
+        onOk={handleSubmitNewProduct}
+        onCancel={() => {
+          setNewProductModal(false);
+          setNewProductImageFile(null);
+          setNewProductImagePreview(null);
+          newProductForm.resetFields();
+        }}
+        confirmLoading={submitting}
+        okText="Kirim Pengajuan"
+        cancelText="Batal"
+        width={700}
+      >
+        <div style={{ marginBottom: 16, padding: 12, background: '#fffbe6', borderRadius: 8, border: '1px solid #ffe58f' }}>
+          <strong>Catatan:</strong> Produk baru akan di-review oleh admin sebelum ditampilkan di marketplace.
+        </div>
+
+        <Form form={newProductForm} layout="vertical">
+          <Form.Item
+            name="nama_produk"
+            label="Nama Produk"
+            rules={[{ required: true, message: 'Nama produk harus diisi' }]}
+          >
+            <Input placeholder="Contoh: Vanila Premium Grade A" />
+          </Form.Item>
+
+          <Row gutter={16}>
+            <Col span={8}>
+              <Form.Item
+                name="jumlah"
+                label="Jumlah yang Disupply"
+                rules={[{ required: true, message: 'Jumlah harus diisi' }]}
+              >
+                <InputNumber style={{ width: '100%' }} min={1} placeholder="100" addonAfter="unit" />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item
+                name="harga_supply"
+                label="Harga Penawaran (per unit)"
+                rules={[{ required: true, message: 'Harga harus diisi' }]}
+              >
+                <InputNumber
+                  style={{ width: '100%' }}
+                  formatter={value => `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                  parser={value => value.replace(/Rp\s?|(,*)/g, '')}
+                  min={0}
+                />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item
+                name="grade"
+                label="Kualitas/Grade"
+                initialValue="A"
+              >
+                <Select>
+                  <Select.Option value="A">Grade A (Premium)</Select.Option>
+                  <Select.Option value="B">Grade B (Standar)</Select.Option>
+                  <Select.Option value="C">Grade C (Ekonomi)</Select.Option>
+                  <Select.Option value="D">Grade D (Reject)</Select.Option>
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Form.Item
+            name="lokasi_supplier"
+            label="Lokasi Anda (Opsional)"
+          >
+            <Input placeholder="Contoh: Bantul, Yogyakarta" />
+          </Form.Item>
+
+          <Form.Item
+            name="deskripsi"
+            label="Deskripsi Produk (Opsional)"
+          >
+            <Input.TextArea
+              rows={2}
+              placeholder="Deskripsi singkat tentang produk..."
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="pesan"
+            label="Pesan untuk Admin (Opsional)"
+          >
+            <Input.TextArea
+              rows={2}
+              placeholder="Contoh: Produk segar dari kebun sendiri, bisa nego harga untuk pembelian banyak"
+            />
+          </Form.Item>
+
+          <Form.Item label="Foto Produk (Wajib untuk produk baru)">
+            <Upload
+              listType="picture-card"
+              showUploadList={false}
+              beforeUpload={() => false}
+              onChange={handleNewProductImageChange}
+              accept="image/*"
+            >
+              {newProductImagePreview ? (
+                <img src={newProductImagePreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
                 <div>
                   <UploadOutlined />

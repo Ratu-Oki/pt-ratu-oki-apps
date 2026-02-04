@@ -18,7 +18,7 @@ const AdminLayout = ({ children, headerType = 'full', title, subTitle, actionBut
     typeof window !== 'undefined' ? window.innerWidth > 768 : true
   );
 
-
+  
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };

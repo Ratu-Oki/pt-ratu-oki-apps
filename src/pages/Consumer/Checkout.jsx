@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Row, Col, Card, Form, Input, Select, Button, Radio, Divider, List, Space, message, Spin } from 'antd';
-import { ArrowLeftOutlined } from '@ant-design/icons';
+import { Layout, Row, Col, Card, Form, Input, Select, Button, Divider, List, Space, message, Spin, Modal } from 'antd';
+import { ArrowLeftOutlined, QrcodeOutlined, CheckCircleOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -10,16 +10,21 @@ import { useAuth } from '../../context/AuthContext';
 
 /**
  * Checkout Page
- * Halaman pembayaran dengan form pengiriman dan metode pembayaran
+ * Halaman pembayaran dengan form pengiriman dan metode pembayaran QRIS
  */
 const Checkout = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [paymentMethod, setPaymentMethod] = useState('transfer');
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  // Payment modal state
+  const [paymentModalVisible, setPaymentModalVisible] = useState(false);
+  const [paymentData, setPaymentData] = useState(null);
+  const [checkingPayment, setCheckingPayment] = useState(false);
+  const [paymentComplete, setPaymentComplete] = useState(false);
 
   // Load cart from localStorage
   useEffect(() => {
@@ -49,6 +54,39 @@ const Checkout = () => {
     }
   }, [user, form]);
 
+  // Auto-check payment status
+  useEffect(() => {
+    let interval;
+    if (paymentModalVisible && paymentData && !paymentComplete) {
+      interval = setInterval(async () => {
+        try {
+          setCheckingPayment(true);
+          const response = await transactionService.getPaymentStatus(paymentData.transactionId);
+
+          if (response.success && response.data.payment.status === 'settlement') {
+            setPaymentComplete(true);
+            clearInterval(interval);
+            message.success('Pembayaran berhasil!');
+
+            // Clear cart and redirect after short delay
+            setTimeout(() => {
+              localStorage.removeItem('cart');
+              navigate('/consumer/status-pesanan');
+            }, 2000);
+          }
+        } catch (error) {
+          console.log('Error checking payment status:', error);
+        } finally {
+          setCheckingPayment(false);
+        }
+      }, 5000); // Check every 5 seconds
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [paymentModalVisible, paymentData, paymentComplete, navigate]);
+
   const provinces = [
     { label: 'Jawa Barat', value: 'jawa-barat' },
     { label: 'Jawa Tengah', value: 'jawa-tengah' },
@@ -69,11 +107,8 @@ const Checkout = () => {
     { label: 'Surabaya', value: 'surabaya' },
   ];
 
-  const paymentMethods = [
-    { value: 'transfer', label: 'Transfer Bank', info: 'BCA, Mandiri, BNI, BRI' },
-    { value: 'ewallet', label: 'E-Wallet', info: 'GoPay, OVO, DANA, LinkAja' },
-    { value: 'cod', label: 'Cash on Delivery', info: 'Bayar saat barang diterima' },
-  ];
+  // Payment method fixed to QRIS
+  const paymentMethod = 'qris';
 
   /**
    * Format currency
@@ -94,7 +129,7 @@ const Checkout = () => {
   const total = subtotal + shipping;
 
   /**
-   * Handle form submit
+   * Handle form submit with QRIS payment
    */
   const handleSubmit = async () => {
     try {
@@ -115,20 +150,23 @@ const Checkout = () => {
           grade: item.grade || 'A'
         })),
         shipping_address: `${values.nama_penerima}, ${values.no_telepon}, ${values.alamat_lengkap}, ${values.kecamatan}, ${values.provinsi}, ${values.kode_pos}`,
-        payment_method: paymentMethod,
-        notes: values.notes || ''
+        notes: values.notes || '',
+        payment_type: paymentMethod
       };
 
-      const response = await transactionService.create(transactionData);
+      const response = await transactionService.createWithPayment(transactionData);
 
       if (response.success) {
-        message.success('Pesanan berhasil dibuat! Silakan lakukan pembayaran.');
-
-        // Clear cart
-        localStorage.removeItem('cart');
-
-        // Redirect to order status
-        navigate('/consumer/status-pesanan');
+        // Show payment modal with QR code
+        setPaymentData({
+          transactionId: response.data.transaction.id,
+          invoiceNumber: response.data.transaction.invoice_number,
+          qrCodeUrl: response.data.payment.qr_code_url,
+          qrString: response.data.payment.qr_string,
+          total: response.data.payment.total,
+          expiredAt: response.data.payment.expired_at
+        });
+        setPaymentModalVisible(true);
       } else {
         message.error(response.message || 'Gagal membuat pesanan');
       }
@@ -141,6 +179,29 @@ const Checkout = () => {
       }
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  /**
+   * Handle close payment modal
+   */
+  const handleClosePaymentModal = () => {
+    if (!paymentComplete) {
+      Modal.confirm({
+        title: 'Batalkan Pembayaran?',
+        content: 'Pesanan Anda akan disimpan dan bisa dibayar nanti dari halaman Status Pesanan.',
+        okText: 'Tutup',
+        cancelText: 'Lanjut Bayar',
+        onOk: () => {
+          setPaymentModalVisible(false);
+          localStorage.removeItem('cart');
+          navigate('/consumer/status-pesanan');
+        }
+      });
+    } else {
+      setPaymentModalVisible(false);
+      localStorage.removeItem('cart');
+      navigate('/consumer/status-pesanan');
     }
   };
 
@@ -253,24 +314,24 @@ const Checkout = () => {
                 </Form>
               </Card>
 
-              {/* Payment Method */}
+              {/* Payment Method - QRIS Only */}
               <Card className={styles.formCard} bordered={false}>
                 <h2 className={styles.cardTitle}>Metode Pembayaran</h2>
 
-                <Radio.Group value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)} style={{ width: '100%' }}>
-                  <div className={styles.paymentOptions}>
-                    {paymentMethods.map((method) => (
-                      <div key={method.value} className={styles.paymentOption}>
-                        <Radio value={method.value} className={styles.radioOption}>
-                          <div>
-                            <div className={styles.methodLabel}>{method.label}</div>
-                            <div className={styles.methodInfo}>{method.info}</div>
-                          </div>
-                        </Radio>
-                      </div>
-                    ))}
+                <div className={styles.paymentOption} style={{ borderColor: '#1b5e3f', background: '#f0f9f4' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <QrcodeOutlined style={{ fontSize: 32, color: '#1b5e3f' }} />
+                    <div>
+                      <div className={styles.methodLabel}>QRIS</div>
+                      <div className={styles.methodInfo}>Scan QR untuk bayar dengan berbagai e-wallet</div>
+                    </div>
                   </div>
-                </Radio.Group>
+                </div>
+
+                <div className={styles.paymentNote}>
+                  <QrcodeOutlined style={{ fontSize: 20, marginRight: 12, color: '#2D7A52' }} />
+                  <span>Pembayaran menggunakan QRIS dapat dilakukan melalui berbagai aplikasi e-wallet seperti GoPay, OVO, DANA, LinkAja, dan lainnya.</span>
+                </div>
               </Card>
             </Col>
 
@@ -330,8 +391,9 @@ const Checkout = () => {
                     onClick={handleSubmit}
                     loading={submitting}
                     className={styles.submitBtn}
+                    icon={<QrcodeOutlined />}
                   >
-                    Bayar Sekarang
+                    Bayar dengan {paymentMethod.toUpperCase()}
                   </Button>
                   <Button
                     type="default"
@@ -353,6 +415,79 @@ const Checkout = () => {
 
       {/* Footer */}
       <Footer />
+
+      {/* Payment Modal with QR Code */}
+      <Modal
+        title={
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <QrcodeOutlined style={{ fontSize: 24, color: '#2D7A52' }} />
+            <span>Scan QR untuk Membayar</span>
+          </div>
+        }
+        open={paymentModalVisible}
+        onCancel={handleClosePaymentModal}
+        footer={null}
+        centered
+        width={450}
+        maskClosable={false}
+      >
+        {paymentData && (
+          <div className={styles.paymentModalContent}>
+            {paymentComplete ? (
+              <div className={styles.paymentSuccess}>
+                <CheckCircleOutlined style={{ fontSize: 64, color: '#52c41a' }} />
+                <h3>Pembayaran Berhasil!</h3>
+                <p>Terima kasih. Pesanan Anda sedang diproses.</p>
+              </div>
+            ) : (
+              <>
+                <div className={styles.qrSection}>
+                  <div className={styles.invoiceInfo}>
+                    <span>Invoice: {paymentData.invoiceNumber}</span>
+                  </div>
+
+                  {paymentData.qrCodeUrl ? (
+                    <img
+                      src={paymentData.qrCodeUrl}
+                      alt="QR Code Pembayaran"
+                      className={styles.qrImage}
+                    />
+                  ) : (
+                    <div className={styles.qrPlaceholder}>
+                      <Spin size="large" />
+                      <p>Memuat QR Code...</p>
+                    </div>
+                  )}
+
+                  <div className={styles.paymentAmount}>
+                    <span>Total Pembayaran</span>
+                    <strong>{formatCurrency(paymentData.total)}</strong>
+                  </div>
+                </div>
+
+                <div className={styles.paymentInstructions}>
+                  <h4>Cara Pembayaran:</h4>
+                  <ol>
+                    <li>Buka aplikasi e-wallet Anda (GoPay, OVO, DANA, dll)</li>
+                    <li>Pilih menu <strong>Scan QR</strong></li>
+                    <li>Scan QR code di atas</li>
+                    <li>Konfirmasi pembayaran</li>
+                  </ol>
+                </div>
+
+                <div className={styles.paymentStatus}>
+                  {checkingPayment ? (
+                    <Spin size="small" />
+                  ) : (
+                    <ClockCircleOutlined style={{ color: '#faad14' }} />
+                  )}
+                  <span>Menunggu pembayaran...</span>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+      </Modal>
     </Layout>
   );
 };
