@@ -1,70 +1,105 @@
-# Getting Started with Create React App
+# Panduan Penggunaan Project (Ratu Oki Apps)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Panduan ini ditulis dalam Bahasa Indonesia sederhana. Berisi langkah-langkah setup, cara menjalankan, dan panduan singkat fitur untuk tiga peran: Pengguna (consumer), Admin, dan Supplier.
 
-## Available Scripts
+**Persyaratan awal**
+- Node.js (versi 14 atau lebih baru direkomendasikan)
+- npm (biasanya sudah terpasang bersama Node.js)
 
-In the project directory, you can run:
+**1. Setup dan Menjalankan Proyek (Development)**
+1. Buka terminal di folder proyek: [README.md](README.md)
+2. Install dependensi:
 
-### `npm start`
+```bash
+npm install
+```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+3. Menjalankan development server:
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+```bash
+npm start
+```
 
-### `npm test`
+4. Akses aplikasi di browser: http://localhost:3000
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Catatan: jika port 3000 sudah digunakan, CRA akan menawarkan port lain.
 
-### `npm run build`
+**2. Build untuk produksi**
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```bash
+npm run build
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Folder `build/` akan terbuat dan siap di-deploy.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+**3. Struktur penting di folder `src/`**
+- `src/pages/Consumer/` : halaman untuk pengguna (shopping, cart, checkout, riwayat, status pesanan)
+- `src/pages/Admin/` : halaman dashboard admin (pengguna, produk, transaksi, laporan, pengaturan)
+- `src/pages/Supplier/` : halaman untuk supplier (manajemen rekening bank dll.)
+- `src/services/api.js` : konfigurasi panggilan API
+- `src/context/AuthContext.js` : manajemen autentikasi dan role
 
-### `npm run eject`
+**4. Fitur utama (Ringkasan singkat)**
+- Fitur Pengguna (Consumer):
+	- Melihat daftar produk
+	- Menambah produk ke keranjang
+	- Checkout dan memilih metode pembayaran
+	- Melihat riwayat pesanan dan status pesanan
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- Fitur Admin:
+	- Dashboard metrik penjualan dan aktivitas terbaru
+	- Kelola produk (tambah/ubah/hapus)
+	- Kelola pengguna
+	- Kelola transaksi dan verifikasi pembayaran
+	- Laporan penjualan
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+- Fitur Supplier:
+	- Kelola data rekening bank untuk menerima pembayaran
+	- Melacak pesanan yang terkait supplier (jika ada fitur pemisahan supplier)
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+**5. Panduan singkat per peran (langkah yang paling sering dilakukan)**
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+- Pengguna (Consumer):
+	1. Buka halaman utama di `http://localhost:3000`.
+	2. Gunakan menu atau pencarian untuk menemukan produk.
+	3. Klik produk lalu pilih "Tambah ke Keranjang".
+	4. Buka halaman `Cart` lalu klik "Checkout".
+	5. Isi data pengiriman dan pilih metode pembayaran lalu konfirmasi.
+	6. Pantau status pesanan di halaman `Riwayat` atau `Status Pesanan`.
 
-## Learn More
+- Admin:
+	1. Login ke area admin (biasanya ada rute `/admin` atau tombol di UI).
+	2. Buka `Dashboard` untuk melihat ringkasan metrik.
+	3. Gunakan menu `Produk` untuk menambah/ubah/hapus produk.
+	4. Buka `Transaksi` untuk melihat pesanan masuk dan verifikasi pembayaran.
+	5. Gunakan `Laporan` untuk mengekspor data penjualan.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+- Supplier:
+	1. Login sebagai supplier.
+	2. Buka halaman `BankAccountManager` untuk menambahkan atau memperbarui rekening.
+	3. Cek pesanan terkait supplier (jika tersedia) dan konfirmasi pemenuhan.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+**6. Konfigurasi API dan autentikasi**
+- Endpoint API utama dikelola di `src/services/api.js`.
+- Untuk menjalankan fitur yang membutuhkan login, pastikan backend (API) tersedia dan Anda memiliki URL serta token yang benar.
 
-### Code Splitting
+Jika ada variabel environment yang diperlukan, tambahkan file `.env` mengikuti dokumentasi backend (mis. `REACT_APP_API_URL=https://api.example.com`).
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+**7. Troubleshooting singkat**
+- Jika `npm start` error:
+	- Jalankan `npm install` ulang.
+	- Hapus `node_modules/` dan `package-lock.json`, lalu `npm install`.
+- Jika kesalahan API (CORS/auth): periksa `REACT_APP_API_URL` dan kebijakan backend.
 
-### Analyzing the Bundle Size
+**8. Cara kontribusi singkat**
+1. Buat branch baru untuk perubahan: `git checkout -b feat/nama-fitur`
+2. Lakukan perubahan, lalu jalankan `npm start` untuk tes lokal.
+3. Commit dan push, lalu buat pull request.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+--
+Jika mau, saya bisa:
+- Menambahkan contoh `.env.example` dengan variabel yang dibutuhkan
+- Menambahkan petunjuk login admin dan akun testing (jika tersedia)
+- Menyusun panduan screenshot untuk tiap halaman
 
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Beritahu langkah mana yang ingin kamu lengkapkan terlebih dulu.
