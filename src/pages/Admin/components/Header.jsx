@@ -104,7 +104,7 @@ const Header = ({ onMenuClick, title, subTitle, type = 'full', actionButton }) =
             {actionButton && actionButton}
             <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" trigger={['click']}>
               <button className={styles.userButton} style={{ marginLeft: '16px' }}>
-                <span className={styles.userIcon}>👤</span>
+                <span className={styles.userIcon}><UserOutlined /></span>
                 <span className={styles.userName}>{user?.nama || 'Admin'}</span>
               </button>
             </Dropdown>

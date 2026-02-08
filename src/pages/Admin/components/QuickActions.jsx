@@ -2,6 +2,12 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './QuickActions.module.css';
 import { message } from 'antd';
+import {
+  PlusOutlined,
+  FileTextOutlined,
+  AreaChartOutlined,
+  InboxOutlined
+} from '@ant-design/icons';
 
 const QuickActions = () => {
   const navigate = useNavigate();
@@ -29,28 +35,28 @@ const QuickActions = () => {
     {
       id: 1,
       label: 'Tambah Produk',
-      icon: '➕',
+      icon: <PlusOutlined />,
       color: '#2d7a52',
       description: 'Tambah produk baru'
     },
     {
       id: 2,
       label: 'Lihat Order',
-      icon: '📋',
+      icon: <AreaChartOutlined />,
       color: '#8B5A3C',
       description: 'Kelola pesanan'
     },
     {
       id: 3,
       label: 'Download Laporan',
-      icon: '📊',
+      icon: <FileTextOutlined />,
       color: '#27AE60',
       description: 'Lihat & export laporan'
     },
     {
       id: 4,
       label: 'Kelola Stok',
-      icon: '📦',
+      icon: <InboxOutlined />,
       color: '#E67E22',
       description: 'Atur persediaan'
     }

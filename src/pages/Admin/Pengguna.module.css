@@ -221,6 +221,61 @@
   background-color: #e9ecef;
 }
 
+/* Search Button Group */
+.actionButtonsGroup {
+  display: flex;
+  gap: 0;
+  align-items: center;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.actionButtonsGroup:hover,
+.actionButtonsGroup:focus-within {
+  border-color: #2D7A52;
+  box-shadow: 0 2px 8px rgba(45, 122, 82, 0.1);
+}
+
+.searchInput {
+  flex: 1;
+  border: none;
+  padding: 12px 16px;
+  font-size: 14px;
+  outline: none;
+  background: transparent;
+  color: #333;
+  font-family: inherit;
+}
+
+.searchInput::placeholder {
+  color: #999;
+}
+
+.filterBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #2D7A52;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 12px 16px;
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+
+.filterBtn:hover {
+  background: #1f5638;
+}
+
+.filterBtn:active {
+  transform: scale(0.95);
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
   .penggunaContainer {
