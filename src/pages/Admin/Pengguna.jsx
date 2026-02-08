@@ -2,11 +2,12 @@
  * Pengguna Page
  * Halaman manajemen pengguna (suppliers) dengan data real dari API
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback  } from 'react';
 import styles from './Pengguna.module.css';
 import AdminLayout from './components/AdminLayout';
 import { supplierService } from '../../services/api';
-import { Spin, message, Modal, Input, Select } from 'antd';
+import { Spin, message, Modal, Input, Select, Button} from 'antd';
+import { SearchOutlined } from '@ant-design/icons';
 
 const Pengguna = () => {
   const [loading, setLoading] = useState(true);
@@ -174,7 +175,7 @@ const Pengguna = () => {
         onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
         className={styles.searchInput}
       />
-      <button className={styles.filterBtn} onClick={handleSearch}>🔍</button>
+      <Button onClick={handleSearch} icon={<SearchOutlined />}></Button>
     </div>
   );
 

@@ -7,7 +7,7 @@ import styles from './Produk.module.css';
 import AdminLayout from './components/AdminLayout';
 import { productService, stockService } from '../../services/api';
 import { Table, Button, Modal, Form, Input, InputNumber, Select, Space, Tag, message, Tabs, Image, Badge } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, CheckOutlined, CloseOutlined, WhatsAppOutlined, EyeOutlined } from '@ant-design/icons';
+import { PlusOutlined, EditOutlined, DeleteOutlined, CheckOutlined, CloseOutlined, WhatsAppOutlined, EyeOutlined, SearchOutlined} from '@ant-design/icons';
 
 const Produk = () => {
   const [loading, setLoading] = useState(true);
@@ -420,7 +420,7 @@ const Produk = () => {
         onPressEnter={handleSearch}
         style={{ width: 200 }}
       />
-      <Button onClick={handleSearch}>🔍</Button>
+      <Button onClick={handleSearch} icon={<SearchOutlined />}></Button>
       <Button type="primary" icon={<PlusOutlined />} onClick={() => {
         setProductModal({ visible: true, mode: 'add', product: null });
         form.resetFields();

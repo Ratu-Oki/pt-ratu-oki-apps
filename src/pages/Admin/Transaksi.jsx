@@ -6,7 +6,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import styles from './Transaksi.module.css';
 import AdminLayout from './components/AdminLayout';
 import { transactionService } from '../../services/api';
-import { Spin, message, Modal, Select } from 'antd';
+import { Spin, message, Modal, Select, Button } from 'antd';
+import { SearchOutlined } from '@ant-design/icons';
 
 const Transaksi = () => {
   const [loading, setLoading] = useState(true);
@@ -164,7 +165,7 @@ const Transaksi = () => {
         onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
         className={styles.searchInput}
       />
-      <button className={styles.filterBtn} onClick={handleSearch}>🔍</button>
+      <Button onClick={handleSearch} icon={<SearchOutlined />}></Button>
     </div>
   );
 
