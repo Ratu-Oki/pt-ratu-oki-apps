@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Dropdown, Modal, message } from 'antd';
-import { LogoutOutlined, UserOutlined } from '@ant-design/icons';
+import { LogoutOutlined, UserOutlined, NotificationOutlined  } from '@ant-design/icons';
 import { useAuth } from '../../../context/AuthContext';
 import styles from './Header.module.css';
 
@@ -70,13 +70,12 @@ const Header = ({ onMenuClick, title, subTitle, type = 'full', actionButton }) =
 
           <div className={styles.headerRight}>
             <button className={styles.notificationButton}>
-              <span className={styles.notificationIcon}>🔔</span>
-              <span className={styles.notificationBadge}>3</span>
+              <span className={styles.notificationIcon}><NotificationOutlined /></span>
             </button>
 
             <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" trigger={['click']}>
               <button className={styles.userButton}>
-                <span className={styles.userIcon}>👤</span>
+                <span className={styles.userIcon}><UserOutlined /></span>
                 <span className={styles.userName}>{user?.nama || 'Admin'}</span>
               </button>
             </Dropdown>

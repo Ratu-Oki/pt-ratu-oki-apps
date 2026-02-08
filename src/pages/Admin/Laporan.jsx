@@ -7,6 +7,18 @@ import styles from './Laporan.module.css';
 import AdminLayout from './components/AdminLayout';
 import { reportService } from '../../services/api';
 import { Spin, message, Table, Empty } from 'antd';
+import {
+  SearchOutlined,
+  CalendarOutlined,
+  BarChartOutlined,
+  AppstoreOutlined,
+  InboxOutlined,
+  DollarCircleOutlined,
+  WarningOutlined,
+  TrophyOutlined,
+  FileTextOutlined,
+  FileExcelOutlined
+} from '@ant-design/icons';
 
 const Laporan = () => {
   const [loading, setLoading] = useState(true);
@@ -193,13 +205,13 @@ const Laporan = () => {
             </select>
           </div>
 
-          <button className={styles.filterBtn} onClick={fetchReportData}>🔍 Filter</button>
+          <button className={styles.filterBtn} onClick={fetchReportData}><SearchOutlined /> Filter</button>
         </div>
 
         {/* Period Info */}
         {reportData?.date_range && (
           <div className={styles.periodInfo}>
-            <span>📅 Periode: <strong>{getPeriodLabel()}</strong></span>
+            <span><CalendarOutlined /> Periode: <strong>{getPeriodLabel()}</strong></span>
             {reportData.date_range.start && (
               <span className={styles.dateRange}>
                 ({formatDate(reportData.date_range.start)} - {formatDate(reportData.date_range.end)})
@@ -213,7 +225,7 @@ const Laporan = () => {
           {/* Penjualan Card */}
           <div className={styles.metricCard}>
             <div className={styles.metricIcon} style={{ backgroundColor: '#2D7A52' }}>
-              📊
+              <BarChartOutlined />
             </div>
             <div className={styles.metricContent}>
               <h3>Total Penjualan</h3>
@@ -233,7 +245,7 @@ const Laporan = () => {
           {/* Distribusi Card */}
           <div className={styles.metricCard}>
             <div className={styles.metricIcon} style={{ backgroundColor: '#F39C12' }}>
-              📦
+              <AppstoreOutlined />
             </div>
             <div className={styles.metricContent}>
               <h3>Distribusi Stok</h3>
@@ -252,7 +264,7 @@ const Laporan = () => {
           {/* Stok Card */}
           <div className={styles.metricCard}>
             <div className={styles.metricIcon} style={{ backgroundColor: '#3498DB' }}>
-              📮
+              <InboxOutlined />
             </div>
             <div className={styles.metricContent}>
               <h3>Nilai Stok</h3>
@@ -264,7 +276,7 @@ const Laporan = () => {
               </p>
               <div className={styles.metricDetails}>
                 <span className={styles.warning}>
-                  ⚠️ {reportData?.stok?.produk_stok_rendah || 0} produk stok rendah
+                  <WarningOutlined /> {reportData?.stok?.produk_stok_rendah || 0} produk stok rendah
                 </span>
               </div>
             </div>
@@ -273,7 +285,7 @@ const Laporan = () => {
           {/* Laba Card */}
           <div className={styles.metricCard}>
             <div className={styles.metricIcon} style={{ backgroundColor: '#9B59B6' }}>
-              💰
+              <DollarCircleOutlined />
             </div>
             <div className={styles.metricContent}>
               <h3>Laba Kotor</h3>
@@ -292,7 +304,7 @@ const Laporan = () => {
 
         {/* Supply Info */}
         <div className={styles.supplySection}>
-          <h3>📥 Status Supply</h3>
+          <h3><InboxOutlined /> Status Supply</h3>
           <div className={styles.supplyGrid}>
             <div className={styles.supplyItem}>
               <span className={styles.supplyLabel}>Pending</span>
@@ -311,7 +323,7 @@ const Laporan = () => {
 
         {/* Top Products */}
         <div className={styles.topProductsSection}>
-          <h3>🏆 Produk Terlaris</h3>
+          <h3><TrophyOutlined /> Produk Terlaris</h3>
           {reportData?.top_products && reportData.top_products.length > 0 ? (
             <Table
               dataSource={reportData.top_products}
@@ -327,7 +339,7 @@ const Laporan = () => {
 
         {/* Recent Transactions */}
         <div className={styles.recentSection}>
-          <h3>📋 Transaksi Terbaru</h3>
+          <h3><FileTextOutlined /> Transaksi Terbaru</h3>
           {reportData?.recent_transactions && reportData.recent_transactions.length > 0 ? (
             <div className={styles.transactionList}>
               {reportData.recent_transactions.slice(0, 5).map((t) => (
@@ -353,7 +365,7 @@ const Laporan = () => {
           <h3>Download Laporan Lengkap</h3>
           <div className={styles.downloadButtons}>
             <button className={styles.downloadBtn} onClick={handleExportPDF}>
-              <span className={styles.downloadIcon}>📄</span>
+              <span className={styles.downloadIcon}><FileTextOutlined /></span>
               <div className={styles.downloadInfo}>
                 <strong>Laporan PDF</strong>
                 <p>Cetak / simpan sebagai PDF</p>
@@ -364,7 +376,7 @@ const Laporan = () => {
               onClick={handleExportExcel}
               disabled={exportLoading}
             >
-              <span className={styles.downloadIcon}>📊</span>
+              <span className={styles.downloadIcon}><FileExcelOutlined /></span>
               <div className={styles.downloadInfo}>
                 <strong>Laporan Excel</strong>
                 <p>{exportLoading ? 'Mengexport...' : 'Download file CSV'}</p>

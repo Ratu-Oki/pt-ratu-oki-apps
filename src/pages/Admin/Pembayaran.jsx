@@ -7,7 +7,8 @@ import styles from './Pembayaran.module.css';
 import AdminLayout from './components/AdminLayout';
 import MetricsCard from './components/MetricsCard';
 import { transactionService } from '../../services/api';
-import { Spin, message, Tag, Empty } from 'antd';
+import { Spin, message, Empty } from 'antd';
+import { DollarOutlined, ClockCircleOutlined, CloseCircleOutlined, AppstoreOutlined } from '@ant-design/icons';
 
 const Pembayaran = () => {
   const [loading, setLoading] = useState(true);
@@ -118,28 +119,28 @@ const Pembayaran = () => {
       id: 1,
       label: 'Total Pembayaran',
       value: formatCurrency(summary.total_pembayaran),
-      icon: '💰',
+      icon: <DollarOutlined />,
       bgColor: '#2D7A52'
     },
     {
       id: 2,
       label: 'Menunggu Pembayaran',
       value: formatCurrency(summary.pending_pembayaran),
-      icon: '⏳',
+      icon: <ClockCircleOutlined />,
       bgColor: '#E67E22'
     },
     {
       id: 3,
       label: 'Pembayaran Gagal',
       value: formatCurrency(summary.gagal_pembayaran),
-      icon: '❌',
+      icon: <CloseCircleOutlined />,
       bgColor: '#E74C3C'
     },
     {
       id: 4,
       label: 'Total Transaksi',
       value: summary.total_transaksi.toString(),
-      icon: '📊',
+      icon: <AppstoreOutlined />,
       bgColor: '#3498DB'
     }
   ];

@@ -7,6 +7,7 @@ import styles from './Stok.module.css';
 import AdminLayout from './components/AdminLayout';
 import { stockService } from '../../services/api';
 import { Spin, message, Modal, Select, Input } from 'antd';
+import { WarningOutlined, BoxPlotOutlined, CheckCircleOutlined, AppstoreOutlined, UploadOutlined } from '@ant-design/icons';
 
 const Stok = () => {
   const [loading, setLoading] = useState(true);
@@ -64,7 +65,7 @@ const Stok = () => {
       id: 1,
       label: 'Produk Stok Rendah',
       value: summary.low_stock_products || 0,
-      icon: '⚠️',
+      icon: <WarningOutlined />,
       bgColor: '#FFB3BA',
       textColor: '#C41C3B'
     },
@@ -72,7 +73,7 @@ const Stok = () => {
       id: 2,
       label: 'Total Produk',
       value: summary.total_products || 0,
-      icon: '📦',
+      icon: <BoxPlotOutlined />,
       bgColor: '#FFEB99',
       textColor: '#B8860B'
     },
@@ -80,7 +81,7 @@ const Stok = () => {
       id: 3,
       label: 'Total Stok',
       value: summary.total_stock || 0,
-      icon: '✓',
+      icon: <CheckCircleOutlined />,
       bgColor: '#B3FFB3',
       textColor: '#2D7A52'
     }
@@ -138,14 +139,14 @@ const Stok = () => {
         style={{ backgroundColor: activeView === 'stock' ? '#2D7A52' : '#6c757d' }}
         onClick={() => setActiveView('stock')}
       >
-        📦 Stok
+        <AppstoreOutlined /> Stok
       </button>
       <button
         className={styles.addButton}
         style={{ backgroundColor: activeView === 'supplies' ? '#2D7A52' : '#6c757d' }}
         onClick={() => setActiveView('supplies')}
       >
-        📥 Supplies
+        <UploadOutlined /> Supplies
       </button>
     </div>
   );

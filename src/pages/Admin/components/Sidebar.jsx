@@ -2,6 +2,16 @@ import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Modal, message } from 'antd';
 import { useAuth } from '../../../context/AuthContext';
+import { BarChartOutlined,
+  AppstoreOutlined,
+  CreditCardOutlined,
+  DollarOutlined,
+  TeamOutlined,
+  StockOutlined,
+  UserOutlined,
+  FileTextOutlined,
+  SettingOutlined, 
+  LogoutOutlined } from '@ant-design/icons';
 import styles from './Sidebar.module.css';
 
 const Sidebar = ({ isOpen, onToggle, isCollapsed = false }) => {
@@ -10,22 +20,22 @@ const Sidebar = ({ isOpen, onToggle, isCollapsed = false }) => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
-  const menuItems = [
-    { id: 1, label: 'Dashboard', icon: '📊', path: '/admin/dashboard' },
-    { id: 2, label: 'Produk', icon: '📦', path: '/admin/produk' },
-    { id: 3, label: 'Transaksi', icon: '💳', path: '/admin/transaksi' },
-    { id: 4, label: 'Pembayaran', icon: '💰', path: '/admin/pembayaran' },
-    { id: 5, label: 'Bayar Supplier', icon: '🤝', path: '/admin/pembayaran-supplier' },
-    { id: 6, label: 'Stok', icon: '📈', path: '/admin/stok' }
+const menuItems = [
+  { id: 1, label: 'Dashboard', icon: <BarChartOutlined />, path: '/admin/dashboard' },
+  { id: 2, label: 'Produk', icon: <AppstoreOutlined />, path: '/admin/produk' },
+  { id: 3, label: 'Transaksi', icon: <CreditCardOutlined />, path: '/admin/transaksi' },
+  { id: 4, label: 'Pembayaran', icon: <DollarOutlined />, path: '/admin/pembayaran' },
+  { id: 5, label: 'Bayar Supplier', icon: <TeamOutlined />, path: '/admin/pembayaran-supplier' },
+  { id: 6, label: 'Stok', icon: <StockOutlined />, path: '/admin/stok' }
   ];
 
   const footerMenuItems = [
-    { id: 1, label: 'Pengguna', icon: '👥', path: '/admin/pengguna' },
-    { id: 2, label: 'Laporan', icon: '📄', path: '/admin/laporan' }
+  { id: 1, label: 'Pengguna', icon: <UserOutlined />, path: '/admin/pengguna' },
+  { id: 2, label: 'Laporan', icon: <FileTextOutlined />, path: '/admin/laporan' }
   ];
 
   const accountMenuItems = [
-    { id: 1, label: 'Pengaturan', icon: '⚙️', path: '/admin/pengaturan' }
+  { id: 1, label: 'Pengaturan', icon: <SettingOutlined />, path: '/admin/pengaturan' }
   ];
 
   const toggleCollapse = () => {
@@ -148,7 +158,7 @@ const Sidebar = ({ isOpen, onToggle, isCollapsed = false }) => {
                 color: '#e74c3c'
               }}
             >
-              <span className={styles.menuIcon}>🚪</span>
+              <span className={styles.menuIcon}><LogoutOutlined /></span>
               {!collapsed && <span className={styles.menuText}>Keluar</span>}
             </button>
           </div>

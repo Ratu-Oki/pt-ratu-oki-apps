@@ -8,6 +8,7 @@ import AdminLayout from './components/AdminLayout';
 import MetricsCard from './components/MetricsCard';
 import { paymentService, stockService } from '../../services/api';
 import { Spin, message, Modal, Select, Input, Tag, Empty, Tabs, Button, Badge } from 'antd';
+import { DollarOutlined, CheckCircleOutlined, ClockCircleOutlined, CommentOutlined } from '@ant-design/icons';
 
 const PembayaranSupplier = () => {
     const [loading, setLoading] = useState(true);
@@ -175,28 +176,28 @@ const PembayaranSupplier = () => {
             id: 1,
             label: 'Total Settlement',
             value: formatCurrency(summary.total_settlement || 0),
-            icon: '💰',
+            icon: <DollarOutlined />,
             bgColor: '#27AE60'
         },
         {
             id: 2,
             label: 'Sudah Dicairkan',
             value: formatCurrency(summary.total_disbursed || 0),
-            icon: '✅',
+            icon: <CheckCircleOutlined />,
             bgColor: '#2D7A52'
         },
         {
             id: 3,
             label: 'Menunggu Pencairan',
             value: formatCurrency(summary.pending_disbursement || 0),
-            icon: '⏳',
+            icon: <ClockCircleOutlined />,
             bgColor: '#F39C12'
         },
         {
             id: 4,
             label: 'Perlu Dibayar',
             value: pendingSupplies.length.toString(),
-            icon: '📋',
+            icon: <CommentOutlined />,
             bgColor: '#3498DB'
         }
     ];
@@ -206,7 +207,7 @@ const PembayaranSupplier = () => {
             key: 'payments',
             label: (
                 <span>
-                    💳 Daftar Pembayaran
+                     Daftar Pembayaran
                     <Badge count={payments.filter(p => p.status === 'settlement' && p.disbursement_status !== 'completed').length} offset={[8, 0]} />
                 </span>
             ),
@@ -215,7 +216,7 @@ const PembayaranSupplier = () => {
             key: 'pending',
             label: (
                 <span>
-                    📦 Supply Belum Dibayar
+                     Supply Belum Dibayar
                     <Badge count={pendingSupplies.length} offset={[8, 0]} />
                 </span>
             ),

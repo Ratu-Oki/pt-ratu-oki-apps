@@ -12,6 +12,18 @@ import QuickActions from './components/QuickActions';
 import RecentActivities from './components/RecentActivities';
 import { transactionService, productService } from '../../services/api';
 import { Spin, message } from 'antd';
+import {
+  ClockCircleOutlined,
+  CreditCardOutlined,
+  CarOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  CommentOutlined,
+  DollarOutlined,
+  ShoppingCartOutlined,
+  AppstoreOutlined,
+ 
+} from '@ant-design/icons';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -52,13 +64,13 @@ const Dashboard = () => {
 
   const getStatusIcon = (status) => {
     const icons = {
-      pending: '⏳',
-      paid: '💳',
-      shipped: '🚚',
-      completed: '✅',
-      cancelled: '❌'
+      pending: <ClockCircleOutlined />,
+      paid: <CreditCardOutlined />,
+      shipped: <CarOutlined />,
+      completed: <CheckCircleOutlined />,
+      cancelled: <CloseCircleOutlined />
     };
-    return icons[status] || '📝';
+    return icons[status] || <CommentOutlined />;
   };
 
   const formatRelativeTime = (dateStr) => {
@@ -115,7 +127,7 @@ const Dashboard = () => {
           value: `Rp ${formatNumber(stats.total_revenue || stats.monthly?.revenue || 0)}`,
           change: stats.today?.revenue > 0 ? `+Rp ${formatNumber(stats.today.revenue)} hari ini` : 'Hari ini Rp 0',
           isPositive: (stats.today?.revenue || 0) > 0,
-          icon: '💰',
+          icon: <DollarOutlined />,
           bgColor: '#2D7A52'
         },
         {
@@ -124,7 +136,7 @@ const Dashboard = () => {
           value: String(stats.total_transactions || stats.monthly?.transactions || 0),
           change: stats.today?.transactions > 0 ? `+${stats.today.transactions} hari ini` : 'Hari ini 0',
           isPositive: (stats.today?.transactions || 0) > 0,
-          icon: '🛍️',
+          icon: <ShoppingCartOutlined />,
           bgColor: '#8B5A3C'
         },
         {
@@ -133,7 +145,7 @@ const Dashboard = () => {
           value: String(activeProductCount),
           change: `${stats.total_products || activeProductCount} total produk`,
           isPositive: true,
-          icon: '📦',
+          icon:<AppstoreOutlined />,
           bgColor: '#27AE60'
         },
         {
@@ -142,7 +154,7 @@ const Dashboard = () => {
           value: String(stats.pending_transactions || 0),
           change: stats.pending_transactions > 0 ? 'Perlu ditindak' : 'Semua selesai',
           isPositive: (stats.pending_transactions || 0) === 0,
-          icon: '⏳',
+          icon: <ClockCircleOutlined />,
           bgColor: '#E67E22'
         }
       ]);
@@ -176,10 +188,10 @@ const Dashboard = () => {
       message.error('Gagal memuat data dashboard');
       // Set fallback data
       setMetrics([
-        { id: 1, label: 'Total Penjualan', value: 'Rp 0', change: 'Hari ini Rp 0', isPositive: true, icon: '💰', bgColor: '#2D7A52' },
-        { id: 2, label: 'Total Pesanan', value: '0', change: 'Hari ini 0', isPositive: true, icon: '🛍️', bgColor: '#8B5A3C' },
-        { id: 3, label: 'Produk Aktif', value: '0', change: '0 total produk', isPositive: true, icon: '📦', bgColor: '#27AE60' },
-        { id: 4, label: 'Pending Transaksi', value: '0', change: 'Semua selesai', isPositive: true, icon: '⏳', bgColor: '#E67E22' }
+        { id: 1, label: 'Total Penjualan', value: 'Rp 0', change: 'Hari ini Rp 0', isPositive: true, icon: <DollarOutlined />, bgColor: '#2D7A52' },
+        { id: 2, label: 'Total Pesanan', value: '0', change: 'Hari ini 0', isPositive: true, icon: <ShoppingCartOutlined />, bgColor: '#8B5A3C' },
+        { id: 3, label: 'Produk Aktif', value: '0', change: '0 total produk', isPositive: true, icon:<AppstoreOutlined />, bgColor: '#27AE60' },
+        { id: 4, label: 'Pending Transaksi', value: '0', change: 'Semua selesai', isPositive: true, icon:<ClockCircleOutlined />, bgColor: '#E67E22' }
       ]);
       setTransactions([]);
       setActivities([]);
