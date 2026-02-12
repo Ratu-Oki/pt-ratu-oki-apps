@@ -147,6 +147,20 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     /**
+     * Update user data in state and cookies
+     */
+    const updateUser = useCallback((updatedUserData) => {
+        const newUser = { ...user, ...updatedUserData };
+        setUser(newUser);
+        // Update cookie with new user data
+        Cookies.set('user', JSON.stringify(newUser), {
+            expires: 1,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'Lax'
+        });
+    }, [user]);
+
+    /**
      * Clear error state
      */
     const clearError = useCallback(() => {
@@ -195,6 +209,7 @@ export const AuthProvider = ({ children }) => {
         adminLogin,
         register,
         logout,
+        updateUser,
         clearError,
         hasRole,
     };

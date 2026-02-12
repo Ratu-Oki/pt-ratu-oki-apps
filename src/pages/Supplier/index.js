@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Layout, Card, Row, Col, Table, Button, Modal, Form, Input, InputNumber, Select, message, Spin, Tag, Tabs, Upload, Statistic, Empty, Image } from 'antd';
-import { PlusOutlined, UploadOutlined, LogoutOutlined, ShoppingCartOutlined, HistoryOutlined, InboxOutlined } from '@ant-design/icons';
+import { Layout, Card, Row, Col, Table, Button, Modal, Form, Input, InputNumber, Select, message, Spin, Tag, Tabs, Upload, Statistic, Empty, Alert, Divider, Space } from 'antd';
+import { PlusOutlined, UploadOutlined, LogoutOutlined, ShoppingCartOutlined, HistoryOutlined, InboxOutlined, SettingOutlined, SaveOutlined, KeyOutlined, UserOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { stockService } from '../../services/api';
+import { stockService, authService } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import BankAccountManager from './BankAccountManager';
 import './Supplier.css';
@@ -13,7 +13,7 @@ import './Supplier.css';
  */
 const Supplier = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
   const [loading, setLoading] = useState(true);
   const [availableProducts, setAvailableProducts] = useState([]);
   const [mySupplies, setMySupplies] = useState([]);
@@ -31,6 +31,14 @@ const Supplier = () => {
   // Form
   const [supplyForm] = Form.useForm();
   const [newProductForm] = Form.useForm();
+
+  // Settings states and forms
+  const [loadingUsername, setLoadingUsername] = useState(false);
+  const [loadingEmail, setLoadingEmail] = useState(false);
+  const [loadingPassword, setLoadingPassword] = useState(false);
+  const [usernameForm] = Form.useForm();
+  const [emailForm] = Form.useForm();
+  const [passwordForm] = Form.useForm();
 
   // Fetch data
   const fetchData = useCallback(async () => {
@@ -78,6 +86,143 @@ const Supplier = () => {
       currency: 'IDR',
       minimumFractionDigits: 0
     }).format(amount || 0);
+  };
+
+  // Initialize settings form with current user data
+  useEffect(() => {
+    if (user) {
+      usernameForm.setFieldsValue({
+        current_username: user.username || 'N/A'
+      });
+      emailForm.setFieldsValue({
+        current_email: user.email || 'N/A'
+      });
+    }
+  }, [user, usernameForm, emailForm]);
+
+  // Handle change username
+  const handleChangeUsername = async (values) => {
+    try {
+      if (!values.new_username) {
+        message.error('Username baru harus diisi');
+        return;
+      }
+
+      if (values.new_username === user.username || values.new_username === user.email) {
+        message.error('Username baru harus berbeda dengan username sebelumnya');
+        return;
+      }
+
+      setLoadingUsername(true);
+      const response = await authService.updateProfile({
+        username: values.new_username
+      });
+
+      if (response.success) {
+        message.success('Username berhasil diubah');
+        // Update user in auth context
+        updateUser({ username: values.new_username });
+        usernameForm.setFieldsValue({
+          current_username: values.new_username,
+          new_username: ''
+        });
+      } else {
+        message.error(response.message || 'Gagal mengubah username');
+      }
+    } catch (error) {
+      console.error('Error changing username:', error);
+      message.error(error.message || 'Gagal mengubah username. Silakan coba lagi.');
+    } finally {
+      setLoadingUsername(false);
+    }
+  };
+
+  // Handle change email
+  const handleChangeEmail = async (values) => {
+    try {
+      if (!values.new_email) {
+        message.error('Email baru harus diisi');
+        return;
+      }
+
+      // Basic email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(values.new_email)) {
+        message.error('Format email tidak valid');
+        return;
+      }
+
+      if (values.new_email === user.email) {
+        message.error('Email baru harus berbeda dengan email sebelumnya');
+        return;
+      }
+
+      setLoadingEmail(true);
+      const response = await authService.updateProfile({
+        email: values.new_email
+      });
+
+      if (response.success) {
+        message.success('Email berhasil diubah');
+        // Update user in auth context
+        updateUser({ email: values.new_email });
+        emailForm.setFieldsValue({
+          current_email: values.new_email,
+          new_email: ''
+        });
+      } else {
+        message.error(response.message || 'Gagal mengubah email');
+      }
+    } catch (error) {
+      console.error('Error changing email:', error);
+      message.error(error.message || 'Gagal mengubah email. Silakan coba lagi.');
+    } finally {
+      setLoadingEmail(false);
+    }
+  };
+
+
+  // Handle change password
+  const handleChangePassword = async (values) => {
+    try {
+      if (!values.current_password || !values.new_password || !values.confirm_password) {
+        message.error('Semua field harus diisi');
+        return;
+      }
+
+      if (values.new_password !== values.confirm_password) {
+        message.error('Password baru dan konfirmasi password harus sama');
+        return;
+      }
+
+      if (values.new_password === values.current_password) {
+        message.error('Password baru harus berbeda dengan password sebelumnya');
+        return;
+      }
+
+      if (values.new_password.length < 6) {
+        message.error('Password baru harus minimal 6 karakter');
+        return;
+      }
+
+      setLoadingPassword(true);
+      const response = await authService.changePassword(
+        values.current_password,
+        values.new_password
+      );
+
+      if (response.success) {
+        message.success('Password berhasil diubah');
+        passwordForm.resetFields();
+      } else {
+        message.error(response.message || 'Gagal mengubah password');
+      }
+    } catch (error) {
+      console.error('Error changing password:', error);
+      message.error(error.message || 'Password saat ini salah atau terjadi kesalahan');
+    } finally {
+      setLoadingPassword(false);
+    }
   };
 
   // Handle image upload
@@ -329,6 +474,269 @@ const Supplier = () => {
         </span>
       ),
       children: <BankAccountManager />
+    },
+    {
+      key: 'settings',
+      label: (
+        <span>
+          <SettingOutlined /> Pengaturan
+        </span>
+      ),
+      children: (
+        <div>
+          <Alert
+            message="Keamanan Akun"
+            description="Pastikan username dan password Anda aman. Password minimal 6 karakter."
+            type="info"
+            showIcon
+            style={{ marginBottom: 24 }}
+            closable
+          />
+
+          <Row gutter={[24, 24]}>
+            {/* Change Username Section */}
+            <Col xs={24} md={12}>
+              <Card
+                title={
+                  <Space>
+                    <UserOutlined />
+                    <span>Ubah Username</span>
+                  </Space>
+                }
+                style={{ boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)' }}
+              >
+                <Form
+                  form={usernameForm}
+                  layout="vertical"
+                  onFinish={handleChangeUsername}
+                >
+                  <Form.Item
+                    label="Username Saat Ini"
+                    name="current_username"
+                  >
+                    <Input
+                      disabled
+                      prefix={<UserOutlined />}
+                    />
+                  </Form.Item>
+
+                  <Divider />
+
+                  <Form.Item
+                    label="Username Baru"
+                    name="new_username"
+                    rules={[
+                      {
+                        required: true,
+                        message: 'Username baru harus diisi'
+                      },
+                      {
+                        min: 3,
+                        message: 'Username minimal 3 karakter'
+                      },
+                      {
+                        max: 20,
+                        message: 'Username maksimal 20 karakter'
+                      },
+                      {
+                        pattern: /^[a-zA-Z0-9_-]+$/,
+                        message: 'Username hanya boleh mengandung huruf, angka, underscore, dan dash'
+                      }
+                    ]}
+                  >
+                    <Input
+                      placeholder="Masukkan username baru"
+                      prefix={<UserOutlined />}
+                    />
+                  </Form.Item>
+
+                  <Form.Item>
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      block
+                      icon={<SaveOutlined />}
+                      loading={loadingUsername}
+                    >
+                      Simpan Username
+                    </Button>
+                  </Form.Item>
+                </Form>
+              </Card>
+            </Col>
+
+            {/* Change Email Section */}
+            <Col xs={24} md={12}>
+              <Card
+                title={
+                  <Space>
+                    <UserOutlined />
+                    <span>Ubah Email</span>
+                  </Space>
+                }
+                style={{ boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)' }}
+              >
+                <Form
+                  form={emailForm}
+                  layout="vertical"
+                  onFinish={handleChangeEmail}
+                >
+                  <Form.Item
+                    label="Email Saat Ini"
+                    name="current_email"
+                  >
+                    <Input
+                      disabled
+                      type="email"
+                      prefix={<UserOutlined />}
+                    />
+                  </Form.Item>
+
+                  <Divider />
+
+                  <Form.Item
+                    label="Email Baru"
+                    name="new_email"
+                    rules={[
+                      {
+                        required: true,
+                        message: 'Email baru harus diisi'
+                      },
+                      {
+                        type: 'email',
+                        message: 'Format email tidak valid'
+                      }
+                    ]}
+                  >
+                    <Input
+                      placeholder="Masukkan email baru"
+                      type="email"
+                      prefix={<UserOutlined />}
+                    />
+                  </Form.Item>
+
+                  <Form.Item>
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      block
+                      icon={<SaveOutlined />}
+                      loading={loadingEmail}
+                    >
+                      Simpan Email
+                    </Button>
+                  </Form.Item>
+                </Form>
+              </Card>
+            </Col>
+
+            {/* Change Password Section */}
+            <Col xs={24} md={12}>
+              <Card
+                title={
+                  <Space>
+                    <KeyOutlined />
+                    <span>Ubah Password</span>
+                  </Space>
+                }
+                style={{ boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)' }}
+              >
+                <Form
+                  form={passwordForm}
+                  layout="vertical"
+                  onFinish={handleChangePassword}
+                >
+                  <Form.Item
+                    label="Password Saat Ini"
+                    name="current_password"
+                    rules={[
+                      {
+                        required: true,
+                        message: 'Password saat ini harus diisi'
+                      }
+                    ]}
+                  >
+                    <Input.Password
+                      placeholder="Masukkan password saat ini"
+                    />
+                  </Form.Item>
+
+                  <Form.Item
+                    label="Password Baru"
+                    name="new_password"
+                    rules={[
+                      {
+                        required: true,
+                        message: 'Password baru harus diisi'
+                      },
+                      {
+                        min: 6,
+                        message: 'Password minimal 6 karakter'
+                      },
+                      {
+                        max: 20,
+                        message: 'Password maksimal 20 karakter'
+                      }
+                    ]}
+                  >
+                    <Input.Password
+                      placeholder="Masukkan password baru"
+                    />
+                  </Form.Item>
+
+                  <Form.Item
+                    label="Konfirmasi Password Baru"
+                    name="confirm_password"
+                    rules={[
+                      {
+                        required: true,
+                        message: 'Konfirmasi password harus diisi'
+                      },
+                      ({ getFieldValue }) => ({
+                        validator(_, value) {
+                          if (!value || getFieldValue('new_password') === value) {
+                            return Promise.resolve();
+                          }
+                          return Promise.reject(new Error('Password tidak cocok'));
+                        }
+                      })
+                    ]}
+                  >
+                    <Input.Password
+                      placeholder="Konfirmasi password baru"
+                    />
+                  </Form.Item>
+
+                  <Form.Item>
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      block
+                      icon={<KeyOutlined />}
+                      loading={loadingPassword}
+                      danger
+                    >
+                      Simpan Password
+                    </Button>
+                  </Form.Item>
+                </Form>
+              </Card>
+            </Col>
+          </Row>
+
+    
+          <Card style={{ marginTop: 24, background: '#fafafa' }}>
+            <h3>💡 Tips Keamanan</h3>
+            <ul style={{ marginLeft: 20 }}>
+              <li>Selalu gunakan password yang kuat dan unik</li>
+              <li>Jangan bagikan username dan password Anda kepada orang lain</li>
+              <li>Ubah password secara berkala untuk keamanan lebih baik</li>
+              <li>Logout dari perangkat yang tidak Anda gunakan</li>
+              <li>Jika akun Anda dirasa tidak aman, hubungi admin segera</li>
+            </ul>
+          </Card>
+        </div>
+      )
     }
   ];
 
@@ -349,7 +757,9 @@ const Supplier = () => {
           <span style={{ color: '#fff', fontSize: 18 }}>Supplier Dashboard</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <span style={{ color: '#fff' }}>Halo, {user?.nama || 'Supplier'}</span>
+          <span style={{ color: '#fff' }}>
+            Halo, {user?.username || 'Supplier'}
+          </span>
           <Button icon={<LogoutOutlined />} onClick={handleLogout}>
             Logout
           </Button>
