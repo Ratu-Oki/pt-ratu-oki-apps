@@ -212,6 +212,43 @@ export const supplierService = {
     },
 };
 
+export const consumerService = {
+    getAll: async (params = {}) => {
+        const response = await api.get('/consumers', { params });
+        return response.data;
+    },
+
+    getById: async (id) => {
+        const response = await api.get(`/consumers/${id}`);
+        return response.data;
+    },
+
+    getStats: async (id) => {
+        const response = await api.get(`/consumers/${id}/stats`);
+        return response.data;
+    },
+
+    create: async (data) => {
+        const response = await api.post('/consumers', data);
+        return response.data;
+    },
+
+    update: async (id, data) => {
+        const response = await api.put(`/consumers/${id}`, data);
+        return response.data;
+    },
+
+    resetPassword: async (id) => {
+        const response = await api.post(`/consumers/${id}/reset-password`);
+        return response.data;
+    },
+
+    delete: async (id) => {
+        const response = await api.delete(`/consumers/${id}`);
+        return response.data;
+    },
+};
+
 // ============================================
 // STOCK SERVICES
 // ============================================

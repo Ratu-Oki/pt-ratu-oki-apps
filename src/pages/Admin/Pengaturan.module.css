@@ -1,0 +1,103 @@
+.pengaturanPage {
+  padding: 28px;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdfb 100%);
+  min-height: 560px;
+  border-radius: 10px;
+}
+
+.tabBar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.tabBar button {
+  background: transparent;
+  border: 1px solid #e9f0ea;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #2f3b36;
+  transition: all 160ms ease;
+}
+
+.tabBar button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(27,94,63,0.08);
+}
+
+.activeTab {
+  background: #1b5e3f;
+  color: #ffffff;
+  border-color: #1b5e3f;
+  box-shadow: 0 6px 18px rgba(27,94,63,0.14);
+}
+
+.createCard {
+  background: #ffffff;
+  border: 1px solid #f0f7f2;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(20,45,30,0.04);
+}
+
+.createCard h3 {
+  margin: 0 0 12px 0;
+  color: #163826;
+}
+
+.listContainer {
+  background: #ffffff;
+  border: 1px solid #f3faf4;
+  padding: 14px;
+  border-radius: 10px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table th,
+.table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #f3f6f3;
+  text-align: left;
+}
+
+.table thead th {
+  background: linear-gradient(90deg, #fafaf9, #fbfdfa);
+  font-weight: 700;
+  color: #2f3b36;
+}
+
+.table tr:nth-child(even) {
+  background: #fcfdfc;
+}
+
+.table td:last-child {
+  display: flex;
+  gap: 8px;
+}
+
+.smallBtn {
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+@media (max-width: 1000px) {
+  .createCard {
+    padding: 14px;
+  }
+  .tabBar {
+    flex-wrap: wrap;
+  }
+  .table th,
+  .table td {
+    padding: 10px 8px;
+  }
+}
+
