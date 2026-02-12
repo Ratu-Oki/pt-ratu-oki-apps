@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Layout, Row, Col, message, Affix, Button, Badge, Spin } from 'antd';
+import { Layout, Row, Col, message, Affix, Button, Badge, Spin, Modal, Form, Input, Divider, Space, Alert } from 'antd';
 import { ShoppingCartOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import Header from './components/Header';
@@ -7,7 +7,7 @@ import Sidebar from './components/Sidebar';
 import ProductGrid from './components/ProductGrid';
 import Footer from './components/Footer';
 import styles from './Consumer.module.css';
-import { productService } from '../../services/api';
+import { productService, authService } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 
 /**
@@ -16,7 +16,15 @@ import { useAuth } from '../../context/AuthContext';
  */
 const Consumer = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
+  const [profileModalVisible, setProfileModalVisible] = useState(false);
+  const [usernameValue, setUsernameValue] = useState('');
+  const [emailValue, setEmailValue] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [loadingUsername, setLoadingUsername] = useState(false);
+  const [loadingEmail, setLoadingEmail] = useState(false);
+  const [loadingPassword, setLoadingPassword] = useState(false);
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState([]);
   const [cartItems, setCartItems] = useState(() => {
@@ -160,6 +168,13 @@ const Consumer = () => {
       <Header
         cartCount={cartItems.reduce((sum, item) => sum + (item.qty || 1), 0)}
         userName={user?.nama || 'Guest'}
+        onProfileClick={() => {
+          setUsernameValue(user?.nama || '');
+          setEmailValue(user?.email || '');
+          setCurrentPassword('');
+          setNewPassword('');
+          setProfileModalVisible(true);
+        }}
         onSearch={handleSearch}
       />
 
@@ -202,6 +217,89 @@ const Consumer = () => {
 
       {/* Footer */}
       <Footer />
+
+      {/* Profile Settings Modal */}
+      <Modal
+        title="Pengaturan Akun"
+        open={profileModalVisible}
+        onCancel={() => setProfileModalVisible(false)}
+        footer={null}
+      >
+        <div style={{ marginBottom: 12 }}>
+          <h3>Ubah Username</h3>
+          <Form layout="vertical">
+            <Form.Item>
+              <Input value={usernameValue} onChange={(e) => setUsernameValue(e.target.value)} placeholder="Username" />
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary" loading={loadingUsername} onClick={async () => {
+                if (!usernameValue) { message.error('Username tidak boleh kosong'); return; }
+                setLoadingUsername(true);
+                try {
+                  await authService.updateProfile({ nama: usernameValue });
+                  const profile = await authService.getProfile();
+                  if (profile && profile.data) updateUser(profile.data);
+                  message.success('Username diperbarui');
+                } catch (err) {
+                  message.error(err.message || 'Gagal memperbarui username');
+                } finally { setLoadingUsername(false); }
+              }}>Simpan Username</Button>
+            </Form.Item>
+          </Form>
+        </div>
+
+        <Divider />
+
+        <div style={{ marginBottom: 12 }}>
+          <h3>Ubah Email</h3>
+          <Form layout="vertical">
+            <Form.Item>
+              <Input type="email" value={emailValue} onChange={(e) => setEmailValue(e.target.value)} placeholder="Email" />
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary" loading={loadingEmail} onClick={async () => {
+                if (!emailValue) { message.error('Email tidak boleh kosong'); return; }
+                setLoadingEmail(true);
+                try {
+                  await authService.updateProfile({ email: emailValue });
+                  const profile = await authService.getProfile();
+                  if (profile && profile.data) updateUser(profile.data);
+                  message.success('Email diperbarui');
+                } catch (err) {
+                  message.error(err.message || 'Gagal memperbarui email');
+                } finally { setLoadingEmail(false); }
+              }}>Simpan Email</Button>
+            </Form.Item>
+          </Form>
+        </div>
+
+        <Divider />
+
+        <div>
+          <h3>Ubah Password</h3>
+          <Form layout="vertical">
+            <Form.Item label="Password Saat Ini">
+              <Input.Password value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
+            </Form.Item>
+            <Form.Item label="Password Baru">
+              <Input.Password value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary" loading={loadingPassword} onClick={async () => {
+                if (!currentPassword || !newPassword) { message.error('Lengkapi password saat ini dan baru'); return; }
+                setLoadingPassword(true);
+                try {
+                  await authService.changePassword(currentPassword, newPassword);
+                  message.success('Password berhasil diubah');
+                  setCurrentPassword(''); setNewPassword('');
+                } catch (err) {
+                  message.error(err.message || 'Gagal mengganti password');
+                } finally { setLoadingPassword(false); }
+              }}>Simpan Password</Button>
+            </Form.Item>
+          </Form>
+        </div>
+      </Modal>
 
       {/* Floating Cart Button */}
       {cartItems.length > 0 && (

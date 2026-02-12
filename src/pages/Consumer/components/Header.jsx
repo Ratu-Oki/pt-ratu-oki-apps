@@ -12,7 +12,7 @@ const { Header: AntHeader } = Layout;
  * Header Component
  * Navigation bar dengan logo, menu, cart, dan user profile dengan logout
  */
-const Header = ({ cartCount = 0, userName = 'User' }) => {
+const Header = ({ cartCount = 0, userName = 'User', onProfileClick }) => {
   const [drawerVisible, setDrawerVisible] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -74,9 +74,18 @@ const Header = ({ cartCount = 0, userName = 'User' }) => {
       icon: <LogoutOutlined />,
       label: 'Logout',
       danger: true,
-      onClick: handleLogout,
     },
   ];
+
+  const handleUserMenuClick = ({ key }) => {
+    if (key === 'profile') {
+      if (typeof onProfileClick === 'function') onProfileClick();
+      return;
+    }
+    if (key === 'logout') {
+      handleLogout();
+    }
+  };
 
   const mobileMenuItems = [
     ...menuItems,
@@ -139,7 +148,7 @@ const Header = ({ cartCount = 0, userName = 'User' }) => {
             </Link>
           </Tooltip>
 
-          <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" trigger={['click']}>
+          <Dropdown menu={{ items: userMenuItems, onClick: handleUserMenuClick }} placement="bottomRight" trigger={["click"]}>
             <div className={styles.userProfile} style={{ cursor: 'pointer' }}>
               <UserOutlined style={{ fontSize: '20px', color: '#1b5e3f' }} />
               <span>{displayName}</span>
