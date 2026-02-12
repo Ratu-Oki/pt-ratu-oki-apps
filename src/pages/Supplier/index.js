@@ -36,6 +36,10 @@ const Supplier = () => {
   const [loadingUsername, setLoadingUsername] = useState(false);
   const [loadingEmail, setLoadingEmail] = useState(false);
   const [loadingPassword, setLoadingPassword] = useState(false);
+  const [emailOtpRequested, setEmailOtpRequested] = useState(false);
+  const [pendingNewEmail, setPendingNewEmail] = useState('');
+  const [oldOtp, setOldOtp] = useState('');
+  const [newOtp, setNewOtp] = useState('');
   const [usernameForm] = Form.useForm();
   const [emailForm] = Form.useForm();
   const [passwordForm] = Form.useForm();
@@ -144,8 +148,64 @@ const Supplier = () => {
 
   // Handle change email
   const handleChangeEmail = async (values) => {
-    // Email change is not yet available on backend; inform user
-    message.info('Perubahan email belum tersedia. Fitur ini akan ditambahkan di backend.');
+    try {
+      const newEmail = values?.new_email;
+      if (!newEmail) {
+        message.error('Email baru harus diisi');
+        return;
+      }
+
+      setLoadingEmail(true);
+      await authService.requestEmailChange(newEmail);
+      setEmailOtpRequested(true);
+      setPendingNewEmail(newEmail);
+      setOldOtp('');
+      setNewOtp('');
+      message.success('OTP telah dikirim ke email lama dan email baru');
+    } catch (error) {
+      console.error('Error requesting email change:', error);
+      message.error(error.message || 'Gagal mengirim OTP perubahan email');
+    } finally {
+      setLoadingEmail(false);
+    }
+  };
+
+  const handleConfirmEmailChange = async () => {
+    try {
+      if (!pendingNewEmail) {
+        message.error('Email baru tidak ditemukan. Silakan kirim OTP terlebih dahulu.');
+        return;
+      }
+
+      if (!oldOtp || !newOtp) {
+        message.error('OTP email lama dan email baru wajib diisi');
+        return;
+      }
+
+      setLoadingEmail(true);
+      await authService.confirmEmailChange(pendingNewEmail, oldOtp, newOtp);
+
+      try {
+        const profile = await authService.getProfile();
+        if (profile && profile.data) {
+          updateUser(profile.data);
+          emailForm.setFieldsValue({ current_email: profile.data.email || pendingNewEmail, new_email: '' });
+        }
+      } catch {
+        // ignore
+      }
+
+      setEmailOtpRequested(false);
+      setPendingNewEmail('');
+      setOldOtp('');
+      setNewOtp('');
+      message.success('Email berhasil diubah');
+    } catch (error) {
+      console.error('Error confirming email change:', error);
+      message.error(error.message || 'Gagal mengonfirmasi perubahan email');
+    } finally {
+      setLoadingEmail(false);
+    }
   };
 
 
@@ -582,6 +642,36 @@ const Supplier = () => {
                     />
                   </Form.Item>
 
+                  {emailOtpRequested && (
+                    <>
+                      <Alert
+                        type="info"
+                        showIcon
+                        style={{ marginBottom: 12 }}
+                        message="OTP sudah dikirim"
+                        description="Masukkan OTP dari email lama dan email baru untuk konfirmasi perubahan email."
+                      />
+
+                      <Form.Item label="OTP Email Lama">
+                        <Input
+                          value={oldOtp}
+                          onChange={(e) => setOldOtp(e.target.value)}
+                          placeholder="6 digit OTP"
+                          maxLength={6}
+                        />
+                      </Form.Item>
+
+                      <Form.Item label="OTP Email Baru">
+                        <Input
+                          value={newOtp}
+                          onChange={(e) => setNewOtp(e.target.value)}
+                          placeholder="6 digit OTP"
+                          maxLength={6}
+                        />
+                      </Form.Item>
+                    </>
+                  )}
+
                   <Form.Item>
                     <Button
                       type="primary"
@@ -590,9 +680,22 @@ const Supplier = () => {
                       icon={<SaveOutlined />}
                       loading={loadingEmail}
                     >
-                      Simpan Email
+                      {emailOtpRequested ? 'Kirim Ulang OTP' : 'Kirim OTP'}
                     </Button>
                   </Form.Item>
+
+                  {emailOtpRequested && (
+                    <Form.Item>
+                      <Button
+                        type="primary"
+                        block
+                        onClick={handleConfirmEmailChange}
+                        loading={loadingEmail}
+                      >
+                        Konfirmasi Email
+                      </Button>
+                    </Form.Item>
+                  )}
                 </Form>
               </Card>
             </Col>

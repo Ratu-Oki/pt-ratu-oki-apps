@@ -20,6 +20,9 @@ const Consumer = () => {
   const [profileModalVisible, setProfileModalVisible] = useState(false);
   const [usernameValue, setUsernameValue] = useState('');
   const [emailValue, setEmailValue] = useState('');
+  const [emailOldOtp, setEmailOldOtp] = useState('');
+  const [emailNewOtp, setEmailNewOtp] = useState('');
+  const [emailOtpRequested, setEmailOtpRequested] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [loadingUsername, setLoadingUsername] = useState(false);
@@ -37,6 +40,13 @@ const Consumer = () => {
     priceRange: { min: 0, max: 100000000 },
     search: '',
   });
+
+  useEffect(() => {
+    if (user) {
+      setUsernameValue(user.nama || '');
+      setEmailValue(user.email || '');
+    }
+  }, [user]);
 
   // Save cart to localStorage whenever it changes
   useEffect(() => {
@@ -256,19 +266,78 @@ const Consumer = () => {
             <Form.Item>
               <Input type="email" value={emailValue} onChange={(e) => setEmailValue(e.target.value)} placeholder="Email" />
             </Form.Item>
+            {emailOtpRequested && (
+              <>
+                <Alert
+                  type="info"
+                  showIcon
+                  style={{ marginBottom: 12 }}
+                  message="OTP sudah dikirim"
+                  description="Masukkan OTP dari email lama dan email baru untuk konfirmasi perubahan email."
+                />
+                <Form.Item label="OTP Email Lama">
+                  <Input
+                    value={emailOldOtp}
+                    onChange={(e) => setEmailOldOtp(e.target.value)}
+                    placeholder="6 digit OTP"
+                    maxLength={6}
+                  />
+                </Form.Item>
+                <Form.Item label="OTP Email Baru">
+                  <Input
+                    value={emailNewOtp}
+                    onChange={(e) => setEmailNewOtp(e.target.value)}
+                    placeholder="6 digit OTP"
+                    maxLength={6}
+                  />
+                </Form.Item>
+              </>
+            )}
             <Form.Item>
-              <Button type="primary" loading={loadingEmail} onClick={async () => {
-                if (!emailValue) { message.error('Email tidak boleh kosong'); return; }
-                setLoadingEmail(true);
-                try {
-                  await authService.updateProfile({ email: emailValue });
-                  const profile = await authService.getProfile();
-                  if (profile && profile.data) updateUser(profile.data);
-                  message.success('Email diperbarui');
-                } catch (err) {
-                  message.error(err.message || 'Gagal memperbarui email');
-                } finally { setLoadingEmail(false); }
-              }}>Simpan Email</Button>
+              {!emailOtpRequested ? (
+                <Button
+                  type="primary"
+                  loading={loadingEmail}
+                  onClick={async () => {
+                    if (!emailValue) { message.error('Email tidak boleh kosong'); return; }
+                    setLoadingEmail(true);
+                    try {
+                      await authService.requestEmailChange(emailValue);
+                      setEmailOtpRequested(true);
+                      setEmailOldOtp('');
+                      setEmailNewOtp('');
+                      message.success('OTP telah dikirim ke email lama dan email baru');
+                    } catch (err) {
+                      message.error(err.message || 'Gagal mengirim OTP perubahan email');
+                    } finally {
+                      setLoadingEmail(false);
+                    }
+                  }}
+                >Kirim OTP</Button>
+              ) : (
+                <Button
+                  type="primary"
+                  loading={loadingEmail}
+                  onClick={async () => {
+                    if (!emailValue) { message.error('Email baru tidak boleh kosong'); return; }
+                    if (!emailOldOtp || !emailNewOtp) { message.error('OTP email lama dan email baru wajib diisi'); return; }
+                    setLoadingEmail(true);
+                    try {
+                      await authService.confirmEmailChange(emailValue, emailOldOtp, emailNewOtp);
+                      const profile = await authService.getProfile();
+                      if (profile && profile.data) updateUser(profile.data);
+                      setEmailOtpRequested(false);
+                      setEmailOldOtp('');
+                      setEmailNewOtp('');
+                      message.success('Email berhasil diubah');
+                    } catch (err) {
+                      message.error(err.message || 'Gagal mengonfirmasi perubahan email');
+                    } finally {
+                      setLoadingEmail(false);
+                    }
+                  }}
+                >Konfirmasi Email</Button>
+              )}
             </Form.Item>
           </Form>
         </div>

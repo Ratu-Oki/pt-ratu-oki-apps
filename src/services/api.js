@@ -111,6 +111,27 @@ export const authService = {
         });
         return response.data;
     },
+
+    deleteUser: async (id) => {
+        const response = await api.delete(`/auth/users/${id}`);
+        return response.data;
+    },
+
+    requestEmailChange: async (newEmail) => {
+        const response = await api.post('/account-settings/change-email/request', {
+            new_email: newEmail,
+        });
+        return response.data;
+    },
+
+    confirmEmailChange: async (newEmail, oldOtp, newOtp) => {
+        const response = await api.post('/account-settings/change-email/confirm', {
+            new_email: newEmail,
+            old_otp: oldOtp,
+            new_otp: newOtp,
+        });
+        return response.data;
+    },
 };
 
 // ============================================

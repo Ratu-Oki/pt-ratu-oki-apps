@@ -5,7 +5,7 @@
 import React, { useState, useEffect, useCallback  } from 'react';
 import styles from './Pengguna.module.css';
 import AdminLayout from './components/AdminLayout';
-import { supplierService } from '../../services/api';
+import { authService, supplierService } from '../../services/api';
 import { Spin, message, Modal, Input, Select, Button} from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 
@@ -136,12 +136,12 @@ const Pengguna = () => {
       okType: 'danger',
       onOk: async () => {
         try {
-          await supplierService.delete(supplierId);
-          message.success('Supplier berhasil dihapus');
+          await authService.deleteUser(supplierId);
+          message.success('Akun berhasil dihapus');
           fetchSuppliers(pagination.page);
         } catch (error) {
           console.error('Error deleting supplier:', error);
-          message.error(error.message || 'Gagal menghapus supplier');
+          message.error(error.message || 'Gagal menghapus akun');
         }
       }
     });

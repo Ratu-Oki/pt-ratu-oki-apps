@@ -105,8 +105,7 @@ const Pengaturan = () => {
       okType: 'danger',
       onOk: async () => {
         try {
-          if (role === 'supplier') await supplierService.delete(id);
-          else await consumerService.delete(id);
+          await authService.deleteUser(id);
           message.success('Akun berhasil dihapus');
           if (role === 'supplier') fetchSuppliers(); else fetchConsumers();
         } catch (err) {
