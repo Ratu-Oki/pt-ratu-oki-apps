@@ -114,20 +114,25 @@ const Supplier = () => {
       }
 
       setLoadingUsername(true);
-      const response = await authService.updateProfile({
-        username: values.new_username
-      });
+      const response = await authService.updateProfile({ username: values.new_username });
 
-      if (response.success) {
+      if (response && response.success) {
+        // Refetch profile from server to ensure DB-sourced data
+        try {
+          const profile = await authService.getProfile();
+          if (profile && profile.data) {
+            updateUser(profile.data);
+            usernameForm.setFieldsValue({ current_username: profile.data.username || values.new_username, new_username: '' });
+          }
+        } catch (err) {
+          // Fallback to optimistic update
+          updateUser({ username: values.new_username });
+          usernameForm.setFieldsValue({ current_username: values.new_username, new_username: '' });
+        }
+
         message.success('Username berhasil diubah');
-        // Update user in auth context
-        updateUser({ username: values.new_username });
-        usernameForm.setFieldsValue({
-          current_username: values.new_username,
-          new_username: ''
-        });
       } else {
-        message.error(response.message || 'Gagal mengubah username');
+        message.error((response && response.message) || 'Gagal mengubah username');
       }
     } catch (error) {
       console.error('Error changing username:', error);
@@ -139,46 +144,8 @@ const Supplier = () => {
 
   // Handle change email
   const handleChangeEmail = async (values) => {
-    try {
-      if (!values.new_email) {
-        message.error('Email baru harus diisi');
-        return;
-      }
-
-      // Basic email validation
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(values.new_email)) {
-        message.error('Format email tidak valid');
-        return;
-      }
-
-      if (values.new_email === user.email) {
-        message.error('Email baru harus berbeda dengan email sebelumnya');
-        return;
-      }
-
-      setLoadingEmail(true);
-      const response = await authService.updateProfile({
-        email: values.new_email
-      });
-
-      if (response.success) {
-        message.success('Email berhasil diubah');
-        // Update user in auth context
-        updateUser({ email: values.new_email });
-        emailForm.setFieldsValue({
-          current_email: values.new_email,
-          new_email: ''
-        });
-      } else {
-        message.error(response.message || 'Gagal mengubah email');
-      }
-    } catch (error) {
-      console.error('Error changing email:', error);
-      message.error(error.message || 'Gagal mengubah email. Silakan coba lagi.');
-    } finally {
-      setLoadingEmail(false);
-    }
+    // Email change is not yet available on backend; inform user
+    message.info('Perubahan email belum tersedia. Fitur ini akan ditambahkan di backend.');
   };
 
 

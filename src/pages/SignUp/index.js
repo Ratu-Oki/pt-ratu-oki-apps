@@ -272,7 +272,7 @@ const SignUp = () => {
             <p className="modal-message">Akun Anda telah berhasil dibuat. Anda akan diarahkan ke dashboard dalam 2 detik...</p>
             <button
               className="modal-button"
-              onClick={() => navigate('/consumer')}
+              onClick={() => navigate('/signin')}
             >
               Lanjut ke Dashboard
             </button>
