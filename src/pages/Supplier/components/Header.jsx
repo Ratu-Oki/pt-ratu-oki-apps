@@ -15,40 +15,20 @@ import styles from './Header.module.css';
  */
 const Header = ({ onMenuClick, title, subTitle, type = 'full', actionButton }) => {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
-
-
-  const handleLogout = () => {
-    Modal.confirm({
-      title: 'Konfirmasi Logout',
-      content: 'Apakah Anda yakin ingin keluar?',
-      okText: 'Ya, Keluar',
-      cancelText: 'Batal',
-      okButtonProps: { danger: true },
-      onOk: () => {
-        logout();
-        message.success('Berhasil logout');
-        navigate('/signin');
-      }
-    });
+  const { user } = useAuth();
+  const handleProfileClick = () => {
+    navigate('/supplier/profile');
   };
-
 
   const userMenuItems = [
     {
       key: 'profile',
       icon: <UserOutlined />,
       label: 'Profile',
+      onClick: handleProfileClick,
     },
     {
       type: 'divider',
-    },
-    {
-      key: 'logout',
-      icon: <LogoutOutlined />,
-      label: 'Logout',
-      danger: true,
-      onClick: handleLogout,
     },
   ];
 
