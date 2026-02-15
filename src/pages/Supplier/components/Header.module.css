@@ -1,0 +1,270 @@
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+/* Header Left */
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+  min-width: 200px;
+}
+
+/* Menu Button */
+.menuButton {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #1a202c;
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.menuButton:hover {
+  background: #f1f5f9;
+  color: #2d7a52;
+}
+
+/* Search Bar */
+.searchBar {
+  display: flex;
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  flex: 1;
+  max-width: 400px;
+  transition: all 0.2s ease;
+}
+
+.searchBar:hover,
+.searchBar:focus-within {
+  border-color: #2d7a52;
+  background: white;
+}
+
+.searchIcon {
+  font-size: 16px;
+  margin-right: 8px;
+  color: #64748b;
+}
+
+.searchInput {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 14px;
+  color: #1a202c;
+  font-family: inherit;
+  padding: 0;
+}
+
+.searchInput::placeholder {
+  color: #94a3b8;
+}
+
+/* Header Right */
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Notification Button */
+.notificationButton {
+  position: relative;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  font-size: 20px;
+}
+
+.notificationButton:hover {
+  background: #f1f5f9;
+}
+
+.notificationIcon {
+  display: block;
+}
+
+.notificationBadge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: #ef4444;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* User Button */
+.userButton {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  color: #1a202c;
+  font-weight: 500;
+}
+
+.userButton:hover {
+  background: #f1f5f9;
+}
+
+.userIcon {
+  font-size: 18px;
+}
+
+.userName {
+  white-space: nowrap;
+}
+
+/* Page Title (for simple header) */
+.pageTitle {
+  font-size: 22px;
+  font-weight: 600;
+  color: #1a202c;
+  margin: 0;
+  padding: 0;
+  line-height: 1.4;
+}
+
+/* Title Section */
+.titleSection {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Page Subtitle */
+.pageSubtitle {
+  font-size: 12px;
+  color: #27AE60;
+  margin: 0;
+  padding: 0;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+/* Tablet Responsive - 1024px and below */
+@media (max-width: 1024px) {
+  .header {
+    padding: 12px 16px;
+  }
+
+  .searchBar {
+    max-width: 300px;
+  }
+
+  .searchInput {
+    font-size: 13px;
+  }
+
+  .searchInput::placeholder {
+    font-size: 12px;
+  }
+
+  .userName {
+    display: none;
+  }
+}
+
+/* Mobile Responsive - 768px and below */
+@media (max-width: 768px) {
+  .header {
+    flex-wrap: nowrap;
+    padding: 12px 12px;
+    gap: 12px;
+  }
+
+  .menuButton {
+    display: block;
+  }
+
+  .headerLeft {
+    flex: 0;
+    min-width: auto;
+  }
+
+  .searchBar {
+    display: none;
+  }
+
+  .headerRight {
+    gap: 8px;
+  }
+
+  .notificationButton {
+    padding: 6px;
+  }
+
+  .notificationBadge {
+    width: 18px;
+    height: 18px;
+    font-size: 10px;
+  }
+
+  .userButton {
+    padding: 4px 8px;
+  }
+
+  .userName {
+    display: none;
+  }
+}
+
+/* Mobile Small - 480px and below */
+@media (max-width: 480px) {
+  .header {
+    padding: 10px 8px;
+  }
+
+  .menuButton {
+    font-size: 20px;
+    padding: 6px;
+  }
+
+  .notificationButton {
+    padding: 4px;
+    font-size: 18px;
+  }
+
+  .userButton {
+    padding: 4px;
+  }
+
+  .userIcon {
+    font-size: 16px;
+  }
+}

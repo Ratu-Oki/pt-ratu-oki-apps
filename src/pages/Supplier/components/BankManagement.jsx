@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Card, Table, Button, Modal, Form, Input, Select, message, Tag, Space, Popconfirm } from 'antd';
+import { Card, Table, Button, Modal, Form, Input, Select, message, Tag, Space, Popconfirm, Empty } from 'antd';
 import { PlusOutlined, CheckOutlined, StarOutlined, DeleteOutlined, BankOutlined } from '@ant-design/icons';
-import { bankAccountService } from '../../services/api';
+import { bankAccountService } from '../../../services/api';
+import styles from './BankManagement.module.css';
 
 /**
- * BankAccountManager Component
+ * BankManagement Component
  * Komponen untuk supplier mengelola rekening bank
  */
-const BankAccountManager = () => {
+const BankManagement = () => {
     const [loading, setLoading] = useState(true);
     const [bankAccounts, setBankAccounts] = useState([]);
     const [supportedBanks, setSupportedBanks] = useState([]);
@@ -47,7 +48,6 @@ const BankAccountManager = () => {
             const values = await form.validateFields();
             setSubmitting(true);
 
-            // Find bank code from selected bank
             const selectedBank = supportedBanks.find(b => b.name === values.bank_name);
 
             await bankAccountService.create({
@@ -99,57 +99,71 @@ const BankAccountManager = () => {
             key: 'bank_name',
             render: (text) => (
                 <Space>
-                    <BankOutlined />
-                    <span>{text}</span>
+                    <BankOutlined style={{ color: '#2d7a52', fontSize: 18 }} />
+                    <span style={{ fontWeight: 500 }}>{text}</span>
                 </Space>
-            )
+            ),
+            width: 200
         },
         {
-            title: 'No. Rekening',
-            dataIndex: 'account_number',
-            key: 'account_number',
-        },
-        {
-            title: 'Atas Nama',
+            title: 'Nama Akun',
             dataIndex: 'account_name',
             key: 'account_name',
+            ellipsis: true
         },
         {
-            title: 'Status',
-            key: 'status',
-            render: (_, record) => (
-                <Space>
-                    {record.is_default && <Tag color="blue">Default</Tag>}
-                    {record.is_verified ? (
-                        <Tag color="green">Terverifikasi</Tag>
-                    ) : (
-                        <Tag color="orange">Menunggu Verifikasi</Tag>
-                    )}
-                </Space>
-            )
+            title: 'Nomor Rekening',
+            dataIndex: 'account_number',
+            key: 'account_number',
+            render: (text) => <code>{text}</code>,
+            width: 180
+        },
+        {
+            title: 'Default',
+            dataIndex: 'is_default',
+            key: 'is_default',
+            align: 'center',
+            render: (isDefault) => (
+                isDefault ? (
+                    <Tag color="green" icon={<CheckOutlined />}>Default</Tag>
+                ) : (
+                    <Tag>-</Tag>
+                )
+            ),
+            width: 120
         },
         {
             title: 'Aksi',
-            key: 'action',
+            key: 'aksi',
+            align: 'center',
+            fixed: 'right',
+            width: 180,
             render: (_, record) => (
                 <Space>
                     {!record.is_default && (
                         <Button
-                            size="small"
+                            type="text"
                             icon={<StarOutlined />}
+                            size="small"
                             onClick={() => handleSetDefault(record.id)}
+                            title="Jadikan Default"
                         >
-                            Jadikan Default
+                            Set Default
                         </Button>
                     )}
                     <Popconfirm
-                        title="Hapus Rekening?"
-                        description="Rekening ini akan dihapus permanen"
-                        onConfirm={() => handleDelete(record.id)}
-                        okText="Ya, Hapus"
+                        title="Hapus Rekening"
+                        description="Apakah Anda yakin ingin menghapus rekening ini?"
+                        okText="Ya"
                         cancelText="Batal"
+                        onConfirm={() => handleDelete(record.id)}
                     >
-                        <Button size="small" danger icon={<DeleteOutlined />}>
+                        <Button
+                            type="text"
+                            danger
+                            icon={<DeleteOutlined />}
+                            size="small"
+                        >
                             Hapus
                         </Button>
                     </Popconfirm>
@@ -159,17 +173,16 @@ const BankAccountManager = () => {
     ];
 
     return (
-        <Card
-            title={
-                <Space>
-                    <BankOutlined />
-                    <span>Rekening Bank Saya</span>
-                </Space>
-            }
-            extra={
+        <div className={styles.bankManagementContainer}>
+            <div className={styles.header}>
+                <div>
+                    <h2>Kelola Rekening Bank</h2>
+                    <p>Tambahkan dan kelola rekening bank untuk pembayaran dari admin</p>
+                </div>
                 <Button
                     type="primary"
                     icon={<PlusOutlined />}
+                    size="large"
                     onClick={() => {
                         setModalVisible(true);
                         form.resetFields();
@@ -177,77 +190,79 @@ const BankAccountManager = () => {
                 >
                     Tambah Rekening
                 </Button>
-            }
-        >
-            <div style={{ marginBottom: 16, padding: 12, background: '#fffbe6', borderRadius: 8, border: '1px solid #ffe58f' }}>
-                <strong>📌 Info:</strong> Rekening bank digunakan untuk pencairan pembayaran dari admin.
-                Pastikan data rekening benar agar pembayaran tidak bermasalah.
             </div>
 
-            <Table
-                columns={columns}
-                dataSource={bankAccounts}
-                rowKey="id"
-                loading={loading}
-                pagination={false}
-                locale={{ emptyText: 'Belum ada rekening bank. Silakan tambahkan rekening.' }}
-            />
+            {/* Bank Accounts Table */}
+            <Card className={styles.tableCard}>
+                {bankAccounts.length === 0 ? (
+                    <Empty 
+                        description="Belum ada rekening bank" 
+                        style={{ paddingTop: '50px', paddingBottom: '50px' }}
+                    />
+                ) : (
+                    <Table
+                        columns={columns}
+                        dataSource={bankAccounts}
+                        rowKey="id"
+                        loading={loading}
+                        pagination={{ pageSize: 10 }}
+                        scroll={{ x: 1200 }}
+                        className={styles.table}
+                    />
+                )}
+            </Card>
 
-            {/* Add Bank Account Modal */}
+            {/* Add Bank Modal */}
             <Modal
-                title="Tambah Rekening Bank"
+                title={
+                    <Space>
+                        <BankOutlined />
+                        <span>Tambah Rekening Bank Baru</span>
+                    </Space>
+                }
                 open={modalVisible}
+                onCancel={() => setModalVisible(false)}
                 onOk={handleAddBankAccount}
-                onCancel={() => {
-                    setModalVisible(false);
-                    form.resetFields();
-                }}
                 confirmLoading={submitting}
-                okText="Simpan"
-                cancelText="Batal"
+                width={600}
             >
                 <Form form={form} layout="vertical">
                     <Form.Item
-                        name="bank_name"
                         label="Nama Bank"
+                        name="bank_name"
                         rules={[{ required: true, message: 'Pilih bank' }]}
                     >
-                        <Select
-                            showSearch
-                            placeholder="Pilih bank"
-                            optionFilterProp="children"
-                            filterOption={(input, option) =>
-                                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                            }
-                            options={supportedBanks.map(bank => ({
-                                value: bank.name,
-                                label: bank.name
-                            }))}
-                        />
+                        <Select placeholder="Pilih bank">
+                            {supportedBanks.map(bank => (
+                                <Select.Option key={bank.code} value={bank.name}>
+                                    {bank.name}
+                                </Select.Option>
+                            ))}
+                        </Select>
                     </Form.Item>
 
                     <Form.Item
-                        name="account_number"
-                        label="Nomor Rekening"
-                        rules={[
-                            { required: true, message: 'Nomor rekening harus diisi' },
-                            { pattern: /^[0-9]+$/, message: 'Nomor rekening hanya boleh angka' }
-                        ]}
-                    >
-                        <Input placeholder="Contoh: 1234567890" />
-                    </Form.Item>
-
-                    <Form.Item
-                        name="account_name"
                         label="Nama Pemilik Rekening"
+                        name="account_name"
                         rules={[{ required: true, message: 'Nama pemilik harus diisi' }]}
                     >
-                        <Input placeholder="Sesuai buku tabungan" />
+                        <Input placeholder="Nama sesuai dengan rekening bank" />
+                    </Form.Item>
+
+                    <Form.Item
+                        label="Nomor Rekening"
+                        name="account_number"
+                        rules={[
+                            { required: true, message: 'Nomor rekening harus diisi' },
+                            { pattern: /^\d{10,}$/, message: 'Nomor rekening minimal 10 digit' }
+                        ]}
+                    >
+                        <Input placeholder="Masukkan nomor rekening (hanya angka)" />
                     </Form.Item>
                 </Form>
             </Modal>
-        </Card>
+        </div>
     );
 };
 
-export default BankAccountManager;
+export default BankManagement;

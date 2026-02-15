@@ -1,0 +1,38 @@
+import React, { useState } from 'react';
+import styles from './SupplierLayout.module.css';
+import Sidebar from './Sidebar';
+import Header from './Header';
+
+/**
+ * SupplierLayout - Layout wrapper untuk halaman supplier
+ * Menyediakan sidebar, header, dan content area
+ * 
+ * @param {ReactNode} children - Konten halaman
+ * @param {string} headerType - Tipe header: "full" (search + profile) atau "simple" (hanya judul)
+ * @param {string} title - Judul halaman (untuk simple header)
+ * @param {string} subTitle - Subtitle halaman (untuk simple header)
+ * @param {ReactNode} actionButton - Action button untuk ditampilkan di header
+ */
+const SupplierLayout = ({ children, headerType = 'full', title, subTitle, actionButton }) => {
+  const [sidebarOpen, setSidebarOpen] = useState(
+    typeof window !== 'undefined' ? window.innerWidth > 768 : true
+  );
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  return (
+    <div className={styles.dashboardContainer}>
+      <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
+      <div className={styles.mainContent}>
+        <Header onMenuClick={toggleSidebar} type={headerType} title={title} subTitle={subTitle} actionButton={actionButton} />
+        <div className={styles.dashboardContent}>
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default SupplierLayout;

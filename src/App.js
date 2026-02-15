@@ -112,7 +112,7 @@ function App() {
             } />
 
             {/* Supplier Routes - Protected */}
-            <Route path="/supplier" element={
+            <Route path="/supplier/*" element={
               <ProtectedRoute allowedRoles={['supplier']}>
                 <Supplier />
               </ProtectedRoute>

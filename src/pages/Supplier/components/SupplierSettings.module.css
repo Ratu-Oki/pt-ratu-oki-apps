@@ -1,0 +1,66 @@
+.settingsContainer {
+  padding: 0;
+}
+
+.header {
+  margin-bottom: 30px;
+}
+
+.header h2 {
+  font-size: 28px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: #1a1a1a;
+}
+
+.header p {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #f0f0f0;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+}
+
+.card :global(.ant-card-head) {
+  background: #fafafa;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.tipsCard {
+  border: 1px solid #f0f0f0;
+}
+
+.tipsCard h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: #1a1a1a;
+}
+
+.tipsList {
+  margin: 0;
+  padding-left: 24px;
+}
+
+.tipsList li {
+  margin-bottom: 12px;
+  color: #666;
+  line-height: 1.6;
+}
+
+.tipsList li:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  .header h2 {
+    font-size: 24px;
+  }
+}
