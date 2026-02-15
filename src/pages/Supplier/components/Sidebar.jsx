@@ -4,10 +4,10 @@ import { Modal, message } from 'antd';
 import { useAuth } from '../../../context/AuthContext';
 import { BarChartOutlined,
   AppstoreOutlined,
-  ShoppingCartOutlined,
   HistoryOutlined,
   BankOutlined,
-  SettingOutlined, 
+  SettingOutlined,
+  UserOutlined,
   LogoutOutlined } from '@ant-design/icons';
 import styles from './Sidebar.module.css';
 
@@ -25,7 +25,8 @@ const menuItems = [
   ];
 
   const accountMenuItems = [
-  { id: 1, label: 'Pengaturan', icon: <SettingOutlined />, path: '/supplier/settings' }
+  { id: 1, label: 'Profil Saya', icon: <UserOutlined />, path: '/supplier/profile' },
+  { id: 2, label: 'Pengaturan', icon: <SettingOutlined />, path: '/supplier/settings' }
   ];
 
   const toggleCollapse = () => {
@@ -65,7 +66,7 @@ const menuItems = [
         {/* Logo Section */}
         <div className={styles.logoSection}>
           <div className={styles.logo}>
-            <span className={styles.logoIcon}>🌾</span>
+            <span className={styles.logoIcon}>-</span>
             {!collapsed && <span className={styles.logoText}>PT Ratu Oki</span>}
           </div>
           <button

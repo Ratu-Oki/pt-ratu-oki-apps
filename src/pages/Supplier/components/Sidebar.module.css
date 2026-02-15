@@ -34,6 +34,10 @@
 .sidebar.collapsed .menuItem {
   justify-content: center;
   padding: 12px;
+  width: 56px;
+  height: 56px;
+  margin: 8px auto;
+  border-radius: 8px;
 }
 
 .sidebar.collapsed .menuIcon {
@@ -205,13 +209,16 @@
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.5);
   padding: 0 20px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
+  margin-top: 10px;
+
 }
 
 /* Menu Item */
 .menuItem {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   gap: 12px;
   padding: 12px 20px;
   color: rgba(255, 255, 255, 0.7);
@@ -222,7 +229,7 @@
   font-size: 14px;
   font-weight: 500;
   border-radius: 8px;
-  margin: 4px 12px;
+  margin: 6px 12px;
 }
 
 .menuItem:hover {
@@ -331,6 +338,14 @@
   }
 
   .closeButton {
-    display: flex;
+    display: none;
+  }
+
+  .logoSection {
+    justify-content: flex-start;
+  }
+
+  .collapseButton {
+    margin-left: auto;
   }
 }

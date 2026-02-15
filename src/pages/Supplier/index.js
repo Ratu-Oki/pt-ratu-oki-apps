@@ -7,6 +7,7 @@ import AvailableProducts from './components/AvailableProducts';
 import SupplyHistory from './components/SupplyHistory';
 import BankManagement from './components/BankManagement';
 import SupplierSettings from './components/SupplierSettings';
+import Profile from './components/Profile';
 
 /**
  * Supplier Main Page with Routing
@@ -77,6 +78,18 @@ const Supplier = () => {
             subTitle="Kelola keamanan dan data akun Anda"
           >
             <SupplierSettings />
+          </SupplierLayout>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <SupplierLayout
+            headerType="simple"
+            title="Profil Saya"
+            subTitle="Lihat informasi profil akun Anda"
+          >
+            <Profile />
           </SupplierLayout>
         }
       />

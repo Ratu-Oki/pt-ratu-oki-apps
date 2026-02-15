@@ -215,6 +215,7 @@
   .headerLeft {
     flex: 0;
     min-width: auto;
+    margin-left: -8px;
   }
 
   .searchBar {
@@ -237,6 +238,7 @@
 
   .userButton {
     padding: 4px 8px;
+    font-size: 12px;
   }
 
   .userName {
