@@ -4,7 +4,6 @@ import {
   Card,
   Row,
   Col,
-  Steps,
   Table,
   Badge,
   Space,
@@ -23,6 +22,8 @@ import {
 import { useNavigate } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import OrderTracking from './components/OrderTracking';
+import ConfirmOrderButton from './components/ConfirmOrderButton';
 import styles from './StatusPesanan.module.css';
 import { transactionService } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
@@ -57,7 +58,7 @@ const StatusPesanan = () => {
         items: (tx.details || []).map(detail => ({
           id: detail.id,
           name: detail.product?.nama_produk || `Produk #${detail.product_id}`,
-          weight: '1 kg',
+          weight: detail.product?.berat || '1 kg',
           price: detail.harga_satuan,
           qty: detail.jumlah,
         })),
@@ -197,26 +198,11 @@ const StatusPesanan = () => {
         {/* Timeline */}
         <div className={styles.timelineSection}>
           <h3 className={styles.sectionTitle}>Status Pengiriman</h3>
-          <Steps
-            direction="vertical"
-            current={currentStep}
-            status={
-              order.status === 'completed'
-                ? 'finish'
-                : order.status === 'cancelled'
-                  ? 'error'
-                  : 'process'
-            }
-            items={order.timeline.map((item) => ({
-              title: item.title,
-              description: item.time ? (
-                <span className={styles.timelineTime}>{item.time}</span>
-              ) : (
-                <span className={styles.timelinePending}>
-                  Menunggu pembaruan...
-                </span>
-              ),
-            }))}
+          <OrderTracking 
+            status={order.status}
+            timeline={order.timeline}
+            vertical={true}
+            showTimeline={true}
           />
         </div>
 
@@ -301,6 +287,20 @@ const StatusPesanan = () => {
 
         {/* Actions */}
         <div className={styles.orderActions}>
+          {/* Confirm Order Button - shows only when order is in transit or arrived */}
+          <ConfirmOrderButton
+            orderId={order.dbId}
+            orderStatus={order.status}
+            onOrderConfirmed={() => {
+              // Refresh orders after successful confirmation
+              message.success('Terima kasih! Pesanan telah dikonfirmasi sebagai diterima.');
+              fetchOrders();
+              setSelectedOrder(null);
+            }}
+            style={{ marginBottom: 16 }}
+          />
+
+          {/* Other Actions */}
           <Space>
             <Button
               type="default"

@@ -88,6 +88,13 @@ const SupplyHistory = () => {
       width: 80
     },
     {
+      title: 'Berat',
+      dataIndex: 'berat',
+      key: 'berat',
+      render: (berat, record) => record.product?.berat || berat || '-',
+      width: 100
+    },
+    {
       title: 'Grade',
       dataIndex: 'grade',
       key: 'grade',

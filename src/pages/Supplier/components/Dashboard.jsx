@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Card, Row, Col, Statistic, Empty, Button, Spin, Space, Tag, Table, message } from 'antd';
-import { ShoppingCartOutlined, CheckOutlined, ClockCircleOutlined, CloseCircleOutlined, BankOutlined, PlusOutlined } from '@ant-design/icons';
+import { ShoppingCartOutlined, CheckOutlined, ClockCircleOutlined, CloseCircleOutlined, BankOutlined, PlusOutlined, ArrowUpOutlined, DatabaseOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { stockService } from '../../../services/api';
 import styles from './Dashboard.module.css';
@@ -17,7 +17,9 @@ const Dashboard = () => {
     totalSupplies: 0,
     pendingSupplies: 0,
     approvedSupplies: 0,
-    rejectedSupplies: 0
+    rejectedSupplies: 0,
+    totalItemsSupplied: 0,
+    totalInventoryValue: 0
   });
   const [recentSupplies, setRecentSupplies] = useState([]);
 
@@ -33,13 +35,22 @@ const Dashboard = () => {
       const products = productsRes.data || [];
       const supplies = suppliesRes.data || [];
 
+      // Calculate total items supplied (sum of jumlah for approved supplies)
+      const approvedSuppliesList = supplies.filter(s => s.status_produk === 'approved');
+      const totalItemsSupplied = approvedSuppliesList.reduce((sum, s) => sum + (s.jumlah || 0), 0);
+      
+      // Calculate total inventory value (sum of harga_supply * jumlah for approved supplies)
+      const totalInventoryValue = approvedSuppliesList.reduce((sum, s) => sum + ((s.harga_supply || 0) * (s.jumlah || 0)), 0);
+
       setRecentSupplies(supplies);
       setStats({
         availableProducts: products.length,
         totalSupplies: supplies.length,
         pendingSupplies: supplies.filter(s => s.status_produk === 'pending').length,
-        approvedSupplies: supplies.filter(s => s.status_produk === 'approved').length,
-        rejectedSupplies: supplies.filter(s => s.status_produk === 'rejected').length
+        approvedSupplies: approvedSuppliesList.length,
+        rejectedSupplies: supplies.filter(s => s.status_produk === 'rejected').length,
+        totalItemsSupplied: totalItemsSupplied,
+        totalInventoryValue: totalInventoryValue
       });
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -51,6 +62,18 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchData();
+  }, [fetchData]);
+
+  // Real-time polling: Auto-refresh inventory metrics every 10 seconds when dashboard is active
+  useEffect(() => {
+    const pollingInterval = setInterval(() => {
+      fetchData();
+    }, 10000); // 10 seconds polling interval
+
+    return () => {
+      // Cleanup: Clear interval when component unmounts
+      clearInterval(pollingInterval);
+    };
   }, [fetchData]);
 
   // Format currency
@@ -195,6 +218,24 @@ const Dashboard = () => {
             color="#f5222d"
             icon={<CloseCircleOutlined style={{ fontSize: 32 }} />}
             suffix="pengajuan ditolak"
+          />
+        </Col>
+        <Col xs={24} sm={12} md={8}>
+          <StatCard
+            title="Total Barang Dikirim"
+            value={stats.totalItemsSupplied}
+            color="#9254de"
+            icon={<ArrowUpOutlined style={{ fontSize: 32 }} />}
+            suffix="unit disupply"
+          />
+        </Col>
+        <Col xs={24} sm={12} md={8}>
+          <StatCard
+            title="Nilai Inventory"
+            value={formatCurrency(stats.totalInventoryValue)}
+            color="#13c2c2"
+            icon={<DatabaseOutlined style={{ fontSize: 32 }} />}
+            suffix="total inventory"
           />
         </Col>
       </Row>

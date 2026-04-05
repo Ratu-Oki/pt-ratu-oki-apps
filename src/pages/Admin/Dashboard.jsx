@@ -10,7 +10,7 @@ import MetricsCard from './components/MetricsCard';
 import RecentTransactions from './components/RecentTransactions';
 import QuickActions from './components/QuickActions';
 import RecentActivities from './components/RecentActivities';
-import { transactionService, productService } from '../../services/api';
+import { transactionService, productService, stockService } from '../../services/api';
 import { Spin, message } from 'antd';
 import {
   ClockCircleOutlined,
@@ -22,6 +22,8 @@ import {
   DollarOutlined,
   ShoppingCartOutlined,
   AppstoreOutlined,
+  DatabaseOutlined,
+  ArrowDownOutlined,
  
 } from '@ant-design/icons';
 
@@ -103,15 +105,17 @@ const Dashboard = () => {
   const fetchDashboardData = useCallback(async () => {
     setLoading(true);
     try {
-      // Fetch all data in parallel
-      const [transactionStats, recentTransactions, productList] = await Promise.all([
+      // Fetch all data in parallel including stock summary
+      const [transactionStats, recentTransactions, productList, stockSummary] = await Promise.all([
         transactionService.getStats().catch(() => ({ data: {} })),
         transactionService.getAllAdmin({ page: 1, limit: 10 }).catch(() => ({ data: { transactions: [] } })),
-        productService.getAllAdmin({ page: 1, limit: 100 }).catch(() => ({ data: { products: [] } }))
+        productService.getAllAdmin({ page: 1, limit: 100 }).catch(() => ({ data: { products: [] } })),
+        stockService.getSummary().catch(() => ({ data: {} }))
       ]);
 
       // Build metrics from stats
       const stats = transactionStats.data || {};
+      const summary = stockSummary.data || {};
 
       // Count active products from product list if not in stats
       let activeProductCount = stats.active_products || 0;
@@ -119,6 +123,12 @@ const Dashboard = () => {
         const products = productList.data.products || productList.data || [];
         activeProductCount = products.filter(p => p.status_produk === 'active').length;
       }
+
+      // Calculate total items moved out (from transactions)
+      const totalItemsMovedOut = stats.total_items_sold || stats.daily?.items_sold || 0;
+
+      // Get warehouse stock from summary
+      const warehouseStock = summary.total_stock || summary.warehouse_stock || 0;
 
       setMetrics([
         {
@@ -132,24 +142,33 @@ const Dashboard = () => {
         },
         {
           id: 2,
-          label: 'Total Pesanan',
-          value: String(stats.total_transactions || stats.monthly?.transactions || 0),
-          change: stats.today?.transactions > 0 ? `+${stats.today.transactions} hari ini` : 'Hari ini 0',
-          isPositive: (stats.today?.transactions || 0) > 0,
-          icon: <ShoppingCartOutlined />,
-          bgColor: '#8B5A3C'
+          label: 'Barang Keluar',
+          value: String(totalItemsMovedOut),
+          change: stats.today?.items_sold > 0 ? `+${stats.today.items_sold} hari ini` : 'Hari ini 0',
+          isPositive: (stats.today?.items_sold || 0) > 0,
+          icon: <ArrowDownOutlined />,
+          bgColor: '#D35400'
         },
         {
           id: 3,
-          label: 'Produk Aktif',
-          value: String(activeProductCount),
-          change: `${stats.total_products || activeProductCount} total produk`,
-          isPositive: true,
-          icon:<AppstoreOutlined />,
+          label: 'Stok Gudang',
+          value: String(warehouseStock),
+          change: `${formatNumber(summary.available_stock || warehouseStock)} tersedia`,
+          isPositive: warehouseStock > 0,
+          icon: <DatabaseOutlined />,
           bgColor: '#27AE60'
         },
         {
           id: 4,
+          label: 'Produk Aktif',
+          value: String(activeProductCount),
+          change: `${stats.total_products || activeProductCount} total produk`,
+          isPositive: true,
+          icon: <AppstoreOutlined />,
+          bgColor: '#2980B9'
+        },
+        {
+          id: 5,
           label: 'Pending Transaksi',
           value: String(stats.pending_transactions || 0),
           change: stats.pending_transactions > 0 ? 'Perlu ditindak' : 'Semua selesai',
@@ -189,9 +208,10 @@ const Dashboard = () => {
       // Set fallback data
       setMetrics([
         { id: 1, label: 'Total Penjualan', value: 'Rp 0', change: 'Hari ini Rp 0', isPositive: true, icon: <DollarOutlined />, bgColor: '#2D7A52' },
-        { id: 2, label: 'Total Pesanan', value: '0', change: 'Hari ini 0', isPositive: true, icon: <ShoppingCartOutlined />, bgColor: '#8B5A3C' },
-        { id: 3, label: 'Produk Aktif', value: '0', change: '0 total produk', isPositive: true, icon:<AppstoreOutlined />, bgColor: '#27AE60' },
-        { id: 4, label: 'Pending Transaksi', value: '0', change: 'Semua selesai', isPositive: true, icon:<ClockCircleOutlined />, bgColor: '#E67E22' }
+        { id: 2, label: 'Barang Keluar', value: '0', change: 'Hari ini 0', isPositive: true, icon: <ArrowDownOutlined />, bgColor: '#D35400' },
+        { id: 3, label: 'Stok Gudang', value: '0', change: '0 tersedia', isPositive: true, icon: <DatabaseOutlined />, bgColor: '#27AE60' },
+        { id: 4, label: 'Produk Aktif', value: '0', change: '0 total produk', isPositive: true, icon:<AppstoreOutlined />, bgColor: '#2980B9' },
+        { id: 5, label: 'Pending Transaksi', value: '0', change: 'Semua selesai', isPositive: true, icon:<ClockCircleOutlined />, bgColor: '#E67E22' }
       ]);
       setTransactions([]);
       setActivities([]);
@@ -202,6 +222,18 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchDashboardData();
+  }, [fetchDashboardData]);
+
+  // Real-time polling: Auto-refresh metrics every 10 seconds when dashboard is active
+  useEffect(() => {
+    const pollingInterval = setInterval(() => {
+      fetchDashboardData();
+    }, 10000); // 10 seconds polling interval
+
+    return () => {
+      // Cleanup: Clear interval when component unmounts or when polling settings change
+      clearInterval(pollingInterval);
+    };
   }, [fetchDashboardData]);
 
   // Handle view all transactions
