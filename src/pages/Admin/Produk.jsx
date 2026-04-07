@@ -116,6 +116,7 @@ const Produk = () => {
       formData.append('harga_jual', values.harga_jual);
       formData.append('lokasi_supplier', values.lokasi_supplier || '');
       formData.append('deskripsi', values.deskripsi || '');
+      formData.append('berat', values.berat || '1 kg');
 
       if (productModal.mode === 'edit' && productModal.product) {
         await productService.update(productModal.product.id, formData);
@@ -227,6 +228,12 @@ const Produk = () => {
       dataIndex: 'harga_jual',
       key: 'harga_jual',
       render: (val) => formatCurrency(val)
+    },
+    {
+      title: 'Berat',
+      dataIndex: 'berat',
+      key: 'berat',
+      render: (val) => val || '1 kg'
     },
     {
       title: 'Stok',
@@ -459,6 +466,9 @@ const Produk = () => {
               <InputNumber style={{ width: 200 }} formatter={value => `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')} parser={value => value.replace(/Rp\s?|(,*)/g, '')} min={0} />
             </Form.Item>
           </Space>
+          <Form.Item name="berat" label="Berat Produk" rules={[{ required: true, message: 'Berat produk harus diisi' }]}>
+            <Input placeholder="Contoh: 1 kg, 500 gram" />
+          </Form.Item>
           <Form.Item name="lokasi_supplier" label="Lokasi">
             <Input placeholder="Contoh: Jakarta" />
           </Form.Item>

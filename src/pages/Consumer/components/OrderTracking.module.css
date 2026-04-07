@@ -1,0 +1,174 @@
+.orderTrackingContainer {
+  width: 100%;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.statusHeader {
+  margin-bottom: 20px;
+}
+
+.statusMessage {
+  padding: 12px 16px;
+  background-color: #f0f9f4;
+  border-left: 4px solid #2d7a52;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.statusText {
+  margin: 0;
+  color: #2d7a52;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.stepsContainer {
+  padding: 20px 0;
+}
+
+/* Ant Design Steps Custom Styling */
+.stepperUi {
+  padding: 20px 0;
+}
+
+.stepperUi :global(.ant-steps-item-process > .ant-steps-item-container > .ant-steps-item-content > .ant-steps-item-title) {
+  color: #2d7a52;
+  font-weight: 600;
+}
+
+.stepperUi :global(.ant-steps-item-finish > .ant-steps-item-container > .ant-steps-item-content > .ant-steps-item-title) {
+  color: #52c41a;
+}
+
+.stepperUi :global(.ant-steps-item-error > .ant-steps-item-container > .ant-steps-item-content > .ant-steps-item-title) {
+  color: #f5222d;
+}
+
+/* Step Icons */
+.stepIcon {
+  font-size: 20px;
+}
+
+.stepIcon0 {
+  color: #52c41a;
+}
+
+.stepIcon1 {
+  color: #2d7a52;
+}
+
+.stepIcon2 {
+  color: #faad14;
+}
+
+.stepIcon3 {
+  color: #52c41a;
+}
+
+/* Timeline Data */
+.timelineTime {
+  color: #666;
+  font-size: 13px;
+  display: block;
+  margin-top: 4px;
+}
+
+.timelineDescription {
+  color: #666;
+  font-size: 13px;
+  display: block;
+  margin-top: 4px;
+  font-weight: 400;
+}
+
+.timelinePending {
+  color: #999;
+  font-size: 12px;
+  display: block;
+  margin-top: 4px;
+  font-style: italic;
+}
+
+/* Status Info Section */
+.trackingInfo {
+  margin-top: 20px;
+  padding: 12px 16px;
+  border-radius: 4px;
+  background-color: #fafafa;
+}
+
+.infoText {
+  margin: 0;
+  color: #1890ff;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.successText {
+  margin: 0;
+  color: #52c41a;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+.errorText {
+  margin: 0;
+  color: #f5222d;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .orderTrackingContainer {
+    padding: 16px;
+  }
+
+  .stepsContainer {
+    padding: 12px 0;
+  }
+
+  .statusMessage {
+    padding: 10px 12px;
+  }
+
+  .statusText {
+    font-size: 13px;
+  }
+
+  .stepIcon {
+    font-size: 18px !important;
+  }
+
+  .timelineTime,
+  .timelineDescription {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .orderTrackingContainer {
+    padding: 12px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .statusMessage {
+    padding: 8px 10px;
+  }
+
+  .statusText {
+    font-size: 12px;
+  }
+
+  .stepsContainer {
+    padding: 8px 0;
+  }
+}

@@ -374,6 +374,12 @@ export const transactionService = {
         const response = await api.get(`/transactions/${id}/payment-status`);
         return response.data;
     },
+
+    // Approve/Confirm order receipt by consumer
+    approveOrder: async (id) => {
+        const response = await api.post(`/transactions/${id}/approve`, {});
+        return response.data;
+    },
 };
 
 // ============================================

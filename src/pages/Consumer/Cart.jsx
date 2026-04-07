@@ -4,6 +4,7 @@ import { DeleteOutlined, MinusOutlined, PlusOutlined, ShoppingOutlined } from '@
 import { useNavigate } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import OrderTrackingCompact from './components/OrderTrackingCompact';
 import styles from './Cart.module.css';
 import { useAuth } from '../../context/AuthContext';
 
@@ -143,7 +144,7 @@ const Cart = () => {
                           <div className={styles.itemInfo}>
                             <div className={styles.itemName}>{item.nama_produk || item.name}</div>
                             <div className={styles.itemDetails}>
-                              Grade {item.grade || 'A'} • {item.lokasi_supplier || item.origin || 'Indonesia'}
+                              Grade {item.grade || 'A'} • {item.berat || item.weight || '1 kg'} • {item.lokasi_supplier || item.origin || 'Indonesia'}
                             </div>
                             <div className={styles.itemPrice}>
                               {formatCurrency(item.harga_jual || item.price)}
@@ -222,6 +223,18 @@ const Cart = () => {
                     <span className={styles.totalLabel}>Total</span>
                     <span className={styles.totalAmount}>{formatCurrency(total)}</span>
                   </div>
+
+                  <Divider />
+
+                  {/* Order Tracking Preview */}
+                  <div style={{ marginBottom: 16 }}>
+                    <p style={{ fontSize: 12, color: '#999', marginBottom: 8 }}>
+                      📍 Proses Pesanan Anda:
+                    </p>
+                    <OrderTrackingCompact status="pending" showLabel={true} />
+                  </div>
+
+                  <Divider />
 
                   {/* Checkout Button */}
                   <Button
