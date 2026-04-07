@@ -275,22 +275,7 @@ const SignIn = () => {
             </button>
           </form>
 
-          {/* Social Login - Only for non-admin */}
-          {activeRole !== 'admin' && (
-            <div className="social-login">
-              <div className="social-divider">atau</div>
-              <div className="social-buttons">
-                <button type="button" className="social-button" disabled={isLoading}>
-                  <img src={Assets.googleImg} alt="google" className="social-icon" />
-                  Google
-                </button>
-                <button type="button" className="social-button" disabled={isLoading}>
-                  <img src={Assets.facebookImg} alt="facebook" className="social-icon" />
-                  Facebook
-                </button>
-              </div>
-            </div>
-          )}
+
 
           {/* Signup Link - Only for non-admin */}
           {activeRole !== 'admin' && (

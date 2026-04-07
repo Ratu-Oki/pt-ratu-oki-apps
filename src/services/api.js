@@ -425,6 +425,18 @@ export const paymentService = {
         });
         return response.data;
     },
+
+    // Get wallet summary for supplier
+    getWalletSummary: async () => {
+        const response = await api.get('/payments/wallet-summary');
+        return response.data;
+    },
+
+    // Withdraw funds for supplier
+    withdrawFunds: async () => {
+        const response = await api.post('/payments/withdraw');
+        return response.data;
+    },
 };
 
 // ============================================

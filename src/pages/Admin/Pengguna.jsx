@@ -7,7 +7,7 @@ import styles from './Pengguna.module.css';
 import AdminLayout from './components/AdminLayout';
 import { authService, supplierService } from '../../services/api';
 import { Spin, message, Modal, Input, Select, Button} from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
+import { SearchOutlined, PlusOutlined } from '@ant-design/icons';
 
 const Pengguna = () => {
   const [loading, setLoading] = useState(true);
@@ -16,6 +16,8 @@ const Pengguna = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const [editModal, setEditModal] = useState({ visible: false, supplier: null });
+  const [createModal, setCreateModal] = useState({ visible: false, formData: { nama: '', email: '', password: '', telepon: '', alamat: '' } });
+  const [creating, setCreating] = useState(false);
   const [updating, setUpdating] = useState(false);
 
   // Tabs
@@ -110,6 +112,28 @@ const Pengguna = () => {
     }
   };
 
+  // Handle create supplier
+  const handleCreate = async () => {
+    const { nama, email, password } = createModal.formData;
+    if (!nama || !email || !password) {
+      message.error('Nama, Email, dan Password wajib diisi');
+      return;
+    }
+
+    setCreating(true);
+    try {
+      await supplierService.create(createModal.formData);
+      message.success('Supplier berhasil dibuat');
+      setCreateModal({ visible: false, formData: { nama: '', email: '', password: '', telepon: '', alamat: '' } });
+      fetchSuppliers(1);
+    } catch (error) {
+      console.error('Error creating supplier:', error);
+      message.error(error.message || 'Gagal membuat supplier');
+    } finally {
+      setCreating(false);
+    }
+  };
+
   // Handle reset password
   const handleResetPassword = async (supplierId) => {
     Modal.confirm({
@@ -176,6 +200,14 @@ const Pengguna = () => {
         className={styles.searchInput}
       />
       <Button onClick={handleSearch} icon={<SearchOutlined />}></Button>
+      <Button 
+        type="primary" 
+        icon={<PlusOutlined />} 
+        onClick={() => setCreateModal(prev => ({ ...prev, visible: true }))}
+        style={{ marginLeft: '10px' }}
+      >
+        Tambah Supplier
+      </Button>
     </div>
   );
 
@@ -349,6 +381,75 @@ const Pengguna = () => {
             </div>
           </>
         )}
+      </Modal>
+
+      {/* Create Supplier Modal */}
+      <Modal
+        title="Buat Supplier Baru"
+        open={createModal.visible}
+        onOk={handleCreate}
+        onCancel={() => setCreateModal({ visible: false, formData: { nama: '', email: '', password: '', telepon: '', alamat: '' } })}
+        confirmLoading={creating}
+        okText="Buat Supplier"
+        cancelText="Batal"
+      >
+        <div style={{ marginBottom: 16 }}>
+          <label>Nama Lengkap (Wajib):</label>
+          <Input
+            style={{ marginTop: 8 }}
+            value={createModal.formData.nama}
+            onChange={(e) => setCreateModal(prev => ({
+              ...prev, formData: { ...prev.formData, nama: e.target.value }
+            }))}
+            placeholder="Masukkan nama supplier"
+          />
+        </div>
+        <div style={{ marginBottom: 16 }}>
+          <label>Email (Wajib):</label>
+          <Input
+            type="email"
+            style={{ marginTop: 8 }}
+            value={createModal.formData.email}
+            onChange={(e) => setCreateModal(prev => ({
+              ...prev, formData: { ...prev.formData, email: e.target.value }
+            }))}
+            placeholder="contoh@email.com"
+          />
+        </div>
+        <div style={{ marginBottom: 16 }}>
+          <label>Password (Wajib, minimal 6 karakter):</label>
+          <Input.Password
+            style={{ marginTop: 8 }}
+            value={createModal.formData.password}
+            onChange={(e) => setCreateModal(prev => ({
+              ...prev, formData: { ...prev.formData, password: e.target.value }
+            }))}
+            placeholder="Min. 6 karakter"
+          />
+        </div>
+        <div style={{ marginBottom: 16 }}>
+          <label>Telepon (Opsional):</label>
+          <Input
+            style={{ marginTop: 8 }}
+            value={createModal.formData.telepon}
+            onChange={(e) => setCreateModal(prev => ({
+              ...prev, formData: { ...prev.formData, telepon: e.target.value }
+            }))}
+            placeholder="Masukkan nomor telepon"
+          />
+        </div>
+        <div style={{ marginBottom: 16 }}>
+          <label>Alamat (Opsional):</label>
+          <Input.TextArea
+            style={{ marginTop: 8 }}
+            value={createModal.formData.alamat}
+            onChange={(e) => setCreateModal(prev => ({
+              ...prev, formData: { ...prev.formData, alamat: e.target.value }
+            }))}
+            rows={3}
+            placeholder="Masukkan alamat lengkap"
+          />
+        </div>
       </Modal>
     </AdminLayout>
   );
