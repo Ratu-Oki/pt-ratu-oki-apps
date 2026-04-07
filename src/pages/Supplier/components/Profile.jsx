@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Row, Col, Button, Spin, message, Avatar, Tag, Divider } from 'antd';
+import { Card, Row, Col, Button, Spin, message, Avatar, Tag, Divider, Modal, Input } from 'antd';
 import { UserOutlined, MailOutlined, PhoneOutlined, EnvironmentOutlined, EditOutlined } from '@ant-design/icons';
 import { useAuth } from '../../../context/AuthContext';
 import { authService } from '../../../services/api';
@@ -13,6 +13,9 @@ const Profile = () => {
   const { user } = useAuth();
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [editPhoneVisible, setEditPhoneVisible] = useState(false);
+  const [newPhone, setNewPhone] = useState('');
+  const [isSavingPhone, setIsSavingPhone] = useState(false);
 
   useEffect(() => {
     fetchProfileData();
@@ -28,6 +31,34 @@ const Profile = () => {
       console.error('Error fetching profile:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleUpdatePhone = async () => {
+    if (!newPhone) {
+      message.error('Nomor telepon tidak boleh kosong');
+      return;
+    }
+    if (!/^[0-9+]+$/.test(newPhone)) {
+      message.error('Format nomor telepon tidak valid');
+      return;
+    }
+    
+    try {
+      setIsSavingPhone(true);
+      const response = await authService.updateProfile({ telepon: newPhone });
+      if (response && response.data) {
+        setProfileData(response.data);
+      } else {
+        fetchProfileData(); // fallback
+      }
+      message.success('Nomor telepon berhasil diperbarui');
+      setEditPhoneVisible(false);
+    } catch (error) {
+      console.error('Error updating phone:', error);
+      message.error(error.message || 'Gagal mengubah nomor telepon');
+    } finally {
+      setIsSavingPhone(false);
     }
   };
 
@@ -107,6 +138,18 @@ const Profile = () => {
                 <span>Nomor Telepon</span>
               </div>
             }
+            extra={
+              <Button 
+                type="link" 
+                icon={<EditOutlined />} 
+                onClick={() => {
+                  setNewPhone(displayData?.telepon || '');
+                  setEditPhoneVisible(true);
+                }}
+              >
+                Ubah
+              </Button>
+            }
             bordered={false}
           >
             <p className={styles.infoValue}>{displayData?.telepon || '-'}</p>
@@ -178,6 +221,26 @@ const Profile = () => {
           <li>Informasi pribadi Anda dilindungi dan tidak akan dibagikan kepada pihak ketiga</li>
         </ul>
       </Card>
+
+      <Modal
+        title="Ubah Nomor Telepon"
+        open={editPhoneVisible}
+        onOk={handleUpdatePhone}
+        onCancel={() => setEditPhoneVisible(false)}
+        confirmLoading={isSavingPhone}
+        okText="Simpan"
+        cancelText="Batal"
+      >
+        <div style={{ marginBottom: 16 }}>
+          <label>Nomor Telepon Baru:</label>
+          <Input
+            style={{ marginTop: 8 }}
+            value={newPhone}
+            onChange={(e) => setNewPhone(e.target.value)}
+            placeholder="Contoh: 08123456789"
+          />
+        </div>
+      </Modal>
     </div>
   );
 };
