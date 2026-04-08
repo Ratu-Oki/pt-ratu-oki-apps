@@ -1,33 +1,31 @@
 import React from 'react';
 import { Steps } from 'antd';
-import { CheckCircleOutlined, ClockCircleOutlined, CarOutlined, HomeOutlined } from '@ant-design/icons';
+import {
+  CheckCircleOutlined,
+  ClockCircleOutlined,
+  InboxOutlined,
+  CarOutlined,
+  HomeOutlined,
+} from '@ant-design/icons';
 import styles from './OrderTrackingCompact.module.css';
 
-/**
- * OrderTrackingCompact Component
- * Compact horizontal version of OrderTracking for limited space (Cart, Checkout pages)
- * 
- * Props:
- * - status: string - Order status (pending, paid, shipped, completed, cancelled)
- * - showLabel: boolean - Show step labels (default: false for compact view)
- * - className: string - Additional CSS class
- * 
- * Example:
- * <OrderTrackingCompact status="paid" showLabel={false} />
- */
 const OrderTrackingCompact = ({
   status = 'pending',
   showLabel = false,
-  className = ''
+  className = '',
 }) => {
   const getCurrentStep = (orderStatus) => {
     const stepMap = {
       pending: 0,
       paid: 1,
-      shipped: 2,
-      completed: 3,
-      cancelled: -1
+      processing: 1,
+      packed: 2,
+      shipped: 3,
+      awaiting_approval: 4,
+      completed: 4,
+      cancelled: -1,
     };
+
     return stepMap[orderStatus] ?? 0;
   };
 
@@ -42,22 +40,43 @@ const OrderTrackingCompact = ({
 
   const stepsItems = [
     {
-      title: showLabel ? 'Diproses' : null,
+      title: showLabel ? 'Dibuat' : null,
       icon: <CheckCircleOutlined className={styles.icon} />,
     },
     {
-      title: showLabel ? 'Pembayaran' : null,
+      title: showLabel ? 'Proses' : null,
       icon: <ClockCircleOutlined className={styles.icon} />,
     },
     {
-      title: showLabel ? 'Sedang Dikirim' : null,
+      title: showLabel ? 'Kemas' : null,
+      icon: <InboxOutlined className={styles.icon} />,
+    },
+    {
+      title: showLabel ? 'Kirim' : null,
       icon: <CarOutlined className={styles.icon} />,
     },
     {
-      title: showLabel ? 'Tiba di Tujuan' : null,
+      title: showLabel ? 'Tiba' : null,
       icon: <HomeOutlined className={styles.icon} />,
     },
-  ];
+  ].map((item, index) => {
+    let itemStatus = 'wait';
+
+    if (status === 'cancelled') {
+      itemStatus = index === 0 ? 'finish' : 'error';
+    } else if (status === 'completed' && index <= currentStep) {
+      itemStatus = 'finish';
+    } else if (index < currentStep) {
+      itemStatus = 'finish';
+    } else if (index === currentStep) {
+      itemStatus = 'process';
+    }
+
+    return {
+      ...item,
+      status: itemStatus,
+    };
+  });
 
   return (
     <div className={`${styles.compactContainer} ${className}`}>

@@ -27,6 +27,11 @@ import ConfirmOrderButton from './components/ConfirmOrderButton';
 import styles from './StatusPesanan.module.css';
 import { transactionService } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import {
+  buildTrackingTimeline,
+  getTrackingDisplayStatus,
+  getTrackingStatusConfig,
+} from '../../utils/orderTrackingSimulation';
 
 /**
  * Status Pesanan Page
@@ -36,75 +41,25 @@ const StatusPesanan = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [orders, setOrders] = useState([]);
-  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [transactions, setTransactions] = useState([]);
+  const [selectedOrderId, setSelectedOrderId] = useState(null);
+  const [trackingNow, setTrackingNow] = useState(Date.now());
 
   // Fetch orders
   const fetchOrders = useCallback(async () => {
     setLoading(true);
     try {
       const response = await transactionService.getMyTransactions({ page: 1, limit: 20 });
-      const data = response.data || {};
-
-      // Transform transactions to orders with timeline
-      const transformedOrders = (data.transactions || []).map(tx => ({
-        id: tx.invoice_number,
-        dbId: tx.id,
-        date: tx.tanggal_transaksi,
-        total: tx.total_harga,
-        status: tx.status,
-        shippingAddress: tx.shipping_address,
-        paymentMethod: tx.payment_method,
-        items: (tx.details || []).map(detail => ({
-          id: detail.id,
-          name: detail.product?.nama_produk || `Produk #${detail.product_id}`,
-          weight: detail.product?.berat || '1 kg',
-          price: detail.harga_satuan,
-          qty: detail.jumlah,
-        })),
-        timeline: buildTimeline(tx),
-      }));
-
-      setOrders(transformedOrders);
+      const transactionsData = response.data || [];
+      setTransactions(transactionsData);
     } catch (error) {
       console.error('Error fetching orders:', error);
       message.error('Gagal memuat status pesanan');
-      setOrders([]);
+      setTransactions([]);
     } finally {
       setLoading(false);
     }
   }, []);
-
-  // Build timeline based on transaction status
-  const buildTimeline = (tx) => {
-    const statusOrder = ['pending', 'paid', 'shipped', 'completed'];
-    const currentIndex = statusOrder.indexOf(tx.status);
-
-    const steps = [
-      { step: 0, title: 'Pesanan Dibuat', status: 'pending' },
-      { step: 1, title: 'Pembayaran Dikonfirmasi', status: 'paid' },
-      { step: 2, title: 'Diproses & Dikirim', status: 'shipped' },
-      { step: 3, title: 'Diterima', status: 'completed' },
-    ];
-
-    return steps.map((step, idx) => {
-      if (tx.status === 'cancelled') {
-        return {
-          ...step,
-          time: idx === 0 ? formatDateTime(tx.createdAt) : null,
-          pending: idx > 0,
-          cancelled: true
-        };
-      }
-
-      const isCompleted = idx <= currentIndex;
-      return {
-        ...step,
-        time: isCompleted ? formatDateTime(tx.updatedAt) : null,
-        pending: !isCompleted
-      };
-    });
-  };
 
   // Format date time
   const formatDateTime = (dateStr) => {
@@ -122,6 +77,35 @@ const StatusPesanan = () => {
     fetchOrders();
   }, [fetchOrders]);
 
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setTrackingNow(Date.now());
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
+  const orders = transactions.map((tx) => ({
+    id: tx.invoice_number,
+    dbId: tx.id,
+    date: tx.tanggal_transaksi,
+    total: tx.total_harga,
+    status: getTrackingDisplayStatus(tx, trackingNow),
+    actualStatus: tx.status,
+    shippingAddress: tx.shipping_address,
+    paymentMethod: tx.payment_method,
+    items: (tx.details || []).map((detail) => ({
+      id: detail.id,
+      name: detail.product?.nama_produk || `Produk #${detail.product_id}`,
+      weight: detail.product?.berat || '1 kg',
+      price: detail.harga_satuan,
+      qty: detail.jumlah,
+    })),
+    timeline: buildTrackingTimeline(tx, trackingNow, formatDateTime),
+  }));
+
+  const selectedOrder = orders.find((order) => order.dbId === selectedOrderId) || null;
+
   // Get cart count
   const getCartCount = () => {
     const cart = localStorage.getItem('cart');
@@ -133,14 +117,7 @@ const StatusPesanan = () => {
    * Get status badge with color
    */
   const getStatusBadge = (status) => {
-    const statusConfig = {
-      completed: { color: 'success', label: 'Diterima' },
-      shipped: { color: 'processing', label: 'Dalam Pengiriman' },
-      paid: { color: 'warning', label: 'Diproses' },
-      pending: { color: 'default', label: 'Menunggu Pembayaran' },
-      cancelled: { color: 'error', label: 'Dibatalkan' },
-    };
-    return statusConfig[status] || { color: 'default', label: 'Tidak Diketahui' };
+    return getTrackingStatusConfig(status);
   };
 
   /**
@@ -155,25 +132,10 @@ const StatusPesanan = () => {
   };
 
   /**
-   * Get current step based on status
-   */
-  const getCurrentStep = (status) => {
-    const stepMap = {
-      pending: 0,
-      paid: 1,
-      shipped: 2,
-      completed: 3,
-      cancelled: -1
-    };
-    return stepMap[status] ?? 0;
-  };
-
-  /**
    * Render order detail
    */
   const renderOrderDetail = (order) => {
     const statusBadge = getStatusBadge(order.status);
-    const currentStep = getCurrentStep(order.status);
 
     return (
       <Card className={styles.orderDetail}>
@@ -291,11 +253,12 @@ const StatusPesanan = () => {
           <ConfirmOrderButton
             orderId={order.dbId}
             orderStatus={order.status}
+            actualStatus={order.actualStatus}
             onOrderConfirmed={() => {
               // Refresh orders after successful confirmation
               message.success('Terima kasih! Pesanan telah dikonfirmasi sebagai diterima.');
               fetchOrders();
-              setSelectedOrder(null);
+              setSelectedOrderId(null);
             }}
             style={{ marginBottom: 16 }}
           />
@@ -393,7 +356,7 @@ const StatusPesanan = () => {
                           <Card
                             key={order.id}
                             className={styles.orderCard}
-                            onClick={() => setSelectedOrder(order)}
+                            onClick={() => setSelectedOrderId(order.dbId)}
                             style={{ cursor: 'pointer' }}
                             hoverable
                           >
@@ -433,7 +396,7 @@ const StatusPesanan = () => {
                 <Button
                   type="text"
                   icon={<ArrowLeftOutlined />}
-                  onClick={() => setSelectedOrder(null)}
+                  onClick={() => setSelectedOrderId(null)}
                   className={styles.backButton}
                 >
                   Kembali

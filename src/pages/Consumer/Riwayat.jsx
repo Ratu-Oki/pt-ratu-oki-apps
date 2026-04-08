@@ -7,6 +7,10 @@ import Footer from './components/Footer';
 import styles from './Riwayat.module.css';
 import { transactionService } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import {
+  getTrackingDisplayStatus,
+  getTrackingStatusConfig,
+} from '../../utils/orderTrackingSimulation';
 
 /**
  * Riwayat Page
@@ -19,19 +23,22 @@ const Riwayat = () => {
   const [transactions, setTransactions] = useState([]);
   const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0 });
   const [detailModal, setDetailModal] = useState({ visible: false, transaction: null });
+  const [trackingNow, setTrackingNow] = useState(Date.now());
 
   // Fetch transactions
   const fetchTransactions = useCallback(async (page = 1) => {
     setLoading(true);
     try {
       const response = await transactionService.getMyTransactions({ page, limit: pagination.limit });
-      const data = response.data || {};
+      
+      const transactionsData = response.data || [];
+      const paginationData = response.pagination || {};
 
-      setTransactions(data.transactions || []);
+      setTransactions(transactionsData);
       setPagination({
-        page: data.pagination?.page || 1,
-        limit: data.pagination?.limit || 10,
-        total: data.pagination?.total || 0
+        page: paginationData.current_page || 1,
+        limit: paginationData.per_page || 10,
+        total: paginationData.total_items || 0
       });
     } catch (error) {
       console.error('Error fetching transactions:', error);
@@ -44,6 +51,14 @@ const Riwayat = () => {
 
   useEffect(() => {
     fetchTransactions(1);
+  }, [fetchTransactions]);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setTrackingNow(Date.now());
+    }, 1000);
+
+    return () => clearInterval(intervalId);
   }, []);
 
   // Get cart count from localStorage
@@ -57,14 +72,7 @@ const Riwayat = () => {
 
   // Status config
   const getStatusConfig = (status) => {
-    const config = {
-      pending: { color: 'orange', label: 'Menunggu Pembayaran' },
-      paid: { color: 'blue', label: 'Dibayar' },
-      shipped: { color: 'purple', label: 'Dikirim' },
-      completed: { color: 'green', label: 'Selesai' },
-      cancelled: { color: 'red', label: 'Dibatalkan' }
-    };
-    return config[status] || { color: 'default', label: status };
+    return getTrackingStatusConfig(status);
   };
 
   // Format currency
@@ -131,8 +139,9 @@ const Riwayat = () => {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
-      render: (status) => {
-        const config = getStatusConfig(status);
+      render: (_, record) => {
+        const displayStatus = getTrackingDisplayStatus(record, trackingNow);
+        const config = getStatusConfig(displayStatus);
         return <Tag color={config.color}>{config.label}</Tag>;
       }
     },
@@ -229,8 +238,8 @@ const Riwayat = () => {
         {detailModal.transaction && (
           <div>
             <p><strong>Tanggal:</strong> {formatDate(detailModal.transaction.tanggal_transaksi)}</p>
-            <p><strong>Status:</strong> <Tag color={getStatusConfig(detailModal.transaction.status).color}>
-              {getStatusConfig(detailModal.transaction.status).label}
+            <p><strong>Status:</strong> <Tag color={getStatusConfig(getTrackingDisplayStatus(detailModal.transaction, trackingNow)).color}>
+              {getStatusConfig(getTrackingDisplayStatus(detailModal.transaction, trackingNow)).label}
             </Tag></p>
             <p><strong>Alamat Pengiriman:</strong> {detailModal.transaction.shipping_address}</p>
             <p><strong>Metode Pembayaran:</strong> {detailModal.transaction.payment_method || '-'}</p>

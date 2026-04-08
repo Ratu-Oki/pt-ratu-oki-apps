@@ -377,7 +377,7 @@ export const transactionService = {
 
     // Approve/Confirm order receipt by consumer
     approveOrder: async (id) => {
-        const response = await api.post(`/transactions/${id}/approve`, {});
+        const response = await api.post(`/order/${id}/approve`, {});
         return response.data;
     },
 };

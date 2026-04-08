@@ -560,7 +560,7 @@ const Checkout = () => {
                   <p style={{ fontSize: 12, color: '#000000', marginBottom: 12, textAlign: 'center' }}>
                     Status Pesanan Anda:
                   </p>
-                  <OrderTrackingCompact status="paid" showLabel={true} />
+                  <OrderTrackingCompact status="processing" showLabel={true} />
                 </div>
               </div>
             ) : (
