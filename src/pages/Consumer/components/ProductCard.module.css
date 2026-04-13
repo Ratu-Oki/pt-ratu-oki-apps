@@ -69,17 +69,10 @@
   align-items: center;
 }
 
-.ratingContainer {
+.stockContainer {
   display: flex;
   align-items: center;
-  gap: 6px;
   margin: 6px 0 10px 0;
-  flex-wrap: wrap;
-}
-
-.reviewCount {
-  font-size: 12px;
-  color: #999;
 }
 
 .price {

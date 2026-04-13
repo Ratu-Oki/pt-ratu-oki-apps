@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Card, Rate, Button, Badge, Space } from 'antd';
+import { Card, Button, Badge, Tag } from 'antd';
 import { ShoppingCartOutlined } from '@ant-design/icons';
 import styles from './ProductCard.module.css';
 
@@ -16,10 +16,9 @@ const ProductCard = ({
     grade: 'Grade B',
     image: 'https://via.placeholder.com/300x300?text=Vanila',
     price: 450000,
-    rating: 4.5,
-    reviews: 128,
     weight: '1 kg',
     origin: 'Madagascar',
+    stok: 0,
   },
   onAddToCart = () => { },
 }) => {
@@ -74,15 +73,15 @@ const ProductCard = ({
           <span>{product.weight}</span>
         </div>
 
-        {/* Rating */}
-        <div className={styles.ratingContainer}>
-          <Rate
-            allowHalf
-            disabled
-            value={product.rating}
-            style={{ fontSize: '12px' }}
-          />
-          <span className={styles.reviewCount}>({product.reviews})</span>
+        {/* Stok */}
+        <div className={styles.stockContainer}>
+          {product.stok > 10 ? (
+            <Tag color="green" style={{ margin: 0 }}>Stok: {product.stok}</Tag>
+          ) : product.stok > 0 ? (
+            <Tag color="orange" style={{ margin: 0 }}>Stok Terbatas: {product.stok}</Tag>
+          ) : (
+            <Tag color="red" style={{ margin: 0 }}>Habis</Tag>
+          )}
         </div>
 
         {/* Price */}

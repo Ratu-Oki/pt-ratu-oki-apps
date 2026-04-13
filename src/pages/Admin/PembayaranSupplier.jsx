@@ -7,7 +7,7 @@ import styles from './PembayaranSupplier.module.css';
 import AdminLayout from './components/AdminLayout';
 import MetricsCard from './components/MetricsCard';
 import { paymentService, stockService } from '../../services/api';
-import { Spin, message, Modal, Select, Input, Tag, Empty, Tabs, Button, Badge } from 'antd';
+import { Spin, message, Modal, Tag, Empty, Tabs, Button, Badge } from 'antd';
 import { DollarOutlined, CheckCircleOutlined, ClockCircleOutlined, CommentOutlined } from '@ant-design/icons';
 
 const PembayaranSupplier = () => {
@@ -20,7 +20,7 @@ const PembayaranSupplier = () => {
     // Modal states
     const [payModal, setPayModal] = useState({ visible: false, supply: null, paymentType: 'qris', step: 1, paymentData: null });
     const [detailModal, setDetailModal] = useState({ visible: false, payment: null });
-    const [disbursementModal, setDisbursementModal] = useState({ visible: false, payment: null, status: 'completed', ref: '' });
+
     const [processing, setProcessing] = useState(false);
 
     // Fetch data
@@ -167,28 +167,7 @@ const PembayaranSupplier = () => {
         }
     };
 
-    // Update disbursement
-    const handleUpdateDisbursement = async () => {
-        if (!disbursementModal.payment) return;
 
-        setProcessing(true);
-        try {
-            await paymentService.updateDisbursement(
-                disbursementModal.payment.id,
-                disbursementModal.status,
-                disbursementModal.ref
-            );
-
-            message.success('Status pencairan berhasil diupdate');
-            setDisbursementModal({ visible: false, payment: null, status: 'completed', ref: '' });
-            fetchData();
-        } catch (error) {
-            console.error('Update disbursement error:', error);
-            message.error(error.message || 'Gagal update pencairan');
-        } finally {
-            setProcessing(false);
-        }
-    };
 
     // Metrics
     const metrics = [
@@ -201,24 +180,10 @@ const PembayaranSupplier = () => {
         },
         {
             id: 2,
-            label: 'Sudah Dicairkan',
-            value: formatCurrency(summary.total_disbursed || 0),
-            icon: <CheckCircleOutlined />,
-            bgColor: '#2D7A52'
-        },
-        {
-            id: 3,
-            label: 'Menunggu Pencairan',
-            value: formatCurrency(summary.pending_disbursement || 0),
-            icon: <ClockCircleOutlined />,
-            bgColor: '#F39C12'
-        },
-        {
-            id: 4,
             label: 'Perlu Dibayar',
             value: pendingSupplies.length.toString(),
-            icon: <CommentOutlined />,
-            bgColor: '#3498DB'
+            icon: <ClockCircleOutlined />,
+            bgColor: '#F39C12'
         }
     ];
 
@@ -228,7 +193,7 @@ const PembayaranSupplier = () => {
             label: (
                 <span>
                      Daftar Pembayaran
-                    <Badge count={payments.filter(p => p.status === 'settlement' && p.disbursement_status !== 'completed').length} offset={[8, 0]} />
+                    <Badge count={payments.length} offset={[8, 0]} />
                 </span>
             ),
         },
@@ -280,7 +245,6 @@ const PembayaranSupplier = () => {
                                         <th>SUPPLY</th>
                                         <th>JUMLAH</th>
                                         <th>STATUS</th>
-                                        <th>PENCAIRAN</th>
                                         <th>AKSI</th>
                                     </tr>
                                 </thead>
@@ -301,33 +265,12 @@ const PembayaranSupplier = () => {
                                                 </Tag>
                                             </td>
                                             <td>
-                                                <Tag color={getDisbursementColor(payment.disbursement_status)}>
-                                                    {payment.disbursement_status?.toUpperCase()}
-                                                </Tag>
-                                            </td>
-                                            <td>
-                                                <div style={{ display: 'flex', gap: 8 }}>
-                                                    <Button
-                                                        size="small"
-                                                        onClick={() => setDetailModal({ visible: true, payment })}
-                                                    >
-                                                        Detail
-                                                    </Button>
-                                                    {payment.status === 'settlement' && payment.disbursement_status !== 'completed' && (
-                                                        <Button
-                                                            size="small"
-                                                            type="primary"
-                                                            onClick={() => setDisbursementModal({
-                                                                visible: true,
-                                                                payment,
-                                                                status: 'completed',
-                                                                ref: ''
-                                                            })}
-                                                        >
-                                                            Cairkan
-                                                        </Button>
-                                                    )}
-                                                </div>
+                                                <Button
+                                                    size="small"
+                                                    onClick={() => setDetailModal({ visible: true, payment })}
+                                                >
+                                                    Detail
+                                                </Button>
                                             </td>
                                         </tr>
                                     ))}
@@ -580,79 +523,12 @@ const PembayaranSupplier = () => {
                             <span>Tanggal Bayar:</span>
                             <strong>{formatDate(detailModal.payment.payment_date)}</strong>
                         </div>
-                        <div className={styles.detailRow}>
-                            <span>Disbursement:</span>
-                            <Tag color={getDisbursementColor(detailModal.payment.disbursement_status)}>
-                                {detailModal.payment.disbursement_status?.toUpperCase()}
-                            </Tag>
-                        </div>
-                        {detailModal.payment.disbursement_date && (
-                            <div className={styles.detailRow}>
-                                <span>Tanggal Cair:</span>
-                                <strong>{formatDate(detailModal.payment.disbursement_date)}</strong>
-                            </div>
-                        )}
-                        {detailModal.payment.supplier_bank_name && (
-                            <>
-                                <div className={styles.detailRow}>
-                                    <span>Bank:</span>
-                                    <strong>{detailModal.payment.supplier_bank_name}</strong>
-                                </div>
-                                <div className={styles.detailRow}>
-                                    <span>No. Rekening:</span>
-                                    <strong>{detailModal.payment.supplier_bank_account}</strong>
-                                </div>
-                                <div className={styles.detailRow}>
-                                    <span>Atas Nama:</span>
-                                    <strong>{detailModal.payment.supplier_account_name}</strong>
-                                </div>
-                            </>
-                        )}
+
                     </div>
                 )}
             </Modal>
 
-            {/* Disbursement Modal */}
-            <Modal
-                title="Update Pencairan"
-                open={disbursementModal.visible}
-                onOk={handleUpdateDisbursement}
-                onCancel={() => setDisbursementModal({ visible: false, payment: null, status: 'completed', ref: '' })}
-                confirmLoading={processing}
-                okText="Update"
-                cancelText="Batal"
-            >
-                {disbursementModal.payment && (
-                    <div>
-                        <p><strong>Invoice:</strong> {disbursementModal.payment.invoice_number}</p>
-                        <p><strong>Supplier:</strong> {disbursementModal.payment.supplier?.nama}</p>
-                        <p><strong>Jumlah:</strong> {formatCurrency(disbursementModal.payment.net_amount || disbursementModal.payment.amount)}</p>
 
-                        <div style={{ marginTop: 16 }}>
-                            <label>Status Pencairan:</label>
-                            <Select
-                                style={{ width: '100%', marginTop: 8 }}
-                                value={disbursementModal.status}
-                                onChange={(value) => setDisbursementModal(prev => ({ ...prev, status: value }))}
-                            >
-                                <Select.Option value="processing">Processing</Select.Option>
-                                <Select.Option value="completed">Completed</Select.Option>
-                                <Select.Option value="failed">Failed</Select.Option>
-                            </Select>
-                        </div>
-
-                        <div style={{ marginTop: 16 }}>
-                            <label>Referensi Transfer:</label>
-                            <Input
-                                style={{ marginTop: 8 }}
-                                value={disbursementModal.ref}
-                                onChange={(e) => setDisbursementModal(prev => ({ ...prev, ref: e.target.value }))}
-                                placeholder="No. bukti transfer (opsional)"
-                            />
-                        </div>
-                    </div>
-                )}
-            </Modal>
         </AdminLayout>
     );
 };

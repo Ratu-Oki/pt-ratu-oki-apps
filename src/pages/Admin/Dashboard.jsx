@@ -10,7 +10,7 @@ import MetricsCard from './components/MetricsCard';
 import RecentTransactions from './components/RecentTransactions';
 import QuickActions from './components/QuickActions';
 import RecentActivities from './components/RecentActivities';
-import { transactionService, productService, stockService } from '../../services/api';
+import { transactionService, productService, stockService, paymentService } from '../../services/api';
 import { Spin, message } from 'antd';
 import {
   ClockCircleOutlined,
@@ -24,6 +24,8 @@ import {
   AppstoreOutlined,
   DatabaseOutlined,
   ArrowDownOutlined,
+  WalletOutlined,
+  SendOutlined,
  
 } from '@ant-design/icons';
 
@@ -134,14 +136,32 @@ const Dashboard = () => {
         {
           id: 1,
           label: 'Total Penjualan',
-          value: `Rp ${formatNumber(stats.total_revenue || stats.monthly?.revenue || 0)}`,
-          change: stats.today?.revenue > 0 ? `+Rp ${formatNumber(stats.today.revenue)} hari ini` : 'Hari ini Rp 0',
+          value: formatCurrency(stats.total_revenue || stats.monthly?.revenue || 0),
+          change: stats.today?.revenue > 0 ? `+${formatCurrency(stats.today.revenue)} hari ini` : 'Hari ini Rp 0',
           isPositive: (stats.today?.revenue || 0) > 0,
           icon: <DollarOutlined />,
           bgColor: '#2D7A52'
         },
         {
           id: 2,
+          label: 'Saldo Perusahaan',
+          value: formatCurrency(stats.company_balance || 0),
+          change: 'Akumulasi beli - bayar',
+          isPositive: (stats.company_balance || 0) >= 0,
+          icon: <WalletOutlined />,
+          bgColor: '#8E44AD'
+        },
+        {
+          id: 3,
+          label: 'Bayar Supplier',
+          value: formatCurrency(stats.total_supplier_paid || 0),
+          change: stats.monthly_supplier_paid > 0 ? `${formatCurrency(stats.monthly_supplier_paid)} bulan ini` : 'Rp 0 bulan ini',
+          isPositive: false,
+          icon: <SendOutlined />,
+          bgColor: '#C0392B'
+        },
+        {
+          id: 4,
           label: 'Barang Keluar',
           value: String(totalItemsMovedOut),
           change: stats.today?.items_sold > 0 ? `+${stats.today.items_sold} hari ini` : 'Hari ini 0',
@@ -150,7 +170,7 @@ const Dashboard = () => {
           bgColor: '#D35400'
         },
         {
-          id: 3,
+          id: 5,
           label: 'Stok Gudang',
           value: String(warehouseStock),
           change: `${formatNumber(summary.available_stock || warehouseStock)} tersedia`,
@@ -159,7 +179,7 @@ const Dashboard = () => {
           bgColor: '#27AE60'
         },
         {
-          id: 4,
+          id: 6,
           label: 'Produk Aktif',
           value: String(activeProductCount),
           change: `${stats.total_products || activeProductCount} total produk`,
@@ -168,7 +188,7 @@ const Dashboard = () => {
           bgColor: '#2980B9'
         },
         {
-          id: 5,
+          id: 7,
           label: 'Pending Transaksi',
           value: String(stats.pending_transactions || 0),
           change: stats.pending_transactions > 0 ? 'Perlu ditindak' : 'Semua selesai',
@@ -208,10 +228,12 @@ const Dashboard = () => {
       // Set fallback data
       setMetrics([
         { id: 1, label: 'Total Penjualan', value: 'Rp 0', change: 'Hari ini Rp 0', isPositive: true, icon: <DollarOutlined />, bgColor: '#2D7A52' },
-        { id: 2, label: 'Barang Keluar', value: '0', change: 'Hari ini 0', isPositive: true, icon: <ArrowDownOutlined />, bgColor: '#D35400' },
-        { id: 3, label: 'Stok Gudang', value: '0', change: '0 tersedia', isPositive: true, icon: <DatabaseOutlined />, bgColor: '#27AE60' },
-        { id: 4, label: 'Produk Aktif', value: '0', change: '0 total produk', isPositive: true, icon:<AppstoreOutlined />, bgColor: '#2980B9' },
-        { id: 5, label: 'Pending Transaksi', value: '0', change: 'Semua selesai', isPositive: true, icon:<ClockCircleOutlined />, bgColor: '#E67E22' }
+        { id: 2, label: 'Saldo Perusahaan', value: 'Rp 0', change: 'Akumulasi beli - bayar', isPositive: true, icon: <WalletOutlined />, bgColor: '#8E44AD' },
+        { id: 3, label: 'Bayar Supplier', value: 'Rp 0', change: 'Rp 0 bulan ini', isPositive: false, icon: <SendOutlined />, bgColor: '#C0392B' },
+        { id: 4, label: 'Barang Keluar', value: '0', change: 'Hari ini 0', isPositive: true, icon: <ArrowDownOutlined />, bgColor: '#D35400' },
+        { id: 5, label: 'Stok Gudang', value: '0', change: '0 tersedia', isPositive: true, icon: <DatabaseOutlined />, bgColor: '#27AE60' },
+        { id: 6, label: 'Produk Aktif', value: '0', change: '0 total produk', isPositive: true, icon:<AppstoreOutlined />, bgColor: '#2980B9' },
+        { id: 7, label: 'Pending Transaksi', value: '0', change: 'Semua selesai', isPositive: true, icon:<ClockCircleOutlined />, bgColor: '#E67E22' }
       ]);
       setTransactions([]);
       setActivities([]);

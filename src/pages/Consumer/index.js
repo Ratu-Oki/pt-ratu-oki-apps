@@ -165,11 +165,9 @@ const Consumer = () => {
     grade: `Grade ${p.grade || 'A'}`,
     image: p.image_url || 'https://via.placeholder.com/300x300?text=No+Image',
     price: p.harga_jual,
-    rating: p.rating || 0,
-    reviews: p.total_rating || 0,
     weight: p.berat || '1 kg',
     origin: p.lokasi_supplier || 'Indonesia',
-    stok: p.stok
+    stok: p.stok || 0
   }));
 
   return (

@@ -188,8 +188,7 @@ const Checkout = () => {
    * Calculate totals
    */
   const subtotal = cartItems.reduce((sum, item) => sum + (item.harga_jual || item.price || 0) * (item.qty || 1), 0);
-  const shipping = 50000;
-  const total = subtotal + shipping;
+  const total = subtotal;
 
   /**
    * Handle form submit with QRIS payment
@@ -480,12 +479,8 @@ const Checkout = () => {
                 {/* Summary Details */}
                 <div className={styles.summaryDetails}>
                   <div className={styles.summaryRow}>
-                    <span>Subtotal ({cartItems.reduce((sum, item) => sum + (item.qty || 1), 0)} item)</span>
+                    <span>Total ({cartItems.reduce((sum, item) => sum + (item.qty || 1), 0)} item)</span>
                     <span>{formatCurrency(subtotal)}</span>
-                  </div>
-                  <div className={styles.summaryRow}>
-                    <span>Ongkos Kirim</span>
-                    <span>{formatCurrency(shipping)}</span>
                   </div>
                 </div>
 
