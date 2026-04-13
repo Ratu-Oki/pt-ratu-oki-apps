@@ -10,6 +10,7 @@ import Cookies from 'js-cookie';
 // Base configuration
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
+console.log(API_BASE_URL)
 // Create axios instance - DON'T set Authorization here, let interceptor handle it
 const api = axios.create({
     baseURL: API_BASE_URL,
@@ -373,6 +374,12 @@ export const transactionService = {
         const response = await api.get(`/transactions/${id}/payment-status`);
         return response.data;
     },
+
+    // Approve/Confirm order receipt by consumer
+    approveOrder: async (id) => {
+        const response = await api.post(`/order/${id}/approve`, {});
+        return response.data;
+    },
 };
 
 // ============================================
@@ -416,6 +423,18 @@ export const paymentService = {
             disbursement_status,
             disbursement_ref
         });
+        return response.data;
+    },
+
+    // Get wallet summary for supplier
+    getWalletSummary: async () => {
+        const response = await api.get('/payments/wallet-summary');
+        return response.data;
+    },
+
+    // Withdraw funds for supplier
+    withdrawFunds: async () => {
+        const response = await api.post('/payments/withdraw');
         return response.data;
     },
 };

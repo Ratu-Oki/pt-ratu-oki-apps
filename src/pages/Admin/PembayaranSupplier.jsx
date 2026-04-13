@@ -127,15 +127,35 @@ const PembayaranSupplier = () => {
             // paymentService.create returns response.data directly
             // so midtrans data is at response.midtrans (not response.data.midtrans)
             const midtransData = response.midtrans || response.data?.midtrans || {};
+            const paymentId = response.payment?.id || response.data?.payment?.id;
             console.log('Midtrans data:', midtransData);
 
-            message.success('Pembayaran dibuat, silakan selesaikan pembayaran');
+            message.success('Pembayaran dibuat, silakan selesaikan pembayaran. Menunggu konfirmasi...');
 
-            // Move to step 2 with payment data
+            // Start polling for payment status
+            const interval = setInterval(async () => {
+                if (!paymentId) return;
+                try {
+                    const statusRes = await paymentService.getById(paymentId);
+                    const statusData = statusRes.data || statusRes;
+                    
+                    if (statusData.status === 'settlement') {
+                        clearInterval(interval);
+                        message.success('Pembayaran Supplier Berhasil!');
+                        setPayModal({ visible: false, supply: null, paymentType: 'qris', step: 1, paymentData: null, pollInterval: null });
+                        fetchData();
+                    }
+                } catch (e) {
+                    console.error('Error polling status:', e);
+                }
+            }, 3000);
+
+            // Move to step 2 with payment data and pollInterval
             setPayModal(prev => ({
                 ...prev,
                 step: 2,
-                paymentData: midtransData
+                paymentData: midtransData,
+                pollInterval: interval
             }));
 
         } catch (error) {

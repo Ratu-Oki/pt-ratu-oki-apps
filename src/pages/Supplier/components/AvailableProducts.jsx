@@ -77,8 +77,11 @@ const AvailableProducts = () => {
     setImageFile(null);
     setImagePreview(null);
     supplyForm.resetFields();
+    // Set default values
     supplyForm.setFieldsValue({
-      harga_supply: product.harga_beli
+      jumlah: 1,
+      harga_supply: product.harga_beli,
+      grade: 'A'
     });
   };
 
@@ -128,6 +131,7 @@ const AvailableProducts = () => {
       formData.append('pesan', values.pesan || '');
       formData.append('lokasi_supplier', values.lokasi_supplier || '');
       formData.append('deskripsi', values.deskripsi || '');
+      formData.append('berat', values.berat || '1 kg');
 
       if (newProductImageFile) {
         formData.append('image', newProductImageFile);
@@ -155,7 +159,7 @@ const AvailableProducts = () => {
       className={styles.productCard}
       cover={
         product.image_url ? (
-          <img alt={product.nama_produk} src={`${process.env.REACT_APP_API_URL?.replace('/api', '')}${product.image_url}`} style={{ height: 200, objectFit: 'cover' }} />
+          <img alt={product.nama_produk} src={product.image_url} style={{ height: 200, objectFit: 'cover' }} />
         ) : (
           <div style={{ height: 200, background: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <InboxOutlined style={{ fontSize: 48, color: '#ccc' }} />
@@ -251,20 +255,35 @@ const AvailableProducts = () => {
           <Row gutter={16}>
             <Col xs={24} md={12}>
               <Form.Item
-                label="Jumlah (unit)"
+                label="Jumlah (unit) *"
                 name="jumlah"
-                rules={[{ required: true, message: 'Jumlah harus diisi' }]}
+                rules={[
+                  { required: true, message: 'Jumlah harus diisi' },
+                  { type: 'number', min: 1, message: 'Minimal 1 unit' }
+                ]}
               >
-                <InputNumber min={1} style={{ width: '100%' }} />
+                <InputNumber 
+                  min={1} 
+                  defaultValue={1}
+                  placeholder="Berapa unit?"
+                  style={{ width: '100%' }} 
+                />
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
               <Form.Item
-                label="Harga Supply (Rp)"
+                label="Harga Supply (Rp) *"
                 name="harga_supply"
-                rules={[{ required: true, message: 'Harga supply harus diisi' }]}
+                rules={[
+                  { required: true, message: 'Harga supply harus diisi' },
+                  { type: 'number', min: 0, message: 'Harga tidak boleh negatif' }
+                ]}
               >
-                <InputNumber style={{ width: '100%' }} />
+                <InputNumber 
+                  min={0}
+                  placeholder="Harga per unit"
+                  style={{ width: '100%' }} 
+                />
               </Form.Item>
             </Col>
           </Row>
@@ -335,20 +354,35 @@ const AvailableProducts = () => {
           <Row gutter={16}>
             <Col xs={24} md={12}>
               <Form.Item
-                label="Jumlah (unit)"
+                label="Jumlah (unit) *"
                 name="jumlah"
-                rules={[{ required: true, message: 'Jumlah harus diisi' }]}
+                rules={[
+                  { required: true, message: 'Jumlah harus diisi' },
+                  { type: 'number', min: 1, message: 'Minimal 1 unit' }
+                ]}
               >
-                <InputNumber min={1} style={{ width: '100%' }} />
+                <InputNumber 
+                  min={1} 
+                  defaultValue={1}
+                  placeholder="Berapa unit?"
+                  style={{ width: '100%' }} 
+                />
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
               <Form.Item
-                label="Harga Supply (Rp)"
+                label="Harga Supply (Rp) *"
                 name="harga_supply"
-                rules={[{ required: true, message: 'Harga supply harus diisi' }]}
+                rules={[
+                  { required: true, message: 'Harga supply harus diisi' },
+                  { type: 'number', min: 0, message: 'Harga tidak boleh negatif' }
+                ]}
               >
-                <InputNumber style={{ width: '100%' }} />
+                <InputNumber 
+                  min={0}
+                  placeholder="Harga per unit"
+                  style={{ width: '100%' }} 
+                />
               </Form.Item>
             </Col>
           </Row>
@@ -368,6 +402,18 @@ const AvailableProducts = () => {
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
+              <Form.Item
+                label="Berat Produk *"
+                name="berat"
+                rules={[{ required: true, message: 'Berat harus diisi' }]}
+              >
+                <Input placeholder="Contoh: 1 kg, 500 gram" />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col xs={24} md={24}>
               <Form.Item
                 label="Lokasi Supplier"
                 name="lokasi_supplier"

@@ -56,7 +56,7 @@ const SignUp = () => {
         nama: formData.nama,
         email: formData.email,
         password: formData.password,
-        role: formData.role,
+        role: 'consumer',
         telepon: formData.telepon || undefined,
         alamat: formData.alamat || undefined,
       });
@@ -175,22 +175,6 @@ const SignUp = () => {
               />
             </div>
 
-            {/* Role Selection */}
-            <div className="form-group">
-              <label className="form-label">
-                Daftar Sebagai
-              </label>
-              <select
-                name="role"
-                className="form-input"
-                value={formData.role}
-                onChange={handleInputChange}
-                disabled={isLoading}
-              >
-                <option value="consumer">Consumer (Pembeli)</option>
-                <option value="supplier">Supplier (Pemasok)</option>
-              </select>
-            </div>
 
             {/* Password Field */}
             <div className="form-group">
@@ -241,20 +225,8 @@ const SignUp = () => {
             </button>
           </form>
 
-          {/* Social Login */}
-          <div className="social-login">
-            <div className="social-divider">atau</div>
-            <div className="social-buttons">
-              <button type="button" className="social-button" disabled={isLoading}>
-                <img src={Assets.googleImg} alt="google" className="social-icon" />
-                Google
-              </button>
-              <button type="button" className="social-button" disabled={isLoading}>
-                <img src={Assets.facebookImg} alt="facebook" className="social-icon" />
-                Facebook
-              </button>
-            </div>
-          </div>
+
+
 
           {/* Sign In Link */}
           <div className="signin-link">

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Row, Col, Card, Form, Input, Select, Button, Divider, List, Space, message, Spin, Modal } from 'antd';
-import { ArrowLeftOutlined, QrcodeOutlined, CheckCircleOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import { Layout, Row, Col, Card, Form, Input, Select, Button, Divider, List, Space, message, Spin, Modal, Alert } from 'antd';
+import { ArrowLeftOutlined, QrcodeOutlined, CheckCircleOutlined, ClockCircleOutlined, WarningOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import OrderTrackingCompact from './components/OrderTrackingCompact';
 import styles from './Checkout.module.css';
-import { transactionService } from '../../services/api';
+import { transactionService, productService } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 
 /**
@@ -25,6 +26,11 @@ const Checkout = () => {
   const [paymentData, setPaymentData] = useState(null);
   const [checkingPayment, setCheckingPayment] = useState(false);
   const [paymentComplete, setPaymentComplete] = useState(false);
+
+  // Out-of-stock handling state
+  const [stockErrorModalVisible, setStockErrorModalVisible] = useState(false);
+  const [stockErrorItems, setStockErrorItems] = useState([]);
+  const [refetchingProducts, setRefetchingProducts] = useState(false);
 
   // Load cart from localStorage
   useEffect(() => {
@@ -122,6 +128,63 @@ const Checkout = () => {
   };
 
   /**
+   * Refetch products and update cart with fresh stock data
+   * Returns { removed: [], updated: [] } for items affected by stock changes
+   */
+  const refetchAndUpdateCart = async () => {
+    try {
+      setRefetchingProducts(true);
+
+      // Fetch fresh product data from backend
+      const response = await productService.getAll({ limit: 100 });
+      const freshProducts = Array.isArray(response.data) 
+        ? response.data 
+        : (response.data?.products || []);
+
+      // Create product map for quick lookup
+      const productMap = new Map(freshProducts.map(p => [p.id, p]));
+
+      // Check cart items against fresh data
+      const removed = [];
+      const updated = [];
+      let newCart = [...cartItems];
+
+      for (const item of cartItems) {
+        const freshProduct = productMap.get(item.id);
+
+        if (!freshProduct || freshProduct.stok === 0) {
+          // Product removed from inventory or out of stock
+          removed.push(item);
+          newCart = newCart.filter(cartItem => cartItem.id !== item.id);
+        } else if (freshProduct.stok < (item.qty || 1)) {
+          // Stock reduced - adjust quantity to match available stock
+          updated.push({
+            ...item,
+            oldQty: item.qty || 1,
+            newQty: freshProduct.stok,
+          });
+          newCart = newCart.map(cartItem =>
+            cartItem.id === item.id
+              ? { ...cartItem, qty: freshProduct.stok }
+              : cartItem
+          );
+        }
+      }
+
+      // Save updated cart to localStorage
+      setCartItems(newCart);
+
+      return { removed, updated };
+    } catch (error) {
+      console.error('Error refetching products:', error);
+      message.error('Gagal memperbarui data stok. Silakan coba lagi.');
+      return { removed: [], updated: [] };
+    } finally {
+      setRefetchingProducts(false);
+    }
+  };
+
+  /**
    * Calculate totals
    */
   const subtotal = cartItems.reduce((sum, item) => sum + (item.harga_jual || item.price || 0) * (item.qty || 1), 0);
@@ -168,10 +231,47 @@ const Checkout = () => {
         });
         setPaymentModalVisible(true);
       } else {
-        message.error(response.message || 'Gagal membuat pesanan');
+        // Handle specific out-of-stock errors
+        const errorMessage = response.message || 'Gagal membuat pesanan';
+        
+        // Check if error is stock-related (common patterns from backend)
+        const isStockError = 
+          errorMessage.toLowerCase().includes('stock') ||
+          errorMessage.toLowerCase().includes('stok') ||
+          errorMessage.toLowerCase().includes('unavailable') ||
+          response.error?.code === 'STOCK_INSUFFICIENT';
+
+        if (isStockError) {
+          // Refetch products and update cart with fresh data
+          const { removed, updated } = await refetchAndUpdateCart();
+          
+          // Store error details for modal display
+          setStockErrorItems({ removed, updated });
+          setStockErrorModalVisible(true);
+        } else {
+          message.error(errorMessage);
+        }
       }
     } catch (error) {
       console.error('Checkout error:', error);
+      
+      // Handle out-of-stock error responses
+      if (error?.success === false) {
+        const isStockError = 
+          error.message?.toLowerCase().includes('stock') ||
+          error.message?.toLowerCase().includes('stok') ||
+          error.message?.toLowerCase().includes('unavailable') ||
+          error.code === 'STOCK_INSUFFICIENT';
+
+        if (isStockError) {
+          // Refetch products and update cart
+          const { removed, updated } = await refetchAndUpdateCart();
+          setStockErrorItems({ removed, updated });
+          setStockErrorModalVisible(true);
+          return;
+        }
+      }
+      
       if (error.errorFields) {
         message.error('Silakan lengkapi semua data');
       } else {
@@ -202,6 +302,21 @@ const Checkout = () => {
       setPaymentModalVisible(false);
       localStorage.removeItem('cart');
       navigate('/consumer/status-pesanan');
+    }
+  };
+
+  /**
+   * Handle close out-of-stock error modal
+   */
+  const handleCloseStockErrorModal = (action = 'back') => {
+    setStockErrorModalVisible(false);
+    
+    if (action === 'back') {
+      // Go back to cart to review updated items
+      navigate('/consumer/cart');
+    } else if (action === 'retry' && cartItems.length > 0) {
+      // User wants to retry checkout with updated cart
+      setStockErrorModalVisible(false);
     }
   };
 
@@ -438,6 +553,15 @@ const Checkout = () => {
                 <CheckCircleOutlined style={{ fontSize: 64, color: '#52c41a' }} />
                 <h3>Pembayaran Berhasil!</h3>
                 <p>Terima kasih. Pesanan Anda sedang diproses.</p>
+                
+                {/* Order Tracking Preview */}
+                <Divider style={{ margin: '20px 0' }} />
+                <div style={{ marginTop: 16 }}>
+                  <p style={{ fontSize: 12, color: '#000000', marginBottom: 12, textAlign: 'center' }}>
+                    Status Pesanan Anda:
+                  </p>
+                  <OrderTrackingCompact status="processing" showLabel={true} />
+                </div>
               </div>
             ) : (
               <>
@@ -487,6 +611,110 @@ const Checkout = () => {
             )}
           </div>
         )}
+      </Modal>
+
+      {/* Out-of-Stock Error Modal */}
+      <Modal
+        title={
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <WarningOutlined style={{ fontSize: 24, color: '#ff4d4f' }} />
+            <span>Stok Produk Berubah</span>
+          </div>
+        }
+        open={stockErrorModalVisible}
+        onCancel={() => handleCloseStockErrorModal('back')}
+        centered
+        width={500}
+        maskClosable={false}
+        footer={[
+          <Button
+            key="back"
+            type="primary"
+            onClick={() => handleCloseStockErrorModal('back')}
+          >
+            Kembali ke Keranjang
+          </Button>,
+          cartItems.length > 0 && (
+            <Button
+              key="retry"
+              onClick={() => handleCloseStockErrorModal('retry')}
+            >
+              Lanjut Checkout
+            </Button>
+          ),
+        ]}
+      >
+        <div style={{ padding: '20px 0' }}>
+          {/* Main Error Message */}
+          <Alert
+            message="Mohon maaf, stok barang baru saja habis!"
+            type="error"
+            icon={<WarningOutlined />}
+            showIcon
+            style={{ marginBottom: 24 }}
+          />
+
+          {/* Removed Items */}
+          {stockErrorItems.removed && stockErrorItems.removed.length > 0 && (
+            <div style={{ marginBottom: 24 }}>
+              <h4 style={{ color: '#ff4d4f', marginBottom: 12 }}>
+                Produk Dihapus (Stok Habis):
+              </h4>
+              <List
+                dataSource={stockErrorItems.removed}
+                renderItem={(item) => (
+                  <List.Item>
+                    <List.Item.Meta
+                      title={item.nama_produk || item.name}
+                      description={`Qty: ${item.qty || 1} | ${formatCurrency(item.harga_jual || item.price)}`}
+                    />
+                  </List.Item>
+                )}
+              />
+            </div>
+          )}
+
+          {/* Updated Items (Quantity Reduced) */}
+          {stockErrorItems.updated && stockErrorItems.updated.length > 0 && (
+            <div style={{ marginBottom: 24 }}>
+              <h4 style={{ color: '#faad14', marginBottom: 12 }}>
+                Produk Diperbarui (Jumlah Dikurangi):
+              </h4>
+              <List
+                dataSource={stockErrorItems.updated}
+                renderItem={(item) => (
+                  <List.Item>
+                    <List.Item.Meta
+                      title={item.nama_produk || item.name}
+                      description={
+                        <span>
+                          Qty: <strong>{item.oldQty}</strong> → <strong>{item.newQty}</strong> | 
+                          {formatCurrency(item.harga_jual || item.price)}
+                        </span>
+                      }
+                    />
+                  </List.Item>
+                )}
+              />
+            </div>
+          )}
+
+          {/* Info Message */}
+          {cartItems.length > 0 && (
+            <Alert
+              message="Keranjang Anda telah diperbarui dengan stok terbaru. Silakan tinjau kembali sebelum melanjutkan."
+              type="info"
+              style={{ marginBottom: 16 }}
+            />
+          )}
+
+          {cartItems.length === 0 && (
+            <Alert
+              message="Semua produk dalam keranjang Anda tidak tersedia lagi. Silakan kembali ke katalog untuk memilih produk lain."
+              type="warning"
+            />
+          )}
+        </div>
       </Modal>
     </Layout>
   );

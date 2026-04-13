@@ -50,24 +50,31 @@
   margin-left: 24px;
 }
 
-.desktopMenu .ant-menu-item {
+.desktopMenu :global(.ant-menu-item) {
   color: white !important;
   border-bottom: none !important;
   position: relative;
   transition: all 0.3s ease !important;
 }
 
-.desktopMenu .ant-menu-item:hover {
+.desktopMenu :global(.ant-menu-item) a {
+  color: white !important;
+}
+
+.desktopMenu :global(.ant-menu-item:hover) {
   color: white !important;
   background-color: rgba(255, 255, 255, 0.1) !important;
 }
 
-.desktopMenu .ant-menu-item-selected {
-  color: white !important;
-  border-bottom: 3px solid white !important;
-  background: rgba(255, 255, 255, 0.2) !important;
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.3) !important;
-  font-weight: 600;
+.desktopMenu :global(.ant-menu-item-selected) {
+  color: #ffffff !important;
+  border-bottom: 3px solid #ffffff !important;
+  background: transparent !important;
+  font-weight: 700 !important;
+}
+
+.desktopMenu :global(.ant-menu-item-selected) a {
+  color: #ffffff !important;
 }
 
 .headerRight {
@@ -93,7 +100,7 @@
 }
 
 .userProfile:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(213, 24, 24, 0.15);
 }
 
 .mobileMenuBtn {
@@ -133,7 +140,7 @@
     gap: 4px;
   }
 
-  .userProfile > span {
+  .userProfile>span {
     display: none;
   }
 

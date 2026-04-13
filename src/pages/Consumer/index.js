@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Layout, Row, Col, message, Affix, Button, Badge, Spin, Modal, Form, Input, Divider, Space, Alert } from 'antd';
-import { ShoppingCartOutlined } from '@ant-design/icons';
+import { ShoppingCartOutlined, ReloadOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
@@ -167,7 +167,7 @@ const Consumer = () => {
     price: p.harga_jual,
     rating: p.rating || 0,
     reviews: p.total_rating || 0,
-    weight: '1 kg',
+    weight: p.berat || '1 kg',
     origin: p.lokasi_supplier || 'Indonesia',
     stok: p.stok
   }));
@@ -199,6 +199,16 @@ const Consumer = () => {
                 Temukan koleksi vanila berkualitas premium dari berbagai daerah
               </p>
             </div>
+            <Button 
+              icon={<ReloadOutlined />}
+              onClick={() => {
+                setLoading(true);
+                fetchProducts();
+              }}
+              loading={loading}
+            >
+              Segarkan
+            </Button>
           </div>
 
           {/* Main Layout: Sidebar + Products */}
