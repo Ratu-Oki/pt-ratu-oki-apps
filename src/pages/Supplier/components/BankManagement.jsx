@@ -21,18 +21,18 @@ const BankManagement = () => {
         setLoading(true);
         try {
             const [accountsRes, banksRes] = await Promise.all([
-                bankAccountService.getAll().catch(() => ({ data: [] })),
-                bankAccountService.getSupportedBanks().catch(() => ({ data: [] }))
+                bankAccountService.getAll(),
+                bankAccountService.getSupportedBanks()
             ]);
 
-            let accounts = accountsRes.data || [];
-            if (Array.isArray(accountsRes.data)) accounts = accountsRes.data;
+            const accounts = Array.isArray(accountsRes?.data) ? accountsRes.data : [];
+            const banks = Array.isArray(banksRes?.data) ? banksRes.data : [];
 
             setBankAccounts(accounts);
-            setSupportedBanks(banksRes.data || []);
+            setSupportedBanks(banks);
         } catch (error) {
             console.error('Error fetching bank accounts:', error);
-            message.error('Gagal memuat data rekening');
+            message.error(error?.message || 'Gagal memuat data rekening');
         } finally {
             setLoading(false);
         }
