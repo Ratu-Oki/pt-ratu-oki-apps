@@ -108,7 +108,7 @@ const PembayaranSupplier = () => {
 
         setProcessing(true);
         try {
-            const response = await paymentService.create({
+            const response = await paymentService.createFromCompanyBalance({
                 supply_id: payModal.supply.id
             });
 

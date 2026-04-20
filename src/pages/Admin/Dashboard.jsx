@@ -10,7 +10,7 @@ import MetricsCard from './components/MetricsCard';
 import RecentTransactions from './components/RecentTransactions';
 import QuickActions from './components/QuickActions';
 import RecentActivities from './components/RecentActivities';
-import { transactionService, productService, stockService, paymentService } from '../../services/api';
+import { transactionService, productService, stockService } from '../../services/api';
 import { Spin, message } from 'antd';
 import {
   ClockCircleOutlined,
@@ -20,7 +20,6 @@ import {
   CloseCircleOutlined,
   CommentOutlined,
   DollarOutlined,
-  ShoppingCartOutlined,
   AppstoreOutlined,
   DatabaseOutlined,
   ArrowDownOutlined,
@@ -126,11 +125,12 @@ const Dashboard = () => {
         activeProductCount = products.filter(p => p.status_produk === 'active').length;
       }
 
-      // Calculate total items moved out (from transactions)
-      const totalItemsMovedOut = stats.total_items_sold || stats.daily?.items_sold || 0;
+      // Barang keluar = jumlah item yang benar-benar terjual
+      const totalItemsMovedOut = summary.items_sold_total || stats.total_items_sold || 0;
+      const todayItemsMovedOut = summary.items_sold_today || stats.today?.items_sold || 0;
 
-      // Get warehouse stock from summary
-      const warehouseStock = summary.total_stock || summary.warehouse_stock || 0;
+      // Stok gudang = supply yang sudah dibayar supplier dikurangi barang yang sudah terjual
+      const warehouseStock = summary.warehouse_stock || summary.total_stock || 0;
 
       setMetrics([
         {
@@ -146,7 +146,7 @@ const Dashboard = () => {
           id: 2,
           label: 'Saldo Perusahaan',
           value: formatCurrency(stats.company_balance || 0),
-          change: 'Akumulasi beli - bayar',
+          change: 'Penjualan - bayar supplier',
           isPositive: (stats.company_balance || 0) >= 0,
           icon: <WalletOutlined />,
           bgColor: '#8E44AD'
@@ -164,8 +164,8 @@ const Dashboard = () => {
           id: 4,
           label: 'Barang Keluar',
           value: String(totalItemsMovedOut),
-          change: stats.today?.items_sold > 0 ? `+${stats.today.items_sold} hari ini` : 'Hari ini 0',
-          isPositive: (stats.today?.items_sold || 0) > 0,
+          change: todayItemsMovedOut > 0 ? `+${todayItemsMovedOut} hari ini` : 'Hari ini 0',
+          isPositive: todayItemsMovedOut > 0,
           icon: <ArrowDownOutlined />,
           bgColor: '#D35400'
         },
@@ -173,7 +173,7 @@ const Dashboard = () => {
           id: 5,
           label: 'Stok Gudang',
           value: String(warehouseStock),
-          change: `${formatNumber(summary.available_stock || warehouseStock)} tersedia`,
+          change: `${formatNumber(summary.paid_stock_quantity || warehouseStock)} stok dibayar supplier`,
           isPositive: warehouseStock > 0,
           icon: <DatabaseOutlined />,
           bgColor: '#27AE60'
@@ -228,10 +228,10 @@ const Dashboard = () => {
       // Set fallback data
       setMetrics([
         { id: 1, label: 'Total Penjualan', value: 'Rp 0', change: 'Hari ini Rp 0', isPositive: true, icon: <DollarOutlined />, bgColor: '#2D7A52' },
-        { id: 2, label: 'Saldo Perusahaan', value: 'Rp 0', change: 'Akumulasi beli - bayar', isPositive: true, icon: <WalletOutlined />, bgColor: '#8E44AD' },
+        { id: 2, label: 'Saldo Perusahaan', value: 'Rp 0', change: 'Penjualan - bayar supplier', isPositive: true, icon: <WalletOutlined />, bgColor: '#8E44AD' },
         { id: 3, label: 'Bayar Supplier', value: 'Rp 0', change: 'Rp 0 bulan ini', isPositive: false, icon: <SendOutlined />, bgColor: '#C0392B' },
         { id: 4, label: 'Barang Keluar', value: '0', change: 'Hari ini 0', isPositive: true, icon: <ArrowDownOutlined />, bgColor: '#D35400' },
-        { id: 5, label: 'Stok Gudang', value: '0', change: '0 tersedia', isPositive: true, icon: <DatabaseOutlined />, bgColor: '#27AE60' },
+        { id: 5, label: 'Stok Gudang', value: '0', change: '0 stok dibayar supplier', isPositive: true, icon: <DatabaseOutlined />, bgColor: '#27AE60' },
         { id: 6, label: 'Produk Aktif', value: '0', change: '0 total produk', isPositive: true, icon:<AppstoreOutlined />, bgColor: '#2980B9' },
         { id: 7, label: 'Pending Transaksi', value: '0', change: 'Semua selesai', isPositive: true, icon:<ClockCircleOutlined />, bgColor: '#E67E22' }
       ]);
