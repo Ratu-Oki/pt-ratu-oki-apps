@@ -186,10 +186,6 @@ const AvailableProducts = () => {
                 <span className={styles.label}>Harga Beli:</span>
                 <span className={styles.price}>{formatCurrency(product.harga_beli)}</span>
               </div>
-              <div className={styles.priceRow}>
-                <span className={styles.label}>Harga Jual:</span>
-                <span className={styles.price}>{formatCurrency(product.harga_jual)}</span>
-              </div>
             </div>
             <Button
               type="primary"
@@ -272,16 +268,16 @@ const AvailableProducts = () => {
             </Col>
             <Col xs={24} md={12}>
               <Form.Item
-                label="Harga Supply (Rp) *"
+                label="Harga Penawaran (Rp) *"
                 name="harga_supply"
                 rules={[
-                  { required: true, message: 'Harga supply harus diisi' },
+                  { required: true, message: 'Harga penawaran harus diisi' },
                   { type: 'number', min: 0, message: 'Harga tidak boleh negatif' }
                 ]}
               >
                 <InputNumber 
                   min={0}
-                  placeholder="Harga per unit"
+                  placeholder="Masukkan harga penawaran per unit"
                   style={{ width: '100%' }} 
                 />
               </Form.Item>
@@ -371,16 +367,16 @@ const AvailableProducts = () => {
             </Col>
             <Col xs={24} md={12}>
               <Form.Item
-                label="Harga Supply (Rp) *"
+                label="Harga Penawaran (Rp) *"
                 name="harga_supply"
                 rules={[
-                  { required: true, message: 'Harga supply harus diisi' },
+                  { required: true, message: 'Harga penawaran harus diisi' },
                   { type: 'number', min: 0, message: 'Harga tidak boleh negatif' }
                 ]}
               >
                 <InputNumber 
                   min={0}
-                  placeholder="Harga per unit"
+                  placeholder="Masukkan harga penawaran per unit"
                   style={{ width: '100%' }} 
                 />
               </Form.Item>

@@ -8,7 +8,7 @@ import AdminLayout from './components/AdminLayout';
 import MetricsCard from './components/MetricsCard';
 import { paymentService, stockService } from '../../services/api';
 import { Spin, message, Modal, Tag, Empty, Tabs, Button, Badge } from 'antd';
-import { DollarOutlined, CheckCircleOutlined, ClockCircleOutlined, CommentOutlined } from '@ant-design/icons';
+import { DollarOutlined, ClockCircleOutlined } from '@ant-design/icons';
 
 const PembayaranSupplier = () => {
     const [loading, setLoading] = useState(true);
@@ -17,13 +17,10 @@ const PembayaranSupplier = () => {
     const [summary, setSummary] = useState({});
     const [activeTab, setActiveTab] = useState('payments');
 
-    // Modal states
-    const [payModal, setPayModal] = useState({ visible: false, supply: null, paymentType: 'qris', step: 1, paymentData: null });
+    const [payModal, setPayModal] = useState({ visible: false, supply: null });
     const [detailModal, setDetailModal] = useState({ visible: false, payment: null });
-
     const [processing, setProcessing] = useState(false);
 
-    // Fetch data
     const fetchData = useCallback(async () => {
         setLoading(true);
         try {
@@ -33,14 +30,12 @@ const PembayaranSupplier = () => {
                 stockService.getAllSupplies({ status: 'approved' }).catch(() => ({ data: [] }))
             ]);
 
-            // Handle payments response
             let paymentsData = paymentsRes.data?.payments || paymentsRes.data || [];
             if (Array.isArray(paymentsRes.data)) paymentsData = paymentsRes.data;
 
             setPayments(paymentsData);
             setSummary(summaryRes.data || {});
 
-            // Filter approved supplies that don't have pending/settlement payment
             let suppliesData = [];
             if (Array.isArray(suppliesRes.data)) {
                 suppliesData = suppliesRes.data;
@@ -48,15 +43,12 @@ const PembayaranSupplier = () => {
                 suppliesData = suppliesRes.data.supplies;
             }
 
-            // Filter untuk supply yang sudah approved tapi belum dibayar
-            const approvedSupplies = suppliesData.filter(s => s.status_produk === 'approved');
+            const approvedSupplies = suppliesData.filter((s) => s.status_produk === 'approved');
             const paidSupplyIds = paymentsData
-                .filter(p => ['pending', 'processing', 'settlement'].includes(p.status))
-                .map(p => p.supply_id);
+                .filter((p) => ['pending', 'processing', 'settlement'].includes(p.status))
+                .map((p) => p.supply_id);
 
-            const unpaidSupplies = approvedSupplies.filter(s => !paidSupplyIds.includes(s.id));
-            setPendingSupplies(unpaidSupplies);
-
+            setPendingSupplies(approvedSupplies.filter((s) => !paidSupplyIds.includes(s.id)));
         } catch (error) {
             console.error('Error fetching data:', error);
             message.error('Gagal memuat data');
@@ -69,7 +61,6 @@ const PembayaranSupplier = () => {
         fetchData();
     }, [fetchData]);
 
-    // Format currency
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat('id-ID', {
             style: 'currency',
@@ -78,16 +69,17 @@ const PembayaranSupplier = () => {
         }).format(amount || 0);
     };
 
-    // Format date
     const formatDate = (dateStr) => {
         if (!dateStr) return '-';
         return new Date(dateStr).toLocaleDateString('id-ID', {
-            day: 'numeric', month: 'short', year: 'numeric',
-            hour: '2-digit', minute: '2-digit'
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
         });
     };
 
-    // Get status color
     const getStatusColor = (status) => {
         const colors = {
             pending: '#F39C12',
@@ -111,55 +103,24 @@ const PembayaranSupplier = () => {
         return colors[status] || '#95A5A6';
     };
 
-    // Create payment
     const handleCreatePayment = async () => {
+        if (!payModal.supply) return;
 
         setProcessing(true);
         try {
-            console.log('Creating payment...');
             const response = await paymentService.create({
-                supply_id: payModal.supply.id,
-                payment_type: payModal.paymentType
+                supply_id: payModal.supply.id
             });
 
-            console.log('Payment response:', response);
+            const remainingBalance = response.data?.company_balance_remaining;
+            const balanceInfo = typeof remainingBalance === 'number'
+                ? ` Sisa saldo perusahaan: ${formatCurrency(remainingBalance)}.`
+                : '';
 
-            // paymentService.create returns response.data directly
-            // so midtrans data is at response.midtrans (not response.data.midtrans)
-            const midtransData = response.midtrans || response.data?.midtrans || {};
-            const paymentId = response.payment?.id || response.data?.payment?.id;
-            console.log('Midtrans data:', midtransData);
-
-            message.success('Pembayaran dibuat, silakan selesaikan pembayaran. Menunggu konfirmasi...');
-
-            // Start polling for payment status
-            const interval = setInterval(async () => {
-                if (!paymentId) return;
-                try {
-                    const statusRes = await paymentService.getById(paymentId);
-                    const statusData = statusRes.data || statusRes;
-                    
-                    if (statusData.status === 'settlement') {
-                        clearInterval(interval);
-                        message.success('Pembayaran Supplier Berhasil!');
-                        setPayModal({ visible: false, supply: null, paymentType: 'qris', step: 1, paymentData: null, pollInterval: null });
-                        fetchData();
-                    }
-                } catch (e) {
-                    console.error('Error polling status:', e);
-                }
-            }, 3000);
-
-            // Move to step 2 with payment data and pollInterval
-            setPayModal(prev => ({
-                ...prev,
-                step: 2,
-                paymentData: midtransData,
-                pollInterval: interval
-            }));
-
+            message.success(`Pembayaran supplier berhasil diproses dari saldo perusahaan.${balanceInfo}`);
+            setPayModal({ visible: false, supply: null });
+            fetchData();
         } catch (error) {
-            console.log('Error object:', error);
             console.error('Create payment error:', error);
             message.error(error.message || 'Gagal membuat pembayaran');
         } finally {
@@ -167,9 +128,6 @@ const PembayaranSupplier = () => {
         }
     };
 
-
-
-    // Metrics
     const metrics = [
         {
             id: 1,
@@ -192,19 +150,19 @@ const PembayaranSupplier = () => {
             key: 'payments',
             label: (
                 <span>
-                     Daftar Pembayaran
+                    Daftar Pembayaran
                     <Badge count={payments.length} offset={[8, 0]} />
                 </span>
-            ),
+            )
         },
         {
             key: 'pending',
             label: (
                 <span>
-                     Supply Belum Dibayar
+                    Supply Belum Dibayar
                     <Badge count={pendingSupplies.length} offset={[8, 0]} />
                 </span>
-            ),
+            )
         }
     ];
 
@@ -221,18 +179,15 @@ const PembayaranSupplier = () => {
     return (
         <AdminLayout headerType="simple" title="Pembayaran Supplier" subTitle="Kelola pembayaran ke supplier">
             <div className={styles.container}>
-                {/* Metrics */}
                 <div className={styles.metricsGrid}>
-                    {metrics.map(metric => (
+                    {metrics.map((metric) => (
                         <MetricsCard key={metric.id} {...metric} />
                     ))}
                 </div>
 
-                {/* Tabs */}
                 <Tabs activeKey={activeTab} onChange={setActiveTab} items={tabItems} />
 
                 {activeTab === 'payments' ? (
-                    /* Payments Table */
                     <div className={styles.tableContainer}>
                         {payments.length === 0 ? (
                             <Empty description="Belum ada pembayaran" />
@@ -265,10 +220,7 @@ const PembayaranSupplier = () => {
                                                 </Tag>
                                             </td>
                                             <td>
-                                                <Button
-                                                    size="small"
-                                                    onClick={() => setDetailModal({ visible: true, payment })}
-                                                >
+                                                <Button size="small" onClick={() => setDetailModal({ visible: true, payment })}>
                                                     Detail
                                                 </Button>
                                             </td>
@@ -279,7 +231,6 @@ const PembayaranSupplier = () => {
                         )}
                     </div>
                 ) : (
-                    /* Pending Supplies Table */
                     <div className={styles.tableContainer}>
                         {pendingSupplies.length === 0 ? (
                             <Empty description="Semua supply sudah dibayar" />
@@ -310,9 +261,9 @@ const PembayaranSupplier = () => {
                                             <td>
                                                 <Button
                                                     type="primary"
-                                                    onClick={() => setPayModal({ visible: true, supply, paymentType: 'qris', step: 1, paymentData: null })}
+                                                    onClick={() => setPayModal({ visible: true, supply })}
                                                 >
-                                                    💳 Bayar
+                                                    Bayar
                                                 </Button>
                                             </td>
                                         </tr>
@@ -324,162 +275,39 @@ const PembayaranSupplier = () => {
                 )}
             </div>
 
-            {/* Create Payment Modal - Two Steps */}
             <Modal
-                title={payModal.step === 2 ? "Pembayaran" : "Buat Pembayaran"}
+                title="Bayar Supplier"
                 open={payModal.visible}
-                onCancel={() => {
-                    // Stop polling jika ada
-                    if (payModal.pollInterval) clearInterval(payModal.pollInterval);
-                    setPayModal({ visible: false, supply: null, paymentType: 'qris', step: 1, paymentData: null, pollInterval: null });
-                }}
-                footer={payModal.step === 1 ? [
-                    <Button key="cancel" onClick={() => setPayModal({ visible: false, supply: null, paymentType: 'qris', step: 1 })}>
+                onCancel={() => setPayModal({ visible: false, supply: null })}
+                footer={[
+                    <Button key="cancel" onClick={() => setPayModal({ visible: false, supply: null })}>
                         Batal
                     </Button>,
                     <Button key="submit" type="primary" loading={processing} onClick={handleCreatePayment}>
-                        Lanjut Bayar
-                    </Button>
-                ] : [
-                    <Button key="close" onClick={() => {
-                        if (payModal.pollInterval) clearInterval(payModal.pollInterval);
-                        setPayModal({ visible: false, supply: null, paymentType: 'qris', step: 1, paymentData: null, pollInterval: null });
-                        fetchData();
-                    }}>
-                        Tutup
+                        Bayar dari Saldo
                     </Button>
                 ]}
-                width={payModal.step === 2 ? 500 : 450}
+                width={480}
             >
-                {payModal.step === 1 && payModal.supply && (
+                {payModal.supply && (
                     <div>
                         <div style={{ background: '#f5f5f5', padding: 12, borderRadius: 8, marginBottom: 16 }}>
                             <p><strong>Supplier:</strong> {payModal.supply.supplier?.nama}</p>
                             <p><strong>Produk:</strong> {payModal.supply.product?.nama_produk}</p>
-                            <p style={{ marginBottom: 0 }}><strong>Jumlah:</strong> {payModal.supply.jumlah} unit × {formatCurrency(payModal.supply.harga_supply)}</p>
+                            <p style={{ marginBottom: 0 }}>
+                                <strong>Jumlah:</strong> {payModal.supply.jumlah} unit x {formatCurrency(payModal.supply.harga_supply)}
+                            </p>
                         </div>
                         <p style={{ fontSize: 20, color: '#27AE60', textAlign: 'center', margin: '16px 0' }}>
                             <strong>Total: {formatCurrency(payModal.supply.jumlah * payModal.supply.harga_supply)}</strong>
                         </p>
-                        <div>
-                            <label><strong>Pilih Metode Pembayaran:</strong></label>
-                            <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
-                                {[
-                                    { value: 'qris', label: 'QRIS', icon: '📱', desc: 'Scan QR Code' },
-                                    { value: 'gopay', label: 'GoPay', icon: '💚', desc: 'Redirect' },
-                                    { value: 'shopeepay', label: 'ShopeePay', icon: '🧡', desc: 'Redirect' }
-                                ].map(method => (
-                                    <div
-                                        key={method.value}
-                                        onClick={() => setPayModal(prev => ({ ...prev, paymentType: method.value }))}
-                                        style={{
-                                            flex: 1,
-                                            padding: 16,
-                                            border: payModal.paymentType === method.value ? '2px solid #27AE60' : '1px solid #d9d9d9',
-                                            borderRadius: 8,
-                                            textAlign: 'center',
-                                            cursor: 'pointer',
-                                            background: payModal.paymentType === method.value ? '#f6ffed' : '#fff'
-                                        }}
-                                    >
-                                        <div style={{ fontSize: 24 }}>{method.icon}</div>
-                                        <div style={{ fontWeight: 600 }}>{method.label}</div>
-                                        <div style={{ fontSize: 11, color: '#888' }}>{method.desc}</div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {payModal.step === 2 && payModal.paymentData && (
-                    <div style={{ textAlign: 'center' }}>
-                        {/* QRIS - Show QR Code */}
-                        {payModal.paymentType === 'qris' && (
-                            <div>
-                                <p style={{ marginBottom: 16 }}>Scan QR Code berikut dengan aplikasi E-Wallet Anda:</p>
-                                {(() => {
-                                    // Generate QR URL from qr_string if qr_code_url not available
-                                    const qrUrl = payModal.paymentData.qr_code_url ||
-                                        (payModal.paymentData.qr_string ?
-                                            `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(payModal.paymentData.qr_string)}` :
-                                            null);
-
-                                    if (qrUrl) {
-                                        return (
-                                            <div style={{ background: '#fff', padding: 20, borderRadius: 12, display: 'inline-block', boxShadow: '0 2px 12px rgba(0,0,0,0.1)' }}>
-                                                <img
-                                                    src={qrUrl}
-                                                    alt="QR Code"
-                                                    style={{ width: 250, height: 250 }}
-                                                    onError={(e) => {
-                                                        e.target.style.display = 'none';
-                                                        e.target.nextSibling.style.display = 'block';
-                                                    }}
-                                                />
-                                                <p style={{ display: 'none', color: '#E74C3C' }}>Gagal memuat QR Code</p>
-                                            </div>
-                                        );
-                                    } else if (payModal.paymentData.payment_url) {
-                                        return (
-                                            <div>
-                                                <p>QR Code tidak tersedia langsung. Silakan buka link berikut:</p>
-                                                <Button type="primary" size="large" href={payModal.paymentData.payment_url} target="_blank">
-                                                    Buka Halaman Pembayaran
-                                                </Button>
-                                            </div>
-                                        );
-                                    } else {
-                                        return <p style={{ color: '#F39C12' }}>QR Code tidak tersedia. Silakan coba metode pembayaran lain.</p>;
-                                    }
-                                })()}
-                                <p style={{ marginTop: 16, color: '#888', fontSize: 12 }}>
-                                    Total: <strong>{formatCurrency(payModal.supply?.jumlah * payModal.supply?.harga_supply)}</strong>
-                                </p>
-                            </div>
-                        )}
-
-                        {/* E-Wallet - Show Redirect Buttons */}
-                        {(payModal.paymentType === 'gopay' || payModal.paymentType === 'shopeepay') && (
-                            <div>
-                                <div style={{ fontSize: 64, marginBottom: 16 }}>
-                                    {payModal.paymentType === 'gopay' ? '💚' : '🧡'}
-                                </div>
-                                <p style={{ marginBottom: 20 }}>
-                                    Klik tombol di bawah untuk melanjutkan pembayaran via {payModal.paymentType === 'gopay' ? 'GoPay' : 'ShopeePay'}
-                                </p>
-                                {payModal.paymentData.payment_url ? (
-                                    <Button
-                                        type="primary"
-                                        size="large"
-                                        style={{
-                                            background: payModal.paymentType === 'gopay' ? '#00AA13' : '#EE4D2D',
-                                            borderColor: payModal.paymentType === 'gopay' ? '#00AA13' : '#EE4D2D'
-                                        }}
-                                        href={payModal.paymentData.payment_url}
-                                        target="_blank"
-                                    >
-                                        Bayar dengan {payModal.paymentType === 'gopay' ? 'GoPay' : 'ShopeePay'}
-                                    </Button>
-                                ) : (
-                                    <p style={{ color: '#F39C12' }}>Link pembayaran tidak tersedia. Silakan coba lagi.</p>
-                                )}
-                                <p style={{ marginTop: 20, color: '#888', fontSize: 12 }}>
-                                    Total: <strong>{formatCurrency(payModal.supply?.jumlah * payModal.supply?.harga_supply)}</strong>
-                                </p>
-                            </div>
-                        )}
-
-                        <div style={{ marginTop: 24, padding: 12, background: '#fffbe6', borderRadius: 8 }}>
-                            <p style={{ margin: 0, fontSize: 12 }}>
-                                ⏳ Status akan diperbarui otomatis setelah pembayaran berhasil
-                            </p>
+                        <div style={{ padding: 12, background: '#fff7e6', borderRadius: 8, color: '#8c5a00' }}>
+                            Dana pembayaran ini akan dipotong langsung dari saldo perusahaan yang berasal dari pembayaran consumer di Midtrans.
                         </div>
                     </div>
                 )}
             </Modal>
 
-            {/* Payment Detail Modal */}
             <Modal
                 title="Detail Pembayaran"
                 open={detailModal.visible}
@@ -516,19 +344,22 @@ const PembayaranSupplier = () => {
                             </Tag>
                         </div>
                         <div className={styles.detailRow}>
+                            <span>Pencairan:</span>
+                            <Tag color={getDisbursementColor(detailModal.payment.disbursement_status)}>
+                                {(detailModal.payment.disbursement_status || 'pending').toUpperCase()}
+                            </Tag>
+                        </div>
+                        <div className={styles.detailRow}>
                             <span>Metode:</span>
-                            <strong>{detailModal.payment.payment_type?.toUpperCase()}</strong>
+                            <strong>{detailModal.payment.payment_type?.toUpperCase() || 'SALDO PERUSAHAAN'}</strong>
                         </div>
                         <div className={styles.detailRow}>
                             <span>Tanggal Bayar:</span>
                             <strong>{formatDate(detailModal.payment.payment_date)}</strong>
                         </div>
-
                     </div>
                 )}
             </Modal>
-
-
         </AdminLayout>
     );
 };

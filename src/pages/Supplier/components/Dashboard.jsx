@@ -162,7 +162,7 @@ const Dashboard = () => {
       width: 80
     },
     {
-      title: 'Harga',
+      title: 'Harga Penawaran',
       dataIndex: 'harga_supply',
       key: 'harga_supply',
       render: (val) => <span style={{ color: '#2d7a52', fontWeight: 600 }}>{formatCurrency(val)}</span>,
@@ -395,7 +395,7 @@ const Dashboard = () => {
             <ol className={styles.infList}>
               <li>Klik menu "Produk Tersedia"</li>
               <li>Pilih produk yang ingin Anda supply</li>
-              <li>Isi informasi supply (jumlah, harga, grade)</li>
+              <li>Isi informasi supply (jumlah, harga penawaran, grade)</li>
               <li>Upload foto produk Anda</li>
               <li>Submit pengajuan untuk review admin</li>
             </ol>
