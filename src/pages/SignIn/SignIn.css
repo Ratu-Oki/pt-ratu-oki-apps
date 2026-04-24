@@ -69,6 +69,15 @@
   color: #ffc107;
 }
 
+.signin-logo-image {
+  display: block;
+  width: 250px;
+  height: 100px;
+  background-color: white;
+  object-fit: contain;
+  border-radius: 25px;
+}
+
 .signin-title {
   font-size: 42px;
   font-weight: 700;

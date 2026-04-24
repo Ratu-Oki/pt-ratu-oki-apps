@@ -67,7 +67,13 @@ const menuItems = [
         <div className={styles.logoSection}>
           <div className={styles.logo}>
             <span className={styles.logoIcon}>-</span>
-            {!collapsed && <span className={styles.logoText}>PT Ratu Oki</span>}
+            {!collapsed && (
+              <img
+                src="/Logo-PTRATUOKI.png"
+                alt="PT Ratu Oki"
+                className={styles.logoImage}
+              />
+            )}
           </div>
           <button
             className={styles.closeButton}

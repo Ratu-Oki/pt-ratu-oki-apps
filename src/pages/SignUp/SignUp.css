@@ -69,6 +69,13 @@
   color: #ffc107;
 }
 
+.signup-logo-image {
+  display: block;
+  width: 170px;
+  height: 54px;
+  object-fit: contain;
+}
+
 .signup-title {
   font-size: 42px;
   font-weight: 700;
