@@ -107,6 +107,15 @@
   font-weight: 700;
 }
 
+.logoImage {
+  display: block;
+  width: 180px;
+  max-width: 100%;
+  object-fit: contain;
+  background-color: white;
+  border-radius: 25px;
+}
+
 /* Collapse Button */
 .collapseButton {
   background: rgba(255, 255, 255, 0.2);
@@ -323,6 +332,11 @@
     font-size: 16px;
   }
 
+  .logoImage {
+    width: 132px;
+    height: 40px;
+  }
+
   .menuItem {
     font-size: 13px;
     padding: 10px 16px;
@@ -465,6 +479,11 @@
 
   .logoText {
     font-size: 16px;
+  }
+
+  .logoImage {
+    width: 132px;
+    height: 40px;
   }
 
   .collapseButton {

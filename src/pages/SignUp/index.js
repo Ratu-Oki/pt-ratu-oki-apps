@@ -96,8 +96,11 @@ const SignUp = () => {
       <div className="signup-left">
         <div className="signup-left-content">
           <div className="signup-logo">
-            <span>RO</span>
-            <span className="signup-logo-text">PT Ratu Oki</span>
+            <img
+              src="/Logo-PTRATUOKI.png"
+              alt="PT Ratu Oki"
+              className="signup-logo-image"
+            />
           </div>
 
           <h1 className="signup-title">

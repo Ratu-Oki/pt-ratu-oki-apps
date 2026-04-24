@@ -4,7 +4,7 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  padding: 0 24px;
+  padding: 45px 24px;
 }
 
 .headerContainer {
@@ -43,6 +43,14 @@
 .logoText {
   letter-spacing: 0.5px;
   font-size: 16px;
+}
+
+.logoImage {
+  display: block;
+  width: 136px;
+  border-radius: 25px;
+  object-fit: contain;
+  background-color: white;
 }
 
 .desktopMenu {
@@ -122,6 +130,11 @@
     font-size: 14px;
   }
 
+  .logoImage {
+    width: 112px;
+    height: 34px;
+  }
+
   .logoIcon {
     font-size: 20px;
   }
@@ -161,6 +174,11 @@
   .logoText {
     font-size: 12px;
     letter-spacing: 0;
+  }
+
+  .logoImage {
+    width: 96px;
+    height: 30px;
   }
 
   .logoIcon {
