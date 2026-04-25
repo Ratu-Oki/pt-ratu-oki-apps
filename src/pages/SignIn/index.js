@@ -116,8 +116,7 @@ const SignIn = () => {
       <div className="signin-left">
         <div className="signin-left-content">
           <div className="signin-logo">
-            <span>RO</span>
-            <span className="signin-logo-text">PT Ratu Oki</span>
+            <img src={'/logo.png'} alt="PT Ratu Oki" className="logo-image" />
           </div>
 
           <h1 className="signin-title">
