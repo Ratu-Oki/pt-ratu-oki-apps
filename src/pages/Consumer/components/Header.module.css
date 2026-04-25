@@ -4,7 +4,7 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  padding: 0 24px;
+  padding: 55px 24px;
 }
 
 .headerContainer {
@@ -20,6 +20,13 @@
 .logoSection {
   flex-shrink: 0;
   min-width: fit-content;
+}
+.logoImage {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  background: white;
+  border-radius: 50%;
 }
 
 .logo {

@@ -106,7 +106,7 @@ const Header = ({ cartCount = 0, userName = 'User', onProfileClick }) => {
         <div className={styles.logoSection}>
           <Link to="/consumer" style={{ textDecoration: 'none' }}>
             <div className={styles.logo}>
-              <span className={styles.logoText}>PT Ratu Oki</span>
+              <img src={'/logo.png'} alt="PT Ratu Oki" className={styles.logoImage} />
             </div>
           </Link>
         </div>
