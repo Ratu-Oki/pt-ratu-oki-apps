@@ -127,6 +127,13 @@
   opacity: 0.85;
 }
 
+
+.logo-image {
+  width: 250px;
+  object-fit: contain;
+  background: white;
+  border-radius: 25px;
+}
 /* Right Side - Form */
 .signup-right {
   flex: 1;
