@@ -24,6 +24,13 @@
   overflow: hidden;
 }
 
+.logo-image {
+  width: 250px;
+  object-fit: contain;
+  background: white;
+  border-radius: 25px;
+}
+
 .signin-left::before,
 .signin-left::after {
   content: '';
