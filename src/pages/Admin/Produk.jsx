@@ -104,6 +104,24 @@ const Produk = () => {
     }).format(amount || 0);
   };
 
+  const toNumber = (value) => Number(value || 0);
+
+  const getSupplyPriceInfo = (supply) => {
+    const currentBuyPrice = toNumber(supply?.product?.harga_beli);
+    const offeredPrice = toNumber(supply?.harga_supply);
+    const isPending = supply?.status_produk === 'pending';
+    const displayedBuyPrice = isPending ? offeredPrice : currentBuyPrice;
+    const hasChangedPrice = currentBuyPrice !== offeredPrice;
+
+    return {
+      currentBuyPrice,
+      offeredPrice,
+      displayedBuyPrice,
+      hasChangedPrice,
+      isPending
+    };
+  };
+
   // Handle add/edit product
   const handleSaveProduct = async () => {
     try {
@@ -320,16 +338,20 @@ const Produk = () => {
       title: 'Harga',
       dataIndex: 'harga_supply',
       key: 'harga_supply',
-      render: (val, record) => (
-        <div>
-          <div>{formatCurrency(val)}</div>
-          {record.product?.harga_beli && val !== record.product.harga_beli && (
-            <small style={{ color: val < record.product.harga_beli ? 'green' : 'red' }}>
-              vs {formatCurrency(record.product.harga_beli)}
-            </small>
-          )}
-        </div>
-      )
+      render: (val, record) => {
+        const priceInfo = getSupplyPriceInfo(record);
+
+        return (
+          <div>
+            <div>{formatCurrency(val)}</div>
+            {priceInfo.currentBuyPrice > 0 && priceInfo.hasChangedPrice && (
+              <small style={{ color: priceInfo.offeredPrice < priceInfo.currentBuyPrice ? 'green' : 'red' }}>
+                Harga beli awal: {formatCurrency(priceInfo.currentBuyPrice)}
+              </small>
+            )}
+          </div>
+        );
+      }
     },
     {
       title: 'Grade',
@@ -504,12 +526,31 @@ const Produk = () => {
       >
         {supplyDetailModal.supply && (
           <div>
-            <h4>Informasi Produk</h4>
-            <p><strong>Produk:</strong> {supplyDetailModal.supply.product?.nama_produk}</p>
-            <p><strong>Jumlah:</strong> {supplyDetailModal.supply.jumlah} unit</p>
-            <p><strong>Harga Penawaran:</strong> {formatCurrency(supplyDetailModal.supply.harga_supply)}</p>
-            <p><strong>Harga Beli Admin:</strong> {formatCurrency(supplyDetailModal.supply.product?.harga_beli)}</p>
-            <p><strong>Grade:</strong> {supplyDetailModal.supply.grade}</p>
+            {(() => {
+              const priceInfo = getSupplyPriceInfo(supplyDetailModal.supply);
+
+              return (
+                <>
+                  <h4>Informasi Produk</h4>
+                  <p><strong>Produk:</strong> {supplyDetailModal.supply.product?.nama_produk}</p>
+                  <p><strong>Jumlah:</strong> {supplyDetailModal.supply.jumlah} unit</p>
+                  <p><strong>Harga Penawaran Supplier:</strong> {formatCurrency(priceInfo.offeredPrice)}</p>
+                  <p><strong>Harga Beli Admin Saat Ini:</strong> {formatCurrency(priceInfo.currentBuyPrice)}</p>
+                  <p>
+                    <strong>Harga Beli Ditampilkan:</strong> {formatCurrency(priceInfo.displayedBuyPrice)}
+                    {priceInfo.isPending && priceInfo.hasChangedPrice && (
+                      <Tag color="orange" style={{ marginLeft: 8 }}>Menunggu keputusan</Tag>
+                    )}
+                  </p>
+                  {priceInfo.isPending && priceInfo.hasChangedPrice && (
+                    <p style={{ background: '#fff7e6', border: '1px solid #ffd591', padding: 12, borderRadius: 8 }}>
+                      Harga ini hanya preview untuk admin. Jika supply di-reject, harga produk tetap {formatCurrency(priceInfo.currentBuyPrice)}. Jika di-approve, harga beli produk berubah menjadi {formatCurrency(priceInfo.offeredPrice)}.
+                    </p>
+                  )}
+                  <p><strong>Grade:</strong> {supplyDetailModal.supply.grade}</p>
+                </>
+              );
+            })()}
 
             <h4 style={{ marginTop: 16 }}>Informasi Supplier</h4>
             <p><strong>Nama:</strong> {supplyDetailModal.supply.supplier?.nama}</p>
@@ -546,6 +587,13 @@ const Produk = () => {
         <p><strong>Produk:</strong> {verifyModal.supply?.product?.nama_produk}</p>
         <p><strong>Jumlah:</strong> {verifyModal.supply?.jumlah} unit</p>
         <p><strong>Harga:</strong> {formatCurrency(verifyModal.supply?.harga_supply)}</p>
+        {verifyModal.supply && (
+          <p style={{ color: verifyModal.status === 'approved' ? '#1677ff' : '#cf1322' }}>
+            {verifyModal.status === 'approved'
+              ? `Jika approve, harga beli produk akan menjadi ${formatCurrency(verifyModal.supply.harga_supply)}.`
+              : `Jika reject, harga beli produk tetap ${formatCurrency(verifyModal.supply.product?.harga_beli)}.`}
+          </p>
+        )}
         <div style={{ marginTop: 16 }}>
           <label>Catatan untuk Supplier:</label>
           <Input.TextArea
