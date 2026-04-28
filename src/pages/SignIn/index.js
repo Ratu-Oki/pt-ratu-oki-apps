@@ -124,7 +124,7 @@ const SignIn = () => {
           </div>
 
           <h1 className="signin-title">
-            Selamat Datang <span className="highlight">Rivan</span>
+            Selamat Datang <span className="highlight">Kembali</span>
           </h1>
 
           <p className="signin-description">
