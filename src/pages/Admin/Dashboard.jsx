@@ -10,7 +10,7 @@ import MetricsCard from './components/MetricsCard';
 import RecentTransactions from './components/RecentTransactions';
 import QuickActions from './components/QuickActions';
 import RecentActivities from './components/RecentActivities';
-import { transactionService, productService, stockService } from '../../services/api';
+import { transactionService, productService, stockService, paymentService } from '../../services/api';
 import { Spin, message } from 'antd';
 import {
   ClockCircleOutlined,
@@ -107,16 +107,19 @@ const Dashboard = () => {
     setLoading(true);
     try {
       // Fetch all data in parallel including stock summary
-      const [transactionStats, recentTransactions, productList, stockSummary] = await Promise.all([
+      const [transactionStats, recentTransactions, productList, stockSummary, paymentSummary] = await Promise.all([
         transactionService.getStats().catch(() => ({ data: {} })),
         transactionService.getAllAdmin({ page: 1, limit: 10 }).catch(() => ({ data: { transactions: [] } })),
         productService.getAllAdmin({ page: 1, limit: 100 }).catch(() => ({ data: { products: [] } })),
-        stockService.getSummary().catch(() => ({ data: {} }))
+        stockService.getSummary().catch(() => ({ data: {} })),
+        paymentService.getSummary().catch(() => ({ data: {} }))
       ]);
 
       // Build metrics from stats
       const stats = transactionStats.data || {};
       const summary = stockSummary.data || {};
+      const paymentStats = paymentSummary.data || {};
+      const companyBalance = paymentStats.company_balance ?? stats.company_balance ?? 0;
 
       // Count active products from product list if not in stats
       let activeProductCount = stats.active_products || 0;
@@ -145,9 +148,9 @@ const Dashboard = () => {
         {
           id: 2,
           label: 'Saldo Perusahaan',
-          value: formatCurrency(stats.company_balance || 0),
+          value: formatCurrency(companyBalance),
           change: 'Penjualan - bayar supplier',
-          isPositive: (stats.company_balance || 0) >= 0,
+          isPositive: companyBalance >= 0,
           icon: <WalletOutlined />,
           bgColor: '#8E44AD'
         },

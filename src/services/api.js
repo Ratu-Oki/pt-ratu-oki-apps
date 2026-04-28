@@ -395,7 +395,12 @@ export const paymentService = {
 
     // Create supplier payment from company balance
     createFromCompanyBalance: async (data) => {
-        const response = await api.post('/payments', data);
+        const response = await api.post('/payments/company-balance', data);
+        return response.data;
+    },
+
+    topUpCompanyBalance: async (data) => {
+        const response = await api.post('/payments/company-balance/topup', data);
         return response.data;
     },
 

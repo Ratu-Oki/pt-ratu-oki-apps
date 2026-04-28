@@ -6,6 +6,12 @@
     padding: 20px;
 }
 
+.actionBar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 16px;
+}
+
 .metricsGrid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
