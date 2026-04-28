@@ -134,8 +134,12 @@ const SupplyHistory = () => {
       title: 'Catatan Admin',
       dataIndex: 'catatan',
       key: 'catatan',
-      render: (text) => text || '-',
-      ellipsis: true
+      render: (text) => (
+        <div className={styles.adminNoteCell}>
+          {text || '-'}
+        </div>
+      ),
+      width: 280
     }
   ];
 

@@ -6,7 +6,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import styles from './Transaksi.module.css';
 import AdminLayout from './components/AdminLayout';
 import { transactionService } from '../../services/api';
-import { Spin, message, Modal, Select, Button } from 'antd';
+import { Spin, message, Modal, Select, Button, Divider, Tag } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 
 const Transaksi = () => {
@@ -23,6 +23,8 @@ const Transaksi = () => {
     dibatalkan: 0
   });
   const [statusModal, setStatusModal] = useState({ visible: false, transaction: null, newStatus: '' });
+  const [detailModal, setDetailModal] = useState({ visible: false, transaction: null });
+  const [detailLoading, setDetailLoading] = useState(false);
   const [updating, setUpdating] = useState(false);
 
   // Tab data
@@ -114,6 +116,21 @@ const Transaksi = () => {
     }
   };
 
+  const handleShowDetail = async (transaction) => {
+    setDetailModal({ visible: true, transaction });
+    setDetailLoading(true);
+
+    try {
+      const response = await transactionService.getById(transaction.id);
+      setDetailModal({ visible: true, transaction: response.data || transaction });
+    } catch (error) {
+      console.error('Error fetching transaction detail:', error);
+      message.error(error.message || 'Gagal memuat detail transaksi');
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
   // Status badge colors
   const getStatusColor = (status) => {
     const colors = {
@@ -152,6 +169,23 @@ const Transaksi = () => {
       month: 'short',
       year: 'numeric'
     });
+  };
+
+  const formatDateTime = (dateStr) => {
+    if (!dateStr) return '-';
+    return new Date(dateStr).toLocaleString('id-ID', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const formatWeight = (product) => {
+    if (!product?.berat) return '-';
+    const weight = Number(product.berat);
+    return `${Number.isInteger(weight) ? weight : weight.toString()} ${product.satuan_berat || 'kg'}`;
   };
 
   // Action buttons
@@ -254,7 +288,7 @@ const Transaksi = () => {
                           <button
                             className={styles.actionBtn}
                             title="Detail"
-                            onClick={() => message.info(`Detail: ${transaction.invoice_number}`)}
+                            onClick={() => handleShowDetail(transaction)}
                           >👁</button>
                           <button
                             className={styles.actionBtn}
@@ -330,6 +364,111 @@ const Transaksi = () => {
             <Select.Option value="cancelled">Dibatalkan</Select.Option>
           </Select>
         </div>
+      </Modal>
+
+      {/* Transaction Detail Modal */}
+      <Modal
+        title="Detail Transaksi"
+        open={detailModal.visible}
+        onCancel={() => setDetailModal({ visible: false, transaction: null })}
+        footer={[
+          <Button key="close" onClick={() => setDetailModal({ visible: false, transaction: null })}>
+            Tutup
+          </Button>
+        ]}
+        width={760}
+      >
+        <Spin spinning={detailLoading}>
+          {detailModal.transaction && (
+            <div className={styles.detailContent}>
+              <div className={styles.detailGrid}>
+                <div className={styles.detailItem}>
+                  <span>Invoice</span>
+                  <strong>{detailModal.transaction.invoice_number}</strong>
+                </div>
+                <div className={styles.detailItem}>
+                  <span>Status</span>
+                  <Tag color={getStatusColor(detailModal.transaction.status)}>
+                    {getStatusLabel(detailModal.transaction.status)}
+                  </Tag>
+                </div>
+                <div className={styles.detailItem}>
+                  <span>Pembayaran</span>
+                  <strong>{detailModal.transaction.payment_status || '-'}</strong>
+                </div>
+                <div className={styles.detailItem}>
+                  <span>Tanggal</span>
+                  <strong>{formatDateTime(detailModal.transaction.tanggal_transaksi)}</strong>
+                </div>
+              </div>
+
+              <Divider />
+
+              <h4>Data Consumer</h4>
+              <div className={styles.detailGrid}>
+                <div className={styles.detailItem}>
+                  <span>Nama</span>
+                  <strong>{detailModal.transaction.consumer?.nama || '-'}</strong>
+                </div>
+                <div className={styles.detailItem}>
+                  <span>Email</span>
+                  <strong>{detailModal.transaction.consumer?.email || '-'}</strong>
+                </div>
+                <div className={styles.detailItem}>
+                  <span>Telepon</span>
+                  <strong>{detailModal.transaction.consumer?.telepon || '-'}</strong>
+                </div>
+              </div>
+
+              <div className={styles.addressBox}>
+                <span>Alamat Pengiriman</span>
+                <p>{detailModal.transaction.shipping_address || '-'}</p>
+              </div>
+
+              <Divider />
+
+              <h4>Produk Dibeli</h4>
+              <div className={styles.itemsTable}>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Produk</th>
+                      <th>Grade</th>
+                      <th>Berat</th>
+                      <th>Qty</th>
+                      <th>Harga</th>
+                      <th>Subtotal</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(detailModal.transaction.details || []).map((detail) => (
+                      <tr key={detail.id}>
+                        <td>{detail.product?.nama_produk || `Produk #${detail.product_id}`}</td>
+                        <td>Grade {detail.grade || 'A'}</td>
+                        <td>{formatWeight(detail.product)}</td>
+                        <td>{detail.jumlah}</td>
+                        <td>{formatCurrency(detail.harga_satuan)}</td>
+                        <td>{formatCurrency(detail.subtotal)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className={styles.totalDetail}>
+                <span>Total Transaksi</span>
+                <strong>{formatCurrency(detailModal.transaction.total_harga)}</strong>
+              </div>
+
+              {detailModal.transaction.notes && (
+                <div className={styles.addressBox}>
+                  <span>Catatan</span>
+                  <p>{detailModal.transaction.notes}</p>
+                </div>
+              )}
+            </div>
+          )}
+        </Spin>
       </Modal>
     </AdminLayout>
   );
