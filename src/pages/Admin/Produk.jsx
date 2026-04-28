@@ -184,6 +184,9 @@ const Produk = () => {
       formData.append('berat', values.berat);
       formData.append('satuan_berat', values.satuan_berat);
       formData.append('perlu_supply', String(values.perlu_supply !== false));
+      if (values.perlu_supply !== false) {
+        formData.append('stok', values.stok || 0);
+      }
       if (values.perlu_supply === false) {
         const hasExistingImage = Boolean(productModal.product?.image_url);
         if (!productImageFile && !hasExistingImage) {
@@ -644,6 +647,18 @@ const Produk = () => {
                 </div>
               )}
             </>
+          )}
+          {perluSupply !== false && (
+            <Form.Item
+              name="stok"
+              label="Kebutuhan Supply (stok)"
+              rules={[
+                { required: true, message: 'Kebutuhan supply harus diisi' },
+                { type: 'number', min: 1, message: 'Kebutuhan supply minimal 1' }
+              ]}
+            >
+              <InputNumber min={1} style={{ width: '100%' }} placeholder="Contoh: 10" addonAfter={form.getFieldValue('satuan_berat') || 'kg'} />
+            </Form.Item>
           )}
           <Form.Item name="lokasi_supplier" label="Lokasi">
             <Input placeholder="Contoh: Jakarta" />
