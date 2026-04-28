@@ -106,6 +106,34 @@ const Produk = () => {
 
   const toNumber = (value) => Number(value || 0);
 
+  const formatWeight = (record) => {
+    if (!record?.berat) return '1 kg';
+    const numericWeight = Number(record.berat);
+    const displayWeight = Number.isInteger(numericWeight) ? numericWeight : numericWeight.toString();
+    return `${displayWeight} ${record.satuan_berat || 'kg'}`;
+  };
+
+  const getWeightFields = (record) => {
+    if (!record?.berat) {
+      return { berat: 1, satuan_berat: 'kg' };
+    }
+
+    if (typeof record.berat === 'string') {
+      const match = record.berat.match(/^([\d.,]+)\s*(kg|gram)?$/i);
+      if (match) {
+        return {
+          berat: Number(match[1].replace(',', '.')) || 1,
+          satuan_berat: (match[2] || record.satuan_berat || 'kg').toLowerCase()
+        };
+      }
+    }
+
+    return {
+      berat: Number(record.berat) || 1,
+      satuan_berat: record.satuan_berat || 'kg'
+    };
+  };
+
   const getSupplyPriceInfo = (supply) => {
     const currentBuyPrice = toNumber(supply?.product?.harga_beli);
     const offeredPrice = toNumber(supply?.harga_supply);
@@ -132,9 +160,11 @@ const Produk = () => {
       formData.append('nama_produk', values.nama_produk);
       formData.append('harga_beli', values.harga_beli);
       formData.append('harga_jual', values.harga_jual);
+      formData.append('grade', values.grade);
+      formData.append('berat', values.berat);
+      formData.append('satuan_berat', values.satuan_berat);
       formData.append('lokasi_supplier', values.lokasi_supplier || '');
       formData.append('deskripsi', values.deskripsi || '');
-      formData.append('berat', values.berat || '1 kg');
 
       if (productModal.mode === 'edit' && productModal.product) {
         await productService.update(productModal.product.id, formData);
@@ -251,7 +281,13 @@ const Produk = () => {
       title: 'Berat',
       dataIndex: 'berat',
       key: 'berat',
-      render: (val) => val || '1 kg'
+      render: (_, record) => formatWeight(record)
+    },
+    {
+      title: 'Grade',
+      dataIndex: 'grade',
+      key: 'grade',
+      render: (grade) => <Tag color="gold">Grade {grade || 'A'}</Tag>
     },
     {
       title: 'Stok',
@@ -282,11 +318,15 @@ const Produk = () => {
       render: (_, record) => (
         <Space>
           <Button size="small" icon={<EditOutlined />} onClick={() => {
+            const weightFields = getWeightFields(record);
             setProductModal({ visible: true, mode: 'edit', product: record });
             form.setFieldsValue({
               nama_produk: record.nama_produk,
               harga_beli: record.harga_beli,
               harga_jual: record.harga_jual,
+              grade: record.grade || 'A',
+              berat: weightFields.berat,
+              satuan_berat: weightFields.satuan_berat,
               lokasi_supplier: record.lokasi_supplier,
               deskripsi: record.deskripsi
             });
@@ -453,6 +493,7 @@ const Produk = () => {
       <Button type="primary" icon={<PlusOutlined />} onClick={() => {
         setProductModal({ visible: true, mode: 'add', product: null });
         form.resetFields();
+        form.setFieldsValue({ grade: 'A', berat: 1, satuan_berat: 'kg' });
       }}>
         Tambah Produk
       </Button>
@@ -488,9 +529,42 @@ const Produk = () => {
               <InputNumber style={{ width: 200 }} formatter={value => `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')} parser={value => value.replace(/Rp\s?|(,*)/g, '')} min={0} />
             </Form.Item>
           </Space>
-          <Form.Item name="berat" label="Berat Produk" rules={[{ required: true, message: 'Berat produk harus diisi' }]}>
-            <Input placeholder="Contoh: 1 kg, 500 gram" />
+          <Form.Item
+            name="grade"
+            label="Grade"
+            initialValue="A"
+            rules={[{ required: true, message: 'Grade harus dipilih' }]}
+          >
+            <Select>
+              <Select.Option value="A">Grade A (Premium)</Select.Option>
+              <Select.Option value="B">Grade B (Standard)</Select.Option>
+              <Select.Option value="C">Grade C (Extract)</Select.Option>
+              <Select.Option value="D">Grade D</Select.Option>
+            </Select>
           </Form.Item>
+          <Space style={{ width: '100%' }} size="large" align="start">
+            <Form.Item
+              name="berat"
+              label="Berat Produk"
+              rules={[
+                { required: true, message: 'Berat produk harus diisi' },
+                { type: 'number', min: 0.01, message: 'Berat harus lebih dari 0' }
+              ]}
+            >
+              <InputNumber min={0.01} step={0.01} style={{ width: 200 }} placeholder="Contoh: 1" />
+            </Form.Item>
+            <Form.Item
+              name="satuan_berat"
+              label="Satuan"
+              initialValue="kg"
+              rules={[{ required: true, message: 'Satuan harus dipilih' }]}
+            >
+              <Select style={{ width: 200 }}>
+                <Select.Option value="kg">kg</Select.Option>
+                <Select.Option value="gram">gram</Select.Option>
+              </Select>
+            </Form.Item>
+          </Space>
           <Form.Item name="lokasi_supplier" label="Lokasi">
             <Input placeholder="Contoh: Jakarta" />
           </Form.Item>
