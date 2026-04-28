@@ -502,6 +502,8 @@ const Checkout = () => {
           transactionId: response.data.transaction.id,
           invoiceNumber: response.data.transaction.invoice_number,
           qrCodeUrl: response.data.payment.qr_code_url,
+          qrCodeV2Url: response.data.payment.qr_code_v2_url,
+          paymentSimulatorUrl: response.data.payment.payment_simulator_url,
           qrString: response.data.payment.qr_string,
           total: response.data.payment.total,
           expiredAt: response.data.payment.expired_at
@@ -860,6 +862,19 @@ const Checkout = () => {
                     <span>Total Pembayaran</span>
                     <strong>{formatCurrency(paymentData.total)}</strong>
                   </div>
+
+                  {paymentData.paymentSimulatorUrl && (
+                    <Button
+                      type="primary"
+                      block
+                      href={paymentData.paymentSimulatorUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ marginTop: 16 }}
+                    >
+                      Buka Midtrans Simulator
+                    </Button>
+                  )}
                 </div>
 
                 <div className={styles.paymentInstructions}>
@@ -870,6 +885,11 @@ const Checkout = () => {
                     <li>Scan QR code di atas</li>
                     <li>Konfirmasi pembayaran</li>
                   </ol>
+                  {paymentData.paymentSimulatorUrl && (
+                    <p style={{ marginTop: 12, color: '#666' }}>
+                      Untuk sandbox, klik tombol simulator Midtrans lalu ikuti instruksi pembayaran QRIS.
+                    </p>
+                  )}
                 </div>
 
                 <div className={styles.paymentStatus}>
