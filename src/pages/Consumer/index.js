@@ -158,6 +158,13 @@ const Consumer = () => {
     navigate('/consumer/cart');
   };
 
+  const formatWeight = (product) => {
+    if (!product?.berat) return '1 kg';
+    const numericWeight = Number(product.berat);
+    const displayWeight = Number.isInteger(numericWeight) ? numericWeight : numericWeight.toString();
+    return `${displayWeight} ${product.satuan_berat || 'kg'}`;
+  };
+
   // Transform products for ProductGrid component
   const transformedProducts = filteredProducts.map(p => ({
     id: p.id,
@@ -165,7 +172,7 @@ const Consumer = () => {
     grade: `Grade ${p.grade || 'A'}`,
     image: p.image_url || 'https://via.placeholder.com/300x300?text=No+Image',
     price: p.harga_jual,
-    weight: p.berat || '1 kg',
+    weight: formatWeight(p),
     origin: p.lokasi_supplier || 'Indonesia',
     stok: p.stok || 0
   }));

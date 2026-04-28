@@ -85,6 +85,13 @@ const StatusPesanan = () => {
     return () => clearInterval(intervalId);
   }, []);
 
+  const formatWeight = (product) => {
+    if (!product?.berat) return '1 kg';
+    const numericWeight = Number(product.berat);
+    const displayWeight = Number.isInteger(numericWeight) ? numericWeight : numericWeight.toString();
+    return `${displayWeight} ${product.satuan_berat || 'kg'}`;
+  };
+
   const orders = transactions.map((tx) => ({
     id: tx.invoice_number,
     dbId: tx.id,
@@ -97,7 +104,7 @@ const StatusPesanan = () => {
     items: (tx.details || []).map((detail) => ({
       id: detail.id,
       name: detail.product?.nama_produk || `Produk #${detail.product_id}`,
-      weight: detail.product?.berat || '1 kg',
+      weight: formatWeight(detail.product),
       price: detail.harga_satuan,
       qty: detail.jumlah,
     })),

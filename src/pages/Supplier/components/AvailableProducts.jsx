@@ -49,6 +49,13 @@ const AvailableProducts = () => {
     }).format(amount || 0);
   };
 
+  const formatWeight = (product) => {
+    if (!product?.berat) return '1 kg';
+    const numericWeight = Number(product.berat);
+    const displayWeight = Number.isInteger(numericWeight) ? numericWeight : numericWeight.toString();
+    return `${displayWeight} ${product.satuan_berat || 'kg'}`;
+  };
+
   // Handle image upload
   const handleImageChange = (info) => {
     const file = info.file.originFileObj || info.file;
@@ -131,7 +138,8 @@ const AvailableProducts = () => {
       formData.append('pesan', values.pesan || '');
       formData.append('lokasi_supplier', values.lokasi_supplier || '');
       formData.append('deskripsi', values.deskripsi || '');
-      formData.append('berat', values.berat || '1 kg');
+      formData.append('berat', values.berat);
+      formData.append('satuan_berat', values.satuan_berat);
 
       if (newProductImageFile) {
         formData.append('image', newProductImageFile);
@@ -182,6 +190,10 @@ const AvailableProducts = () => {
               <Tag color="blue">Stok: {product.stok}</Tag>
             </div>
             <div className={styles.priceSection}>
+              <div className={styles.priceRow}>
+                <span className={styles.label}>Berat:</span>
+                <span>{formatWeight(product)}</span>
+              </div>
               <div className={styles.priceRow}>
                 <span className={styles.label}>Harga Beli:</span>
                 <span className={styles.price}>{formatCurrency(product.harga_beli)}</span>
@@ -401,9 +413,25 @@ const AvailableProducts = () => {
               <Form.Item
                 label="Berat Produk *"
                 name="berat"
-                rules={[{ required: true, message: 'Berat harus diisi' }]}
+                rules={[
+                  { required: true, message: 'Berat harus diisi' },
+                  { type: 'number', min: 0.01, message: 'Berat harus lebih dari 0' }
+                ]}
               >
-                <Input placeholder="Contoh: 1 kg, 500 gram" />
+                <InputNumber min={0.01} step={0.01} placeholder="Contoh: 1" style={{ width: '100%' }} />
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={12}>
+              <Form.Item
+                label="Satuan Berat *"
+                name="satuan_berat"
+                initialValue="kg"
+                rules={[{ required: true, message: 'Satuan berat harus dipilih' }]}
+              >
+                <Select>
+                  <Select.Option value="kg">kg</Select.Option>
+                  <Select.Option value="gram">gram</Select.Option>
+                </Select>
               </Form.Item>
             </Col>
           </Row>

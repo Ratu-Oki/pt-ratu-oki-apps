@@ -55,6 +55,13 @@ const SupplyHistory = () => {
     }).format(amount || 0);
   };
 
+  const formatWeight = (product) => {
+    if (!product?.berat) return '-';
+    const numericWeight = Number(product.berat);
+    const displayWeight = Number.isInteger(numericWeight) ? numericWeight : numericWeight.toString();
+    return `${displayWeight} ${product.satuan_berat || 'kg'}`;
+  };
+
   // Format date
   const formatDate = (date) => {
     return date ? new Date(date).toLocaleDateString('id-ID', {
@@ -91,7 +98,7 @@ const SupplyHistory = () => {
       title: 'Berat',
       dataIndex: 'berat',
       key: 'berat',
-      render: (berat, record) => record.product?.berat || berat || '-',
+      render: (_, record) => formatWeight(record.product),
       width: 100
     },
     {
