@@ -56,6 +56,12 @@ const AvailableProducts = () => {
     return `${displayWeight} ${product.satuan_berat || 'kg'}`;
   };
 
+  const formatSupplyNeed = (product) => {
+    const quantity = Number(product?.stok || 0);
+    const displayQuantity = Number.isInteger(quantity) ? quantity : quantity.toString();
+    return `${displayQuantity} ${product?.satuan_berat || 'kg'}`;
+  };
+
   // Handle image upload
   const handleImageChange = (info) => {
     const file = info.file.originFileObj || info.file;
@@ -86,7 +92,6 @@ const AvailableProducts = () => {
     supplyForm.resetFields();
     // Set default values
     supplyForm.setFieldsValue({
-      jumlah: 1,
       harga_supply: product.harga_beli,
       grade: 'A'
     });
@@ -100,7 +105,6 @@ const AvailableProducts = () => {
 
       const formData = new FormData();
       formData.append('product_id', supplyModal.product.id);
-      formData.append('jumlah', values.jumlah);
       formData.append('harga_supply', values.harga_supply);
       formData.append('grade', values.grade || 'A');
       formData.append('pesan', values.pesan || '');
@@ -195,6 +199,10 @@ const AvailableProducts = () => {
                 <span>{formatWeight(product)}</span>
               </div>
               <div className={styles.priceRow}>
+                <span className={styles.label}>Kebutuhan:</span>
+                <span>{formatSupplyNeed(product)}</span>
+              </div>
+              <div className={styles.priceRow}>
                 <span className={styles.label}>Harga Beli:</span>
                 <span className={styles.price}>{formatCurrency(product.harga_beli)}</span>
               </div>
@@ -262,20 +270,8 @@ const AvailableProducts = () => {
         <Form form={supplyForm} layout="vertical">
           <Row gutter={16}>
             <Col xs={24} md={12}>
-              <Form.Item
-                label="Jumlah (unit) *"
-                name="jumlah"
-                rules={[
-                  { required: true, message: 'Jumlah harus diisi' },
-                  { type: 'number', min: 1, message: 'Minimal 1 unit' }
-                ]}
-              >
-                <InputNumber 
-                  min={1} 
-                  defaultValue={1}
-                  placeholder="Berapa unit?"
-                  style={{ width: '100%' }} 
-                />
+              <Form.Item label="Jumlah Supply">
+                <Input value={supplyModal.product ? formatSupplyNeed(supplyModal.product) : '-'} disabled />
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
