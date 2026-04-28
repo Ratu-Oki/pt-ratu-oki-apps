@@ -6,7 +6,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import styles from './Produk.module.css';
 import AdminLayout from './components/AdminLayout';
 import { productService, stockService } from '../../services/api';
-import { Table, Button, Modal, Form, Input, InputNumber, Select, Space, Tag, message, Tabs, Image, Badge } from 'antd';
+import { Table, Button, Modal, Form, Input, InputNumber, Select, Space, Tag, message, Tabs, Image, Badge, Checkbox, Upload } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, CheckOutlined, CloseOutlined, WhatsAppOutlined, EyeOutlined, SearchOutlined} from '@ant-design/icons';
 
 const Produk = () => {
@@ -20,7 +20,10 @@ const Produk = () => {
   const [supplyDetailModal, setSupplyDetailModal] = useState({ visible: false, supply: null });
   const [verifyModal, setVerifyModal] = useState({ visible: false, supply: null, status: 'approved', catatan: '' });
   const [submitting, setSubmitting] = useState(false);
+  const [productImageFile, setProductImageFile] = useState(null);
+  const [productImagePreview, setProductImagePreview] = useState(null);
   const [form] = Form.useForm();
+  const perluSupply = Form.useWatch('perlu_supply', form);
 
   // Fetch products
   const fetchProducts = useCallback(async (page = 1) => {
@@ -150,6 +153,21 @@ const Produk = () => {
     };
   };
 
+  const resetProductImage = () => {
+    setProductImageFile(null);
+    setProductImagePreview(null);
+  };
+
+  const handleProductImageChange = (info) => {
+    const file = info.file.originFileObj || info.file;
+    if (!file) return;
+
+    setProductImageFile(file);
+    const reader = new FileReader();
+    reader.onload = (event) => setProductImagePreview(event.target.result);
+    reader.readAsDataURL(file);
+  };
+
   // Handle add/edit product
   const handleSaveProduct = async () => {
     try {
@@ -158,11 +176,25 @@ const Produk = () => {
 
       const formData = new FormData();
       formData.append('nama_produk', values.nama_produk);
-      formData.append('harga_beli', values.harga_beli);
+      if (values.perlu_supply !== false) {
+        formData.append('harga_beli', values.harga_beli);
+      }
       formData.append('harga_jual', values.harga_jual);
       formData.append('grade', values.grade);
       formData.append('berat', values.berat);
       formData.append('satuan_berat', values.satuan_berat);
+      formData.append('perlu_supply', String(values.perlu_supply !== false));
+      if (values.perlu_supply === false) {
+        const hasExistingImage = Boolean(productModal.product?.image_url);
+        if (!productImageFile && !hasExistingImage) {
+          message.error('Gambar produk harus diisi');
+          return;
+        }
+        formData.append('stok', values.stok || 0);
+        if (productImageFile) {
+          formData.append('image', productImageFile);
+        }
+      }
       formData.append('lokasi_supplier', values.lokasi_supplier || '');
       formData.append('deskripsi', values.deskripsi || '');
 
@@ -171,11 +203,14 @@ const Produk = () => {
         message.success('Produk berhasil diupdate');
       } else {
         await productService.create(formData);
-        message.success('Produk berhasil ditambahkan (status: pending, stok: 0)');
+        message.success(values.perlu_supply === false
+          ? 'Produk admin berhasil ditambahkan dan langsung aktif'
+          : 'Produk berhasil ditambahkan (status: pending, stok: 0)');
       }
 
       setProductModal({ visible: false, mode: 'add', product: null });
       form.resetFields();
+      resetProductImage();
       fetchProducts(pagination.page);
     } catch (error) {
       console.error('Error saving product:', error);
@@ -320,13 +355,17 @@ const Produk = () => {
           <Button size="small" icon={<EditOutlined />} onClick={() => {
             const weightFields = getWeightFields(record);
             setProductModal({ visible: true, mode: 'edit', product: record });
+            resetProductImage();
+            const productNeedsSupply = record.status_produk === 'pending';
             form.setFieldsValue({
               nama_produk: record.nama_produk,
+              perlu_supply: productNeedsSupply,
               harga_beli: record.harga_beli,
               harga_jual: record.harga_jual,
               grade: record.grade || 'A',
               berat: weightFields.berat,
               satuan_berat: weightFields.satuan_berat,
+              stok: record.stok || 0,
               lokasi_supplier: record.lokasi_supplier,
               deskripsi: record.deskripsi
             });
@@ -493,7 +532,8 @@ const Produk = () => {
       <Button type="primary" icon={<PlusOutlined />} onClick={() => {
         setProductModal({ visible: true, mode: 'add', product: null });
         form.resetFields();
-        form.setFieldsValue({ grade: 'A', berat: 1, satuan_berat: 'kg' });
+        resetProductImage();
+        form.setFieldsValue({ perlu_supply: true, grade: 'A', berat: 1, satuan_berat: 'kg', stok: 0 });
       }}>
         Tambah Produk
       </Button>
@@ -512,6 +552,7 @@ const Produk = () => {
         onCancel={() => {
           setProductModal({ visible: false, mode: 'add', product: null });
           form.resetFields();
+          resetProductImage();
         }}
         confirmLoading={submitting}
         okText="Simpan"
@@ -521,10 +562,15 @@ const Produk = () => {
           <Form.Item name="nama_produk" label="Nama Produk" rules={[{ required: true, message: 'Nama produk harus diisi' }]}>
             <Input placeholder="Contoh: Vanila Premium Grade A" />
           </Form.Item>
+          <Form.Item name="perlu_supply" valuePropName="checked" initialValue={true}>
+            <Checkbox>Perlu supply dari supplier</Checkbox>
+          </Form.Item>
           <Space style={{ width: '100%' }} size="large">
-            <Form.Item name="harga_beli" label="Harga Beli" rules={[{ required: true, message: 'Harga beli harus diisi' }]}>
-              <InputNumber style={{ width: 200 }} formatter={value => `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')} parser={value => value.replace(/Rp\s?|(,*)/g, '')} min={0} />
-            </Form.Item>
+            {perluSupply !== false && (
+              <Form.Item name="harga_beli" label="Harga Beli Supplier" rules={[{ required: true, message: 'Harga beli harus diisi' }]}>
+                <InputNumber style={{ width: 200 }} formatter={value => `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')} parser={value => value.replace(/Rp\s?|(,*)/g, '')} min={0} />
+              </Form.Item>
+            )}
             <Form.Item name="harga_jual" label="Harga Jual" rules={[{ required: true, message: 'Harga jual harus diisi' }]}>
               <InputNumber style={{ width: 200 }} formatter={value => `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')} parser={value => value.replace(/Rp\s?|(,*)/g, '')} min={0} />
             </Form.Item>
@@ -565,6 +611,40 @@ const Produk = () => {
               </Select>
             </Form.Item>
           </Space>
+          {perluSupply === false && (
+            <>
+              <Form.Item
+                name="stok"
+                label="Stok Awal"
+                rules={[
+                  { required: true, message: 'Stok awal harus diisi' },
+                  { type: 'number', min: 0, message: 'Stok tidak boleh negatif' }
+                ]}
+              >
+                <InputNumber min={0} style={{ width: '100%' }} placeholder="Masukkan stok awal produk admin" />
+              </Form.Item>
+              <Form.Item label="Gambar Produk" required>
+                <Upload
+                  beforeUpload={() => false}
+                  onChange={handleProductImageChange}
+                  maxCount={1}
+                  accept="image/*"
+                >
+                  <Button>Upload Gambar</Button>
+                </Upload>
+              </Form.Item>
+              {productModal.mode === 'edit' && productModal.product?.image_url && !productImagePreview && (
+                <div style={{ marginBottom: 16 }}>
+                  <Image src={productModal.product.image_url} width={160} style={{ borderRadius: 8 }} />
+                </div>
+              )}
+              {productImagePreview && (
+                <div style={{ marginBottom: 16 }}>
+                  <Image src={productImagePreview} width={160} style={{ borderRadius: 8 }} />
+                </div>
+              )}
+            </>
+          )}
           <Form.Item name="lokasi_supplier" label="Lokasi">
             <Input placeholder="Contoh: Jakarta" />
           </Form.Item>
