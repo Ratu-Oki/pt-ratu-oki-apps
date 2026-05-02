@@ -8,6 +8,10 @@ import AdminLayout from './components/AdminLayout';
 import { transactionService } from '../../services/api';
 import { Spin, message, Modal, Select, Button, Divider, Tag } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
+import {
+  getTrackingDisplayStatus,
+  getTrackingStatusConfig,
+} from '../../utils/orderTrackingSimulation';
 
 const Transaksi = () => {
   const [loading, setLoading] = useState(true);
@@ -26,6 +30,14 @@ const Transaksi = () => {
   const [detailModal, setDetailModal] = useState({ visible: false, transaction: null });
   const [detailLoading, setDetailLoading] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const [trackingNow, setTrackingNow] = useState(Date.now());
+
+  const adminEditableStatusOptions = [
+    { value: 'pending', label: 'Pending' },
+    { value: 'paid', label: 'Dibayar' },
+    { value: 'shipped', label: 'Dikirim' },
+    { value: 'cancelled', label: 'Dibatalkan' }
+  ];
 
   // Tab data
   const tabs = [
@@ -38,8 +50,13 @@ const Transaksi = () => {
   ];
 
   // Fetch transactions
-  const fetchTransactions = useCallback(async (page = 1) => {
-    setLoading(true);
+  const fetchTransactions = useCallback(async (page = 1, options = {}) => {
+    const { silent = false } = options;
+
+    if (!silent) {
+      setLoading(true);
+    }
+
     try {
       const params = {
         page,
@@ -82,16 +99,64 @@ const Transaksi = () => {
       }
     } catch (error) {
       console.error('Error fetching transactions:', error);
-      message.error('Gagal memuat data transaksi');
-      setTransactions([]);
+      if (!silent) {
+        message.error('Gagal memuat data transaksi');
+        setTransactions([]);
+      }
     } finally {
-      setLoading(false);
+      if (!silent) {
+        setLoading(false);
+      }
     }
   }, [activeTab, searchTerm, pagination.limit]);
 
   useEffect(() => {
     fetchTransactions(1);
   }, [activeTab]);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setTrackingNow(Date.now());
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      fetchTransactions(pagination.page, { silent: true });
+    }, 5000);
+
+    return () => clearInterval(intervalId);
+  }, [fetchTransactions, pagination.page]);
+
+  useEffect(() => {
+    if (!statusModal.visible || !statusModal.transaction) return;
+
+    const freshTransaction = transactions.find(tx => tx.id === statusModal.transaction.id);
+    if (freshTransaction && freshTransaction !== statusModal.transaction) {
+      setStatusModal(prev => ({
+        ...prev,
+        transaction: freshTransaction,
+        newStatus: prev.newStatus || (freshTransaction.status === 'completed' ? '' : freshTransaction.status),
+      }));
+    }
+  }, [transactions, statusModal.visible, statusModal.transaction]);
+
+  useEffect(() => {
+    if (!detailModal.visible || !detailModal.transaction) return;
+
+    const freshTransaction = transactions.find(tx => tx.id === detailModal.transaction.id);
+    if (freshTransaction && freshTransaction !== detailModal.transaction) {
+      setDetailModal(prev => ({
+        ...prev,
+        transaction: {
+          ...prev.transaction,
+          ...freshTransaction,
+        },
+      }));
+    }
+  }, [transactions, detailModal.visible, detailModal.transaction]);
 
   // Handle search
   const handleSearch = () => {
@@ -101,6 +166,11 @@ const Transaksi = () => {
   // Handle status update
   const handleStatusUpdate = async () => {
     if (!statusModal.transaction || !statusModal.newStatus) return;
+
+    if (statusModal.newStatus === 'completed') {
+      message.error('Status selesai hanya dapat dikonfirmasi oleh pelanggan.');
+      return;
+    }
 
     setUpdating(true);
     try {
@@ -131,12 +201,19 @@ const Transaksi = () => {
     }
   };
 
+  const getDisplayStatus = (transaction) => {
+    return getTrackingDisplayStatus(transaction, trackingNow);
+  };
+
   // Status badge colors
   const getStatusColor = (status) => {
     const colors = {
       pending: '#F39C12',
       paid: '#3498DB',
+      processing: '#3498DB',
+      packed: '#F39C12',
       shipped: '#9B59B6',
+      awaiting_approval: '#2D7A52',
       completed: '#27AE60',
       cancelled: '#E74C3C'
     };
@@ -144,10 +221,18 @@ const Transaksi = () => {
   };
 
   const getStatusLabel = (status) => {
+    const trackingConfig = getTrackingStatusConfig(status);
+    if (trackingConfig?.label) {
+      return trackingConfig.label.toUpperCase();
+    }
+
     const labels = {
       pending: 'PENDING',
       paid: 'DIBAYAR',
+      processing: 'DIPROSES',
+      packed: 'DIKEMAS',
       shipped: 'DIKIRIM',
+      awaiting_approval: 'MENUNGGU PERSETUJUAN',
       completed: 'SELESAI',
       cancelled: 'DIBATALKAN'
     };
@@ -250,7 +335,10 @@ const Transaksi = () => {
                     </td>
                   </tr>
                 ) : (
-                  transactions.map((transaction) => (
+                  transactions.map((transaction) => {
+                    const displayStatus = getDisplayStatus(transaction);
+
+                    return (
                     <tr key={transaction.id}>
                       <td className={styles.orderIdCell}>{transaction.invoice_number}</td>
                       <td className={styles.userCell}>
@@ -278,9 +366,9 @@ const Transaksi = () => {
                       <td>
                         <span
                           className={styles.statusBadge}
-                          style={{ backgroundColor: getStatusColor(transaction.status) }}
+                          style={{ backgroundColor: getStatusColor(displayStatus) }}
                         >
-                          {getStatusLabel(transaction.status)}
+                          {getStatusLabel(displayStatus)}
                         </span>
                       </td>
                       <td>
@@ -296,13 +384,14 @@ const Transaksi = () => {
                             onClick={() => setStatusModal({
                               visible: true,
                               transaction,
-                              newStatus: transaction.status
+                              newStatus: transaction.status === 'completed' ? '' : transaction.status
                             })}
                           >✎</button>
                         </div>
                       </td>
                     </tr>
-                  ))
+                    );
+                  })
                 )}
               </tbody>
             </table>
@@ -349,20 +438,30 @@ const Transaksi = () => {
         cancelText="Batal"
       >
         <p>Invoice: <strong>{statusModal.transaction?.invoice_number}</strong></p>
-        <p>Status saat ini: <strong>{getStatusLabel(statusModal.transaction?.status)}</strong></p>
+        <p>
+          Status saat ini:{' '}
+          <strong>{getStatusLabel(getDisplayStatus(statusModal.transaction))}</strong>
+        </p>
+        <p style={{ color: '#8c8c8c', fontSize: 12, marginTop: -6 }}>
+          Status ini sinkron dengan tampilan pelanggan dan diperbarui otomatis.
+        </p>
         <div style={{ marginTop: 16 }}>
-          <label>Status Baru:</label>
+          <label>Ubah Status Manual:</label>
           <Select
             style={{ width: '100%', marginTop: 8 }}
             value={statusModal.newStatus}
+            placeholder="Pilih status baru"
             onChange={(value) => setStatusModal(prev => ({ ...prev, newStatus: value }))}
           >
-            <Select.Option value="pending">Pending</Select.Option>
-            <Select.Option value="paid">Dibayar</Select.Option>
-            <Select.Option value="shipped">Dikirim</Select.Option>
-            <Select.Option value="completed">Selesai</Select.Option>
-            <Select.Option value="cancelled">Dibatalkan</Select.Option>
+            {adminEditableStatusOptions.map(option => (
+              <Select.Option key={option.value} value={option.value}>
+                {option.label}
+              </Select.Option>
+            ))}
           </Select>
+          <p style={{ marginTop: 8, color: '#8c8c8c', fontSize: 12 }}>
+            Status selesai hanya bisa dikonfirmasi oleh pelanggan saat pesanan diterima.
+          </p>
         </div>
       </Modal>
 
@@ -388,8 +487,8 @@ const Transaksi = () => {
                 </div>
                 <div className={styles.detailItem}>
                   <span>Status</span>
-                  <Tag color={getStatusColor(detailModal.transaction.status)}>
-                    {getStatusLabel(detailModal.transaction.status)}
+                  <Tag color={getStatusColor(getDisplayStatus(detailModal.transaction))}>
+                    {getStatusLabel(getDisplayStatus(detailModal.transaction))}
                   </Tag>
                 </div>
                 <div className={styles.detailItem}>
