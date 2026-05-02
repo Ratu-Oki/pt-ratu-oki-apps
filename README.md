@@ -96,6 +96,12 @@ Jika ada variabel environment yang diperlukan, tambahkan file `.env` mengikuti d
 2. Lakukan perubahan, lalu jalankan `npm start` untuk tes lokal.
 3. Commit dan push, lalu buat pull request.
 
+**9. Kesimpulan**
+
+Ratu Oki Apps adalah aplikasi frontend e-commerce dan supply chain yang membantu menghubungkan consumer, admin, dan supplier dalam satu alur kerja. Consumer dapat melihat produk, melakukan checkout, dan memantau pesanan; admin dapat mengelola produk, pengguna, transaksi, serta laporan; sedangkan supplier dapat mengelola informasi pendukung seperti rekening dan data produk yang disupply.
+
+Dengan dukungan React, integrasi API, autentikasi berbasis role, serta halaman yang dipisahkan sesuai kebutuhan setiap pengguna, aplikasi ini dapat menjadi dasar sistem penjualan dan pengelolaan stok yang lebih terstruktur. README ini diharapkan membantu proses instalasi, pengembangan, dan pemahaman fitur utama agar proyek lebih mudah dijalankan maupun dikembangkan kembali.
+
 --
 Jika mau, saya bisa:
 - Menambahkan contoh `.env.example` dengan variabel yang dibutuhkan

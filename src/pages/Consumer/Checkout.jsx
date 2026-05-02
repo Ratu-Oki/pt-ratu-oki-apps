@@ -6,7 +6,7 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import OrderTrackingCompact from './components/OrderTrackingCompact';
 import styles from './Checkout.module.css';
-import { transactionService, productService } from '../../services/api';
+import { transactionService, productService, addressService } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 
 /**
@@ -31,6 +31,17 @@ const Checkout = () => {
   const [stockErrorModalVisible, setStockErrorModalVisible] = useState(false);
   const [stockErrorItems, setStockErrorItems] = useState([]);
   const [refetchingProducts, setRefetchingProducts] = useState(false);
+  const [provinceOptions, setProvinceOptions] = useState([]);
+  const [regencyOptions, setRegencyOptions] = useState([]);
+  const [districtOptions, setDistrictOptions] = useState([]);
+  const [villageOptions, setVillageOptions] = useState([]);
+  const [addressLoading, setAddressLoading] = useState({
+    provinces: false,
+    regencies: false,
+    districts: false,
+    villages: false,
+  });
+  const [postalCodeLoading, setPostalCodeLoading] = useState(false);
 
   // Load cart from localStorage
   useEffect(() => {
@@ -93,306 +104,189 @@ const Checkout = () => {
     };
   }, [paymentModalVisible, paymentData, paymentComplete, navigate]);
 
-  const provinces = [
-  { label: 'Aceh', value: 'aceh' },
-  { label: 'Sumatera Utara', value: 'sumatera-utara' },
-  { label: 'Sumatera Barat', value: 'sumatera-barat' },
-  { label: 'Riau', value: 'riau' },
-  { label: 'Kepulauan Riau', value: 'kepulauan-riau' },
-  { label: 'Jambi', value: 'jambi' },
-  { label: 'Sumatera Selatan', value: 'sumatera-selatan' },
-  { label: 'Bangka Belitung', value: 'bangka-belitung' },
-  { label: 'Bengkulu', value: 'bengkulu' },
-  { label: 'Lampung', value: 'lampung' },
-  { label: 'DKI Jakarta', value: 'dki-jakarta' },
-  { label: 'Jawa Barat', value: 'jawa-barat' },
-  { label: 'Jawa Tengah', value: 'jawa-tengah' },
-  { label: 'DI Yogyakarta', value: 'di-yogyakarta' },
-  { label: 'Jawa Timur', value: 'jawa-timur' },
-  { label: 'Banten', value: 'banten' },
-  { label: 'Bali', value: 'bali' },
-  { label: 'Nusa Tenggara Barat', value: 'ntb' },
-  { label: 'Nusa Tenggara Timur', value: 'ntt' },
-  { label: 'Kalimantan Barat', value: 'kalimantan-barat' },
-  { label: 'Kalimantan Tengah', value: 'kalimantan-tengah' },
-  { label: 'Kalimantan Selatan', value: 'kalimantan-selatan' },
-  { label: 'Kalimantan Timur', value: 'kalimantan-timur' },
-  { label: 'Kalimantan Utara', value: 'kalimantan-utara' },
-  { label: 'Sulawesi Utara', value: 'sulawesi-utara' },
-  { label: 'Sulawesi Tengah', value: 'sulawesi-tengah' },
-  { label: 'Sulawesi Selatan', value: 'sulawesi-selatan' },
-  { label: 'Sulawesi Tenggara', value: 'sulawesi-tenggara' },
-  { label: 'Gorontalo', value: 'gorontalo' },
-  { label: 'Sulawesi Barat', value: 'sulawesi-barat' },
-  { label: 'Maluku', value: 'maluku' },
-  { label: 'Maluku Utara', value: 'maluku-utara' },
-  { label: 'Papua', value: 'papua' },
-  { label: 'Papua Barat', value: 'papua-barat' },
-  { label: 'Papua Selatan', value: 'papua-selatan' },
-  { label: 'Papua Tengah', value: 'papua-tengah' },
-  { label: 'Papua Pegunungan', value: 'papua-pegunungan' },
-  { label: 'Papua Barat Daya', value: 'papua-barat-daya' },
-];
-
-  const districts = [
-  // ACEH
-  { label: 'Kabupaten Aceh Barat', value: 'aceh-barat' },
-  { label: 'Kabupaten Aceh Barat Daya', value: 'aceh-barat-daya' },
-  { label: 'Kabupaten Aceh Besar', value: 'aceh-besar' },
-  { label: 'Kabupaten Aceh Jaya', value: 'aceh-jaya' },
-  { label: 'Kabupaten Aceh Selatan', value: 'aceh-selatan' },
-  { label: 'Kabupaten Aceh Singkil', value: 'aceh-singkil' },
-  { label: 'Kabupaten Aceh Tamiang', value: 'aceh-tamiang' },
-  { label: 'Kabupaten Aceh Tengah', value: 'aceh-tengah' },
-  { label: 'Kabupaten Aceh Tenggara', value: 'aceh-tenggara' },
-  { label: 'Kabupaten Aceh Timur', value: 'aceh-timur' },
-  { label: 'Kabupaten Aceh Utara', value: 'aceh-utara' },
-  { label: 'Kabupaten Bener Meriah', value: 'bener-meriah' },
-  { label: 'Kabupaten Bireuen', value: 'bireuen' },
-  { label: 'Kabupaten Gayo Lues', value: 'gayo-lues' },
-  { label: 'Kabupaten Nagan Raya', value: 'nagan-raya' },
-  { label: 'Kabupaten Pidie', value: 'pidie' },
-  { label: 'Kabupaten Pidie Jaya', value: 'pidie-jaya' },
-  { label: 'Kabupaten Simeulue', value: 'simeulue' },
-  { label: 'Kota Banda Aceh', value: 'banda-aceh' },
-  { label: 'Kota Langsa', value: 'langsa' },
-  { label: 'Kota Lhokseumawe', value: 'lhokseumawe' },
-  { label: 'Kota Sabang', value: 'sabang' },
-  { label: 'Kota Subulussalam', value: 'subulussalam' },
-
-  // SUMATERA UTARA
-  { label: 'Kabupaten Asahan', value: 'asahan' },
-  { label: 'Kabupaten Batu Bara', value: 'batu-bara' },
-  { label: 'Kabupaten Dairi', value: 'dairi' },
-  { label: 'Kabupaten Deli Serdang', value: 'deli-serdang' },
-  { label: 'Kabupaten Humbang Hasundutan', value: 'humbang-hasundutan' },
-  { label: 'Kabupaten Karo', value: 'karo' },
-  { label: 'Kabupaten Labuhanbatu', value: 'labuhanbatu' },
-  { label: 'Kabupaten Labuhanbatu Selatan', value: 'labuhanbatu-selatan' },
-  { label: 'Kabupaten Labuhanbatu Utara', value: 'labuhanbatu-utara' },
-  { label: 'Kabupaten Langkat', value: 'langkat' },
-  { label: 'Kabupaten Mandailing Natal', value: 'mandailing-natal' },
-  { label: 'Kabupaten Nias', value: 'nias' },
-  { label: 'Kabupaten Nias Barat', value: 'nias-barat' },
-  { label: 'Kabupaten Nias Selatan', value: 'nias-selatan' },
-  { label: 'Kabupaten Nias Utara', value: 'nias-utara' },
-  { label: 'Kabupaten Padang Lawas', value: 'padang-lawas' },
-  { label: 'Kabupaten Padang Lawas Utara', value: 'padang-lawas-utara' },
-  { label: 'Kabupaten Pakpak Bharat', value: 'pakpak-bharat' },
-  { label: 'Kabupaten Samosir', value: 'samosir' },
-  { label: 'Kabupaten Serdang Bedagai', value: 'serdang-bedagai' },
-  { label: 'Kabupaten Simalungun', value: 'simalungun' },
-  { label: 'Kabupaten Tapanuli Selatan', value: 'tapanuli-selatan' },
-  { label: 'Kabupaten Tapanuli Tengah', value: 'tapanuli-tengah' },
-  { label: 'Kabupaten Tapanuli Utara', value: 'tapanuli-utara' },
-  { label: 'Kabupaten Toba', value: 'toba' },
-  { label: 'Kota Binjai', value: 'binjai' },
-  { label: 'Kota Gunungsitoli', value: 'gunungsitoli' },
-  { label: 'Kota Medan', value: 'medan' },
-  { label: 'Kota Padangsidimpuan', value: 'padangsidimpuan' },
-  { label: 'Kota Pematangsiantar', value: 'pematangsiantar' },
-  { label: 'Kota Sibolga', value: 'sibolga' },
-  { label: 'Kota Tanjungbalai', value: 'tanjungbalai' },
-  { label: 'Kota Tebing Tinggi', value: 'tebing-tinggi' },
-
-  // SUMATERA BARAT
-  { label: 'Kabupaten Agam', value: 'agam' },
-  { label: 'Kabupaten Dharmasraya', value: 'dharmasraya' },
-  { label: 'Kabupaten Kepulauan Mentawai', value: 'mentawai' },
-  { label: 'Kabupaten Lima Puluh Kota', value: 'lima-puluh-kota' },
-  { label: 'Kabupaten Padang Pariaman', value: 'padang-pariaman' },
-  { label: 'Kabupaten Pasaman', value: 'pasaman' },
-  { label: 'Kabupaten Pasaman Barat', value: 'pasaman-barat' },
-  { label: 'Kabupaten Pesisir Selatan', value: 'pesisir-selatan' },
-  { label: 'Kabupaten Sijunjung', value: 'sijunjung' },
-  { label: 'Kabupaten Solok', value: 'solok' },
-  { label: 'Kabupaten Solok Selatan', value: 'solok-selatan' },
-  { label: 'Kabupaten Tanah Datar', value: 'tanah-datar' },
-  { label: 'Kota Bukittinggi', value: 'bukittinggi' },
-  { label: 'Kota Padang', value: 'padang' },
-  { label: 'Kota Padang Panjang', value: 'padang-panjang' },
-  { label: 'Kota Pariaman', value: 'pariaman' },
-  { label: 'Kota Payakumbuh', value: 'payakumbuh' },
-  { label: 'Kota Sawahlunto', value: 'sawahlunto' },
-  { label: 'Kota Solok', value: 'kota-solok' },
-  { label: 'Kabupaten Bengkalis', value: 'bengkalis' },
-  { label: 'Kabupaten Indragiri Hilir', value: 'indragiri-hilir' },
-  { label: 'Kabupaten Indragiri Hulu', value: 'indragiri-hulu' },
-  { label: 'Kabupaten Kampar', value: 'kampar' },
-  { label: 'Kabupaten Kepulauan Meranti', value: 'kepulauan-meranti' },
-  { label: 'Kabupaten Kuantan Singingi', value: 'kuantan-singingi' },
-  { label: 'Kabupaten Pelalawan', value: 'pelalawan' },
-  { label: 'Kabupaten Rokan Hilir', value: 'rokan-hilir' },
-  { label: 'Kabupaten Rokan Hulu', value: 'rokan-hulu' },
-  { label: 'Kabupaten Siak', value: 'siak' },
-  { label: 'Kota Dumai', value: 'dumai' },
-  { label: 'Kota Pekanbaru', value: 'pekanbaru' },
-
-  // KEPULAUAN RIAU
-  { label: 'Kabupaten Bintan', value: 'bintan' },
-  { label: 'Kabupaten Karimun', value: 'karimun' },
-  { label: 'Kabupaten Kepulauan Anambas', value: 'anambas' },
-  { label: 'Kabupaten Lingga', value: 'lingga' },
-  { label: 'Kabupaten Natuna', value: 'natuna' },
-  { label: 'Kota Batam', value: 'batam' },
-  { label: 'Kota Tanjungpinang', value: 'tanjungpinang' },
-
-  // JAMBI
-  { label: 'Kabupaten Batanghari', value: 'batanghari' },
-  { label: 'Kabupaten Bungo', value: 'bungo' },
-  { label: 'Kabupaten Kerinci', value: 'kerinci' },
-  { label: 'Kabupaten Merangin', value: 'merangin' },
-  { label: 'Kabupaten Muaro Jambi', value: 'muaro-jambi' },
-  { label: 'Kabupaten Sarolangun', value: 'sarolangun' },
-  { label: 'Kabupaten Tanjung Jabung Barat', value: 'tanjung-jabung-barat' },
-  { label: 'Kabupaten Tanjung Jabung Timur', value: 'tanjung-jabung-timur' },
-  { label: 'Kabupaten Tebo', value: 'tebo' },
-  { label: 'Kota Jambi', value: 'kota-jambi' },
-  { label: 'Kota Sungai Penuh', value: 'sungai-penuh' },
-
-  // SUMATERA SELATAN
-  { label: 'Kabupaten Banyuasin', value: 'banyuasin' },
-  { label: 'Kabupaten Empat Lawang', value: 'empat-lawang' },
-  { label: 'Kabupaten Lahat', value: 'lahat' },
-  { label: 'Kabupaten Muara Enim', value: 'muara-enim' },
-  { label: 'Kabupaten Musi Banyuasin', value: 'musi-banyuasin' },
-  { label: 'Kabupaten Musi Rawas', value: 'musi-rawas' },
-  { label: 'Kabupaten Musi Rawas Utara', value: 'musi-rawas-utara' },
-  { label: 'Kabupaten Ogan Ilir', value: 'ogan-ilir' },
-  { label: 'Kabupaten Ogan Komering Ilir', value: 'oki' },
-  { label: 'Kabupaten Ogan Komering Ulu', value: 'oku' },
-  { label: 'Kabupaten Ogan Komering Ulu Selatan', value: 'oku-selatan' },
-  { label: 'Kabupaten Ogan Komering Ulu Timur', value: 'oku-timur' },
-  { label: 'Kabupaten Penukal Abab Lematang Ilir', value: 'pali' },
-  { label: 'Kota Lubuklinggau', value: 'lubuklinggau' },
-  { label: 'Kota Pagar Alam', value: 'pagar-alam' },
-  { label: 'Kota Palembang', value: 'palembang' },
-  { label: 'Kota Prabumulih', value: 'prabumulih' },
-
-  // BENGKULU
-  { label: 'Kabupaten Bengkulu Selatan', value: 'bengkulu-selatan' },
-  { label: 'Kabupaten Bengkulu Tengah', value: 'bengkulu-tengah' },
-  { label: 'Kabupaten Bengkulu Utara', value: 'bengkulu-utara' },
-  { label: 'Kabupaten Kaur', value: 'kaur' },
-  { label: 'Kabupaten Kepahiang', value: 'kepahiang' },
-  { label: 'Kabupaten Lebong', value: 'lebong' },
-  { label: 'Kabupaten Mukomuko', value: 'mukomuko' },
-  { label: 'Kabupaten Rejang Lebong', value: 'rejang-lebong' },
-  { label: 'Kabupaten Seluma', value: 'seluma' },
-  { label: 'Kota Bengkulu', value: 'kota-bengkulu' },
-
-  // LAMPUNG
-  { label: 'Kabupaten Lampung Barat', value: 'lampung-barat' },
-  { label: 'Kabupaten Lampung Selatan', value: 'lampung-selatan' },
-  { label: 'Kabupaten Lampung Tengah', value: 'lampung-tengah' },
-  { label: 'Kabupaten Lampung Timur', value: 'lampung-timur' },
-  { label: 'Kabupaten Lampung Utara', value: 'lampung-utara' },
-  { label: 'Kabupaten Mesuji', value: 'mesuji' },
-  { label: 'Kabupaten Pesawaran', value: 'pesawaran' },
-  { label: 'Kabupaten Pesisir Barat', value: 'pesisir-barat' },
-  { label: 'Kabupaten Pringsewu', value: 'pringsewu' },
-  { label: 'Kabupaten Tanggamus', value: 'tanggamus' },
-  { label: 'Kabupaten Tulang Bawang', value: 'tulang-bawang' },
-  { label: 'Kabupaten Tulang Bawang Barat', value: 'tulang-bawang-barat' },
-  { label: 'Kabupaten Way Kanan', value: 'way-kanan' },
-  { label: 'Kota Bandar Lampung', value: 'bandar-lampung' },
-  { label: 'Kota Metro', value: 'metro' },
-  // SULAWESI UTARA
-  { label: 'Kabupaten Bolaang Mongondow', value: 'bolaang-mongondow' },
-  { label: 'Kabupaten Bolaang Mongondow Selatan', value: 'bolaang-mongondow-selatan' },
-  { label: 'Kabupaten Bolaang Mongondow Timur', value: 'bolaang-mongondow-timur' },
-  { label: 'Kabupaten Bolaang Mongondow Utara', value: 'bolaang-mongondow-utara' },
-  { label: 'Kabupaten Kepulauan Sangihe', value: 'kepulauan-sangihe' },
-  { label: 'Kabupaten Kepulauan Siau Tagulandang Biaro', value: 'sitaro' },
-  { label: 'Kabupaten Kepulauan Talaud', value: 'kepulauan-talaud' },
-  { label: 'Kabupaten Minahasa', value: 'minahasa' },
-  { label: 'Kabupaten Minahasa Selatan', value: 'minahasa-selatan' },
-  { label: 'Kabupaten Minahasa Tenggara', value: 'minahasa-tenggara' },
-  { label: 'Kabupaten Minahasa Utara', value: 'minahasa-utara' },
-  { label: 'Kota Bitung', value: 'bitung' },
-  { label: 'Kota Kotamobagu', value: 'kotamobagu' },
-  { label: 'Kota Manado', value: 'manado' },
-  { label: 'Kota Tomohon', value: 'tomohon' },
-
-  // GORONTALO
-  { label: 'Kabupaten Boalemo', value: 'boalemo' },
-  { label: 'Kabupaten Bone Bolango', value: 'bone-bolango' },
-  { label: 'Kabupaten Gorontalo', value: 'gorontalo' },
-  { label: 'Kabupaten Gorontalo Utara', value: 'gorontalo-utara' },
-  { label: 'Kabupaten Pohuwato', value: 'pohuwato' },
-  { label: 'Kota Gorontalo', value: 'kota-gorontalo' },
-
-  // SULAWESI TENGAH
-  { label: 'Kabupaten Banggai', value: 'banggai' },
-  { label: 'Kabupaten Banggai Kepulauan', value: 'banggai-kepulauan' },
-  { label: 'Kabupaten Banggai Laut', value: 'banggai-laut' },
-  { label: 'Kabupaten Buol', value: 'buol' },
-  { label: 'Kabupaten Donggala', value: 'donggala' },
-  { label: 'Kabupaten Morowali', value: 'morowali' },
-  { label: 'Kabupaten Morowali Utara', value: 'morowali-utara' },
-  { label: 'Kabupaten Parigi Moutong', value: 'parigi-moutong' },
-  { label: 'Kabupaten Poso', value: 'poso' },
-  { label: 'Kabupaten Sigi', value: 'sigi' },
-  { label: 'Kabupaten Tojo Una-Una', value: 'tojo-una-una' },
-  { label: 'Kabupaten Toli-Toli', value: 'toli-toli' },
-  { label: 'Kota Palu', value: 'palu' },
-
-  // SULAWESI BARAT
-  { label: 'Kabupaten Majene', value: 'majene' },
-  { label: 'Kabupaten Mamasa', value: 'mamasa' },
-  { label: 'Kabupaten Mamuju', value: 'mamuju' },
-  { label: 'Kabupaten Mamuju Tengah', value: 'mamuju-tengah' },
-  { label: 'Kabupaten Pasangkayu', value: 'pasangkayu' },
-  { label: 'Kabupaten Polewali Mandar', value: 'polewali-mandar' },
-
-  // SULAWESI SELATAN
-  { label: 'Kabupaten Bantaeng', value: 'bantaeng' },
-  { label: 'Kabupaten Barru', value: 'barru' },
-  { label: 'Kabupaten Bone', value: 'bone' },
-  { label: 'Kabupaten Bulukumba', value: 'bulukumba' },
-  { label: 'Kabupaten Enrekang', value: 'enrekang' },
-  { label: 'Kabupaten Gowa', value: 'gowa' },
-  { label: 'Kabupaten Jeneponto', value: 'jeneponto' },
-  { label: 'Kabupaten Kepulauan Selayar', value: 'kepulauan-selayar' },
-  { label: 'Kabupaten Luwu', value: 'luwu' },
-  { label: 'Kabupaten Luwu Timur', value: 'luwu-timur' },
-  { label: 'Kabupaten Luwu Utara', value: 'luwu-utara' },
-  { label: 'Kabupaten Maros', value: 'maros' },
-  { label: 'Kabupaten Pangkajene dan Kepulauan', value: 'pangkep' },
-  { label: 'Kabupaten Pinrang', value: 'pinrang' },
-  { label: 'Kabupaten Sidenreng Rappang', value: 'sidrap' },
-  { label: 'Kabupaten Sinjai', value: 'sinjai' },
-  { label: 'Kabupaten Soppeng', value: 'soppeng' },
-  { label: 'Kabupaten Takalar', value: 'takalar' },
-  { label: 'Kabupaten Tana Toraja', value: 'tana-toraja' },
-  { label: 'Kabupaten Toraja Utara', value: 'toraja-utara' },
-  { label: 'Kabupaten Wajo', value: 'wajo' },
-  { label: 'Kota Makassar', value: 'makassar' },
-  { label: 'Kota Palopo', value: 'palopo' },
-  { label: 'Kota Parepare', value: 'parepare' },
-
-  // SULAWESI TENGGARA
-  { label: 'Kabupaten Bombana', value: 'bombana' },
-  { label: 'Kabupaten Buton', value: 'buton' },
-  { label: 'Kabupaten Buton Selatan', value: 'buton-selatan' },
-  { label: 'Kabupaten Buton Tengah', value: 'buton-tengah' },
-  { label: 'Kabupaten Buton Utara', value: 'buton-utara' },
-  { label: 'Kabupaten Kolaka', value: 'kolaka' },
-  { label: 'Kabupaten Kolaka Timur', value: 'kolaka-timur' },
-  { label: 'Kabupaten Kolaka Utara', value: 'kolaka-utara' },
-  { label: 'Kabupaten Konawe', value: 'konawe' },
-  { label: 'Kabupaten Konawe Kepulauan', value: 'konawe-kepulauan' },
-  { label: 'Kabupaten Konawe Selatan', value: 'konawe-selatan' },
-  { label: 'Kabupaten Konawe Utara', value: 'konawe-utara' },
-  { label: 'Kabupaten Muna', value: 'muna' },
-  { label: 'Kabupaten Muna Barat', value: 'muna-barat' },
-  { label: 'Kabupaten Wakatobi', value: 'wakatobi' },
-  { label: 'Kota Baubau', value: 'baubau' },
-  { label: 'Kota Kendari', value: 'kendari' },
-];
-
   // Payment method fixed to QRIS
   const paymentMethod = 'qris';
+
+  const toAddressOption = (item) => ({
+    label: item.name,
+    value: item.id,
+  });
+
+  const getAddressLabel = (fieldValue) => {
+    if (!fieldValue) return '';
+    if (typeof fieldValue === 'string') return fieldValue;
+    return fieldValue.label || fieldValue.value || '';
+  };
+
+  const getPostalCodeFromGeoapify = (data) => {
+    const features = Array.isArray(data?.features) ? data.features : [];
+
+    for (const feature of features) {
+      const postcode = feature?.properties?.postcode;
+      if (postcode) return postcode;
+    }
+
+    return '';
+  };
+
+  const normalizeAddressText = (text) => {
+    return String(text || '')
+      .replace(/\b(kelurahan|desa|kecamatan|kabupaten|kota)\b/gi, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
+
+  const joinAddressParts = (parts) => {
+    return parts
+      .map(normalizeAddressText)
+      .filter(Boolean)
+      .join(', ');
+  };
+
+  const buildPostalCodeSearchTexts = (values) => {
+    const alamatLengkap = normalizeAddressText(values.alamat_lengkap);
+    const kelurahan = getAddressLabel(values.kelurahan);
+    const kecamatan = getAddressLabel(values.kecamatan);
+    const kabupaten = getAddressLabel(values.kabupaten);
+    const provinsi = getAddressLabel(values.provinsi);
+
+    const queries = [
+      joinAddressParts([kelurahan, kecamatan, kabupaten, provinsi, 'Indonesia']),
+      joinAddressParts([kelurahan, kabupaten, provinsi, 'Indonesia']),
+      joinAddressParts([kelurahan, kecamatan, provinsi, 'Indonesia']),
+      joinAddressParts([kecamatan, kabupaten, provinsi, 'Indonesia']),
+      joinAddressParts([alamatLengkap, kelurahan, kecamatan, kabupaten, provinsi, 'Indonesia']),
+    ];
+
+    return [...new Set(queries.filter(Boolean))];
+  };
+
+  const fetchPostalCode = async (fieldOverrides = {}) => {
+    const values = {
+      ...form.getFieldsValue(),
+      ...fieldOverrides,
+    };
+    const searchTexts = buildPostalCodeSearchTexts(values);
+
+    if (searchTexts.length === 0) return;
+
+    try {
+      setPostalCodeLoading(true);
+
+      for (const searchText of searchTexts) {
+        const data = await addressService.searchPostalCode(searchText);
+        const postalCode = getPostalCodeFromGeoapify(data);
+
+        if (postalCode) {
+          form.setFieldsValue({ kode_pos: postalCode });
+          return postalCode;
+        }
+      }
+
+      form.setFieldsValue({ kode_pos: '' });
+      return '';
+    } catch (error) {
+      console.error('Error fetching postal code:', error);
+      return '';
+    } finally {
+      setPostalCodeLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const loadProvinces = async () => {
+      try {
+        setAddressLoading(prev => ({ ...prev, provinces: true }));
+        const data = await addressService.getProvinces();
+        setProvinceOptions(data.map(toAddressOption));
+      } catch (error) {
+        console.error('Error loading provinces:', error);
+        message.error('Gagal memuat data provinsi.');
+      } finally {
+        setAddressLoading(prev => ({ ...prev, provinces: false }));
+      }
+    };
+
+    loadProvinces();
+  }, []);
+
+  const handleProvinceChange = async (provinsi) => {
+    form.setFieldsValue({
+      kabupaten: undefined,
+      kecamatan: undefined,
+      kelurahan: undefined,
+      kode_pos: '',
+    });
+    setRegencyOptions([]);
+    setDistrictOptions([]);
+    setVillageOptions([]);
+
+    if (!provinsi?.value) return;
+
+    try {
+      setAddressLoading(prev => ({ ...prev, regencies: true }));
+      const data = await addressService.getRegencies(provinsi.value);
+      setRegencyOptions(data.map(toAddressOption));
+    } catch (error) {
+      console.error('Error loading regencies:', error);
+      message.error('Gagal memuat data kabupaten/kota.');
+    } finally {
+      setAddressLoading(prev => ({ ...prev, regencies: false }));
+    }
+  };
+
+  const handleRegencyChange = async (kabupaten) => {
+    form.setFieldsValue({
+      kecamatan: undefined,
+      kelurahan: undefined,
+      kode_pos: '',
+    });
+    setDistrictOptions([]);
+    setVillageOptions([]);
+
+    if (!kabupaten?.value) return;
+
+    try {
+      setAddressLoading(prev => ({ ...prev, districts: true }));
+      const data = await addressService.getDistricts(kabupaten.value);
+      setDistrictOptions(data.map(toAddressOption));
+    } catch (error) {
+      console.error('Error loading districts:', error);
+      message.error('Gagal memuat data kecamatan.');
+    } finally {
+      setAddressLoading(prev => ({ ...prev, districts: false }));
+    }
+  };
+
+  const handleDistrictChange = async (kecamatan) => {
+    form.setFieldsValue({
+      kelurahan: undefined,
+      kode_pos: '',
+    });
+    setVillageOptions([]);
+
+    if (!kecamatan?.value) return;
+
+    try {
+      setAddressLoading(prev => ({ ...prev, villages: true }));
+      const data = await addressService.getVillages(kecamatan.value);
+      setVillageOptions(data.map(toAddressOption));
+    } catch (error) {
+      console.error('Error loading villages:', error);
+      message.error('Gagal memuat data desa/kelurahan.');
+    } finally {
+      setAddressLoading(prev => ({ ...prev, villages: false }));
+    }
+  };
+
+  const handleVillageChange = async (kelurahan) => {
+    form.setFieldsValue({ kode_pos: '' });
+    const postalCode = await fetchPostalCode({ kelurahan, kode_pos: '' });
+
+    if (!postalCode) {
+      message.warning('Kode pos belum ditemukan otomatis. Silakan isi manual.');
+    }
+  };
 
   /**
    * Format currency
@@ -489,7 +383,16 @@ const Checkout = () => {
           jumlah: item.qty || 1,
           grade: item.grade || 'A'
         })),
-        shipping_address: `${values.nama_penerima}, ${values.no_telepon}, ${values.alamat_lengkap}, ${values.kecamatan}, ${values.provinsi}, ${values.kode_pos}`,
+        shipping_address: [
+          values.nama_penerima,
+          values.no_telepon,
+          values.alamat_lengkap,
+          getAddressLabel(values.kelurahan),
+          getAddressLabel(values.kecamatan),
+          getAddressLabel(values.kabupaten),
+          getAddressLabel(values.provinsi),
+          values.kode_pos,
+        ].filter(Boolean).join(', '),
         notes: values.notes || '',
         payment_type: paymentMethod
       };
@@ -663,11 +566,14 @@ const Checkout = () => {
                   </Form.Item>
 
                   <Form.Item
-                    label="Alamat Lengkap"
+                    label="Alamat Lengkap (opsional)"
                     name="alamat_lengkap"
-                    rules={[{ required: true, message: 'Alamat lengkap harus diisi' }]}
                   >
-                    <Input.TextArea placeholder="Jl. Merdeka No. 123, Kelurahan..." rows={3} />
+                    <Input.TextArea
+                      placeholder="Jl. Merdeka No. 123, RT/RW..."
+                      rows={3}
+                      onBlur={() => fetchPostalCode()}
+                    />
                   </Form.Item>
 
                   <Row gutter={[16, 16]}>
@@ -677,16 +583,72 @@ const Checkout = () => {
                         name="provinsi"
                         rules={[{ required: true, message: 'Provinsi harus dipilih' }]}
                       >
-                        <Select placeholder="Pilih Provinsi" options={provinces} />
+                        <Select
+                          showSearch
+                          labelInValue
+                          placeholder="Pilih Provinsi"
+                          optionFilterProp="label"
+                          options={provinceOptions}
+                          loading={addressLoading.provinces}
+                          onChange={handleProvinceChange}
+                        />
                       </Form.Item>
                     </Col>
                     <Col xs={24} sm={12}>
                       <Form.Item
-                        label="Kecamatan/Kota"
+                        label="Kabupaten/Kota"
+                        name="kabupaten"
+                        rules={[{ required: true, message: 'Kabupaten/kota harus dipilih' }]}
+                      >
+                        <Select
+                          showSearch
+                          labelInValue
+                          placeholder="Pilih Kabupaten/Kota"
+                          optionFilterProp="label"
+                          options={regencyOptions}
+                          loading={addressLoading.regencies}
+                          disabled={!form.getFieldValue('provinsi')}
+                          onChange={handleRegencyChange}
+                        />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+
+                  <Row gutter={[16, 16]}>
+                    <Col xs={24} sm={12}>
+                      <Form.Item
+                        label="Kecamatan"
                         name="kecamatan"
                         rules={[{ required: true, message: 'Kecamatan harus dipilih' }]}
                       >
-                        <Select placeholder="Pilih Kecamatan" options={districts} />
+                        <Select
+                          showSearch
+                          labelInValue
+                          placeholder="Pilih Kecamatan"
+                          optionFilterProp="label"
+                          options={districtOptions}
+                          loading={addressLoading.districts}
+                          disabled={!form.getFieldValue('kabupaten')}
+                          onChange={handleDistrictChange}
+                        />
+                      </Form.Item>
+                    </Col>
+                    <Col xs={24} sm={12}>
+                      <Form.Item
+                        label="Desa/Kelurahan"
+                        name="kelurahan"
+                        rules={[{ required: true, message: 'Desa/kelurahan harus dipilih' }]}
+                      >
+                        <Select
+                          showSearch
+                          labelInValue
+                          placeholder="Pilih Desa/Kelurahan"
+                          optionFilterProp="label"
+                          options={villageOptions}
+                          loading={addressLoading.villages}
+                          disabled={!form.getFieldValue('kecamatan')}
+                          onChange={handleVillageChange}
+                        />
                       </Form.Item>
                     </Col>
                   </Row>
@@ -696,7 +658,7 @@ const Checkout = () => {
                     name="kode_pos"
                     rules={[{ required: true, message: 'Kode pos harus diisi' }]}
                   >
-                    <Input placeholder="40135" />
+                    <Input placeholder="Otomatis dari alamat" suffix={postalCodeLoading ? <Spin size="small" /> : null} />
                   </Form.Item>
 
                   <Form.Item

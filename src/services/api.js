@@ -8,7 +8,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 
 // Base configuration
-const API_BASE_URL = "https://ratu-oki-backend-production.up.railway.app/api" || 'http://localhost:5000/api';
+const API_BASE_URL = "http://localhost:5000/api" || 'http://localhost:5000/api';
 
 console.log(API_BASE_URL)
 // Create axios instance - DON'T set Authorization here, let interceptor handle it
@@ -510,6 +510,48 @@ export const reportService = {
     // Export report data
     exportData: async (params = {}) => {
         const response = await api.get('/reports/export', { params });
+        return response.data;
+    },
+};
+
+// ============================================
+// ADDRESS SERVICES
+// ============================================
+const EMSIFA_BASE_URL = 'https://www.emsifa.com/api-wilayah-indonesia/api';
+const GEOAPIFY_API_KEY = '4c64928c67a64e879f1a1a6edc1d85ea';
+const GEOAPIFY_GEOCODE_URL = 'https://api.geoapify.com/v1/geocode/search';
+
+export const addressService = {
+    getProvinces: async () => {
+        const response = await axios.get(`${EMSIFA_BASE_URL}/provinces.json`);
+        return response.data;
+    },
+
+    getRegencies: async (provinceId) => {
+        const response = await axios.get(`${EMSIFA_BASE_URL}/regencies/${provinceId}.json`);
+        return response.data;
+    },
+
+    getDistricts: async (regencyId) => {
+        const response = await axios.get(`${EMSIFA_BASE_URL}/districts/${regencyId}.json`);
+        return response.data;
+    },
+
+    getVillages: async (districtId) => {
+        const response = await axios.get(`${EMSIFA_BASE_URL}/villages/${districtId}.json`);
+        return response.data;
+    },
+
+    searchPostalCode: async (text) => {
+        const response = await axios.get(GEOAPIFY_GEOCODE_URL, {
+            params: {
+                text,
+                apiKey: GEOAPIFY_API_KEY,
+                lang: 'id',
+                filter: 'countrycode:id',
+                limit: 5,
+            },
+        });
         return response.data;
     },
 };
