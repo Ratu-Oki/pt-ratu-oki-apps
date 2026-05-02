@@ -517,29 +517,58 @@ export const reportService = {
 // ============================================
 // ADDRESS SERVICES
 // ============================================
-const EMSIFA_BASE_URL = 'https://www.emsifa.com/api-wilayah-indonesia/api';
-const GEOAPIFY_API_KEY = '4c64928c67a64e879f1a1a6edc1d85ea';
+const API_CO_ID_BASE_URL = process.env.REACT_APP_API_CO_ID_BASE_URL || 'https://use.api.co.id';
+const API_CO_ID_KEY = process.env.REACT_APP_API_CO_ID_KEY || '';
+const GEOAPIFY_API_KEY = process.env.REACT_APP_GEOAPIFY_API_KEY || '4c64928c67a64e879f1a1a6edc1d85ea';
 const GEOAPIFY_GEOCODE_URL = 'https://api.geoapify.com/v1/geocode/search';
+
+const apiCoId = axios.create({
+    baseURL: API_CO_ID_BASE_URL,
+    headers: API_CO_ID_KEY ? { 'x-api-co-id': API_CO_ID_KEY } : {},
+    timeout: 30000,
+});
+
+const getRegionalData = async (url, params = {}) => {
+    const firstResponse = await apiCoId.get(url, { params: { ...params, page: 1 } });
+    const firstData = Array.isArray(firstResponse.data?.data) ? firstResponse.data.data : [];
+    const totalPages = firstResponse.data?.paging?.total_page || 1;
+
+    if (totalPages <= 1) {
+        return firstData;
+    }
+
+    const nextPages = [];
+    for (let page = 2; page <= totalPages; page += 1) {
+        nextPages.push(apiCoId.get(url, { params: { ...params, page } }));
+    }
+
+    const nextResponses = await Promise.all(nextPages);
+    return nextResponses.reduce((items, response) => {
+        const data = Array.isArray(response.data?.data) ? response.data.data : [];
+        return items.concat(data);
+    }, firstData);
+};
 
 export const addressService = {
     getProvinces: async () => {
-        const response = await axios.get(`${EMSIFA_BASE_URL}/provinces.json`);
-        return response.data;
+        return getRegionalData('/regional/indonesia/provinces');
     },
 
-    getRegencies: async (provinceId) => {
-        const response = await axios.get(`${EMSIFA_BASE_URL}/regencies/${provinceId}.json`);
-        return response.data;
+    getRegencies: async (provinceCode) => {
+        return getRegionalData(`/regional/indonesia/provinces/${provinceCode}/regencies`);
     },
 
-    getDistricts: async (regencyId) => {
-        const response = await axios.get(`${EMSIFA_BASE_URL}/districts/${regencyId}.json`);
-        return response.data;
+    getDistricts: async (regencyCode) => {
+        return getRegionalData(`/regional/indonesia/regencies/${regencyCode}/districts`);
     },
 
-    getVillages: async (districtId) => {
-        const response = await axios.get(`${EMSIFA_BASE_URL}/villages/${districtId}.json`);
-        return response.data;
+    getVillages: async (districtCode) => {
+        return getRegionalData(`/regional/indonesia/districts/${districtCode}/villages`);
+    },
+
+    getVillageByCode: async (villageCode) => {
+        const response = await apiCoId.get(`/regional/indonesia/villages/${villageCode}`);
+        return response.data?.data;
     },
 
     searchPostalCode: async (text) => {

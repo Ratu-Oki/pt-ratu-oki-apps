@@ -109,7 +109,8 @@ const Checkout = () => {
 
   const toAddressOption = (item) => ({
     label: item.name,
-    value: item.id,
+    value: item.code,
+    raw: item,
   });
 
   const getAddressLabel = (fieldValue) => {
@@ -144,7 +145,7 @@ const Checkout = () => {
   };
 
   const buildPostalCodeSearchTexts = (values) => {
-    const alamatLengkap = normalizeAddressText(values.alamat_lengkap);
+    const alamatLengkap = values.alamat_lengkap;
     const kelurahan = getAddressLabel(values.kelurahan);
     const kecamatan = getAddressLabel(values.kecamatan);
     const kabupaten = getAddressLabel(values.kabupaten);
@@ -168,7 +169,7 @@ const Checkout = () => {
     };
     const searchTexts = buildPostalCodeSearchTexts(values);
 
-    if (searchTexts.length === 0) return;
+    if (searchTexts.length === 0) return '';
 
     try {
       setPostalCodeLoading(true);
