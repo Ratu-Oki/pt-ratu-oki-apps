@@ -25,6 +25,7 @@ const Sidebar = ({ onFilterChange = () => {} }) => {
     'Grade A (Premium)',
     'Grade B (Standard)',
     'Grade C (Extract)',
+    'Grade D',
   ];
 
   const weights = ['100 gram', '250 gram', '500 gram', '1 kg'];

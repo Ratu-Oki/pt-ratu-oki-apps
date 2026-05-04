@@ -303,6 +303,7 @@ const AvailableProducts = () => {
                   <Select.Option value="A">Grade A (Premium)</Select.Option>
                   <Select.Option value="B">Grade B (Standard)</Select.Option>
                   <Select.Option value="C">Grade C (Extract)</Select.Option>
+                  <Select.Option value="D">Grade D</Select.Option>
                 </Select>
               </Form.Item>
             </Col>
@@ -402,6 +403,7 @@ const AvailableProducts = () => {
                   <Select.Option value="A">Grade A (Premium)</Select.Option>
                   <Select.Option value="B">Grade B (Standard)</Select.Option>
                   <Select.Option value="C">Grade C (Extract)</Select.Option>
+                  <Select.Option value="D">Grade D</Select.Option>
                 </Select>
               </Form.Item>
             </Col>

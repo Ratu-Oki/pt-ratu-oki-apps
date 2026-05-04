@@ -46,9 +46,9 @@ const ProductGrid = ({
     },
     {
       id: 4,
-      name: 'Vanila Extract',
-      grade: 'Extract',
-      image: 'https://via.placeholder.com/300x300?text=Extract',
+      name: 'Vanila Grade D',
+      grade: 'Grade D',
+      image: 'https://via.placeholder.com/300x300?text=Vanila+D',
       price: 150000,
       rating: 4.4,
       reviews: 112,
