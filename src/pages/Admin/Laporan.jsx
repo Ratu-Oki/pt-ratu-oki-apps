@@ -262,25 +262,7 @@ const Laporan = () => {
           </div>
 
           {/* Stok Card */}
-          <div className={styles.metricCard}>
-            <div className={styles.metricIcon} style={{ backgroundColor: '#3498DB' }}>
-              <InboxOutlined />
-            </div>
-            <div className={styles.metricContent}>
-              <h3>Nilai Stok</h3>
-              <p className={styles.metricValue}>
-                {formatCurrency(reportData?.stok?.total_nilai_stok || 0)}
-              </p>
-              <p className={styles.metricSubtitle}>
-                {reportData?.stok?.total_quantity || 0} unit tersedia
-              </p>
-              <div className={styles.metricDetails}>
-                <span className={styles.warning}>
-                  <WarningOutlined /> {reportData?.stok?.produk_stok_rendah || 0} produk stok rendah
-                </span>
-              </div>
-            </div>
-          </div>
+          
 
           {/* Laba Card */}
           <div className={styles.metricCard}>
